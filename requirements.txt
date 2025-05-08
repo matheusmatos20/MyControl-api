@@ -1,0 +1,8 @@
+fastapi[standard]==0.115.4
+Session
+pydantic
+pytest
+httpx
+pyodbc
+pandas
+uvicorn python-jose[cryptography] passlib[bcrypt]
