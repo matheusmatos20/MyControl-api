@@ -5,4 +5,6 @@ pytest
 httpx
 pyodbc
 pandas
-uvicorn python-jose[cryptography] passlib[bcrypt]
+uvicorn
+python-jose[cryptography]
+passlib[bcrypt]

@@ -1,6 +1,7 @@
 import pyodbc
 import pandas as pd
-from Model import Conn_DB
+from Model.Conn_DB import Conn as Conn_DB
+from Schemas import Cliente as cliente
 from datetime import datetime
 
 
@@ -21,12 +22,12 @@ class Cliente:
     def retorna_clientes(self):
         query = """
             SELECT 
-                C.ID_CLIENTE AS ID,
+                C.ID_CLIENTE AS Id,
                 C.NM_CLIENTE AS Nome,
-                CONVERT(DATE, C.DT_NASCIMENTO, 103) AS [Dt.Nascimento],
-                C.CD_CPF AS CPF,
-                C.CD_RG AS RG,
-                C.NU_TELEFONE AS TELEFONE,
+                CONVERT(DATE, C.DT_NASCIMENTO, 103) AS DtNascimento,
+                C.CD_CPF AS Cpf,
+                C.CD_RG AS Rg,
+                C.NU_TELEFONE AS Telefone,
                 CONCAT(R.ID_REPRESENTANTE, ' - ', R.NM_CLIENTE) AS Representante
             FROM TB_CLIENTES C WITH(NOLOCK)
             LEFT JOIN TB_REPRESENTANTES R WITH(NOLOCK)
@@ -52,10 +53,8 @@ class Cliente:
             print("Erro ao buscar clientes para combo box:", e)
             return pd.DataFrame()
 
-    def inserir_cliente(self):
-        print(self.cpf)
-        print(self.rg)
-        print(self.telefone)
+    def inserir_cliente(self,cliente):
+        print("Chegou aqui")
         query = f"""
             INSERT INTO TB_CLIENTES (
                 NM_CLIENTE,
@@ -66,12 +65,12 @@ class Cliente:
                 ID_REPRESENTANTE
             )
             SELECT 
-                '{self.nm_cliente}',
-                '{self.dt_nascimento}',
-                '{self.cpf}',
-                '{self.rg}',
-                '{self.telefone}',
-                {self.id_representante}
+                '{cliente.nm_cliente}',
+                 CONVERT(DATE, '{cliente.dt_nascimento}', 103),
+                '{cliente.cpf}',
+                '{cliente.rg}',
+                '{cliente.telefone}',
+                {cliente.id_representante}
         """
         try:
             with self._connect() as conn:
@@ -83,16 +82,16 @@ class Cliente:
             print("Erro ao inserir cliente:", e)
             return False
 
-    def alterar_cliente(self):
+    def alterar_cliente(self,cliente):
         query = f"""
             UPDATE TB_CLIENTES
-            SET NM_CLIENTE = '{self.nm_cliente}',
-                DT_NASCIMENTO = '{self.dt_nascimento}',
-                CD_CPF = '{self.cpf}',
-                CD_RG = '{self.rg}',
-                NU_TELEFONE = '{self.telefone}',
-                ID_REPRESENTANTE = {self.id_representante}
-            WHERE ID_CLIENTE = '{self.id_cliente}'
+            SET NM_CLIENTE = '{cliente.nm_cliente}',
+                DT_NASCIMENTO = CONVERT(DATE, '{cliente.dt_nascimento}', 103),
+                CD_CPF = '{cliente.cpf}',
+                CD_RG = '{cliente.rg}',
+                NU_TELEFONE = '{cliente.telefone}',
+                ID_REPRESENTANTE = {cliente.id_representante}
+            WHERE ID_CLIENTE = '{cliente.id_cliente}'
         """
         try:
             with self._connect() as conn:
@@ -103,3 +102,7 @@ class Cliente:
         except Exception as e:
             print("Erro ao alterar cliente:", e)
             return False
+
+    @property
+    def str_conn(self):
+        return self._str_conn

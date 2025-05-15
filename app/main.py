@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante
-from Schemas import Representante as RepresentanteSchena
+from Model import Representantes as Representante,Cliente as Cliente
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -116,6 +116,64 @@ def Inserir_Representate(cliente: RepresentanteSchena.RepresentanteSchema, user:
         df = dal.inserir_representante(cliente)
         return {
             "mensagem": "Representante Inserido com sucesso!",
+            "dados": {
+                "id_cliente": cliente.id_cliente,
+                "nm_cliente": cliente.nm_cliente,
+                "dt_nascimento": nascimento_formatado.isoformat(),
+                "cpf": cliente.cpf,
+                "rg": cliente.rg,
+                "telefone": cliente.telefone
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Formato de data inválido: {str(e)}"}
+
+
+
+#-----------#
+# Clientes  #
+#-----------#
+
+@app.get("/Clientes")
+async def Consultar_Clientes(current_user: dict = Depends(get_current_user)):
+    dal = Cliente.Cliente()
+    df = dal.retorna_clientes()
+    return df.to_dict(orient="records")
+
+@app.get("/ClientesComboBox")
+async def Retorna_representante_combo(user: dict = Depends(get_current_user)):
+    dal = Cliente.Cliente()
+    df = dal.retorna_clientes_combo_box()
+    return df.to_dict(orient="records")
+
+@app.post("/AlterarCliente/")
+def Alterar_Cliente(cliente: ClienteSchema.ClienteSchema, user: dict = Depends(get_current_user)):
+    try:
+        nascimento_formatado = datetime.strptime(cliente.dt_nascimento, "%d/%m/%Y").date()
+        dal = Cliente.Cliente()
+        df = dal.alterar_cliente(cliente)
+        return {
+            "mensagem": "Cliente Alterado com sucesso!",
+            "dados": {
+                "id_cliente": cliente.id_cliente,
+                "nm_cliente": cliente.nm_cliente,
+                "dt_nascimento": nascimento_formatado.isoformat(),
+                "cpf": cliente.cpf,
+                "rg": cliente.rg,
+                "telefone": cliente.telefone
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Formato de data inválido: {str(e)}"}
+
+@app.post("/InserirCliente/")
+def Inserir_Cliente(cliente: ClienteSchema.ClienteSchema, user: dict = Depends(get_current_user)):
+    try:
+        nascimento_formatado = datetime.strptime(cliente.dt_nascimento, "%d/%m/%Y").date()
+        dal = Cliente.Cliente()
+        df = dal.inserir_cliente(cliente)
+        return {
+            "mensagem": "Cliente Inserido com sucesso!",
             "dados": {
                 "id_cliente": cliente.id_cliente,
                 "nm_cliente": cliente.nm_cliente,

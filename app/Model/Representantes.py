@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from Model import Conn_DB
 from Schemas import Representante as representante
+
 class RepresentanteDAL:
     def __init__(self):
         self.conexao = Conn_DB.Conn()
