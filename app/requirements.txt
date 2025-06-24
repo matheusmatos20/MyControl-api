@@ -1,5 +1,5 @@
 fastapi[standard]==0.115.4
-Session
+# Session
 pydantic
 pytest
 httpx
