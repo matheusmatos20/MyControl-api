@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante,Cliente as Cliente
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema
+from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -76,19 +76,20 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 # ---------------------
 # Endpoints protegidos
 # ---------------------
-@app.get("/Representantes")
+
+@app.get("/Representantes",tags=["Representantes"])
 async def Consultar_Representantes(current_user: dict = Depends(get_current_user)):
     dal = Representante.RepresentanteDAL()
     df = dal.retorna_representantes()
     return df.to_dict(orient="records")
 
-@app.get("/RepresentantesComboBox")
+@app.get("/RepresentantesComboBox",tags=["Representantes"])
 async def Retorna_representante_combo(user: dict = Depends(get_current_user)):
     dal = Representante.RepresentanteDAL()
     df = dal.retorna_representante_combo()
     return df.to_dict(orient="records")
 
-@app.post("/AlterarRepresentante/")
+@app.post("/AlterarRepresentante/",tags=["Representantes"])
 def Alterar_Representante(cliente: RepresentanteSchena.RepresentanteSchema, user: dict = Depends(get_current_user)):
     try:
         nascimento_formatado = datetime.strptime(cliente.dt_nascimento, "%d/%m/%Y").date()
@@ -108,7 +109,7 @@ def Alterar_Representante(cliente: RepresentanteSchena.RepresentanteSchema, user
     except ValueError as e:
         return {"erro": f"Formato de data inválido: {str(e)}"}
 
-@app.post("/InserirRepresentante/")
+@app.post("/InserirRepresentante/",tags=["Representantes"])
 def Inserir_Representate(cliente: RepresentanteSchena.RepresentanteSchema, user: dict = Depends(get_current_user)):
     try:
         nascimento_formatado = datetime.strptime(cliente.dt_nascimento, "%d/%m/%Y").date()
@@ -134,19 +135,19 @@ def Inserir_Representate(cliente: RepresentanteSchena.RepresentanteSchema, user:
 # Clientes  #
 #-----------#
 
-@app.get("/Clientes")
+@app.get("/Clientes",tags=["Clientes"])
 async def Consultar_Clientes(current_user: dict = Depends(get_current_user)):
     dal = Cliente.Cliente()
     df = dal.retorna_clientes()
     return df.to_dict(orient="records")
 
-@app.get("/ClientesComboBox")
+@app.get("/ClientesComboBox",tags=["Clientes"])
 async def Retorna_representante_combo(user: dict = Depends(get_current_user)):
     dal = Cliente.Cliente()
     df = dal.retorna_clientes_combo_box()
     return df.to_dict(orient="records")
 
-@app.post("/AlterarCliente/")
+@app.post("/AlterarCliente/",tags=["Clientes"])
 def Alterar_Cliente(cliente: ClienteSchema.ClienteSchema, user: dict = Depends(get_current_user)):
     try:
         nascimento_formatado = datetime.strptime(cliente.dt_nascimento, "%d/%m/%Y").date()
@@ -166,7 +167,7 @@ def Alterar_Cliente(cliente: ClienteSchema.ClienteSchema, user: dict = Depends(g
     except ValueError as e:
         return {"erro": f"Formato de data inválido: {str(e)}"}
 
-@app.post("/InserirCliente/")
+@app.post("/InserirCliente/",tags=["Clientes"])
 def Inserir_Cliente(cliente: ClienteSchema.ClienteSchema, user: dict = Depends(get_current_user)):
     try:
         nascimento_formatado = datetime.strptime(cliente.dt_nascimento, "%d/%m/%Y").date()
@@ -185,3 +186,46 @@ def Inserir_Cliente(cliente: ClienteSchema.ClienteSchema, user: dict = Depends(g
         }
     except ValueError as e:
         return {"erro": f"Formato de data inválido: {str(e)}"}
+
+
+@app.get("/Cargos",tags=["Cargos"])
+async def Consultar_Cargo(current_user: dict = Depends(get_current_user)):
+    dal = Cargo.CargoDAL()
+    df = dal.retorna_cargos()
+    return df.to_dict(orient="records")
+
+@app.get("/CargosComboBox",tags=["Cargos"])
+async def Retorna_cargo_combo(user: dict = Depends(get_current_user)):
+    dal = Cargo.CargoDAL()
+    df = dal.retorna_cargo_combo()
+    return df.to_dict(orient="records")
+
+@app.post("/AlterarCargo/",tags=["Cargos"])
+def Alterar_Cargo(cargo: CargoSchema.CargoSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Cargo.CargoDAL()
+        df = dal.alterar_cargo(cargo)
+        return {
+            "mensagem": "Cargo Alterado com sucesso!",
+            "dados": {
+                "id_cargo": cargo.id_cargo,
+                "ds_cargo": cargo.ds_cargo,
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Formato de data inválido: {str(e)}"}
+
+@app.post("/InserirCargo/",tags=["Cargos"])
+def Inserir_Cargo(cargo: CargoSchema.CargoSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Cargo.Cargo()
+        df = dal.InseriCargo(cargo)
+        return {
+            "mensagem": "Cargo Inserido com sucesso!",
+            "dados": {
+                "id_cargo": cargo.id_cargp,
+                "ds_cliente": cargo.ds_cargo
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Falha na hora de inserir cargo: {str(e)}"}
