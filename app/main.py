@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema
+from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -229,3 +229,95 @@ def Inserir_Cargo(cargo: CargoSchema.CargoSchema, user: dict = Depends(get_curre
         }
     except ValueError as e:
         return {"erro": f"Falha na hora de inserir cargo: {str(e)}"}
+
+
+
+
+
+@app.get("/Servicos",tags=["Serviços"])
+async def Consultar_Servicos(current_user: dict = Depends(get_current_user)):
+    dal = Servico.ServicoDAL()
+    df = dal.retorna_servicos()
+    return df.to_dict(orient="records")
+
+@app.get("/ServicosComboBox",tags=["Serviços"])
+async def Retorna_servico_combo(user: dict = Depends(get_current_user)):
+    dal = Servico.ServicoDAL()
+    df = dal.retorna_servico_combo()
+    return df.to_dict(orient="records")
+
+@app.post("/AlterarServico/",tags=["Serviços"])
+def Alterar_Servico(servico: ServicoSchema.ServicoSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Servico.ServicoDAL()
+        df = dal.alterar_servico(servico)
+        return {
+            "mensagem": "Serviço Alterado com sucesso!",
+            "dados": {
+                "id_servico": servico.id_servico,
+                "ds_servico": servico.ds_servico
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Formato de data inválido: {str(e)}"}
+
+@app.post("/InserirServico/",tags=["Serviços"])
+def Inserir_Servico(servico: ServicoSchema.ServicoSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Servico.ServicoDAL()
+        df = dal.inserir_servico(servico)
+        return {
+            "mensagem": "Serviço Inserido com sucesso!",
+            "dados": {
+                "id_servico": servico.id_servico,
+                "ds_servico": servico.ds_servico,
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Falha na hora de inserir Serviço: {str(e)}"}
+
+
+
+
+
+@app.get("/Colaboradores",tags=["Colaboradores"])
+async def Consultar_Colaborador(current_user: dict = Depends(get_current_user)):
+    dal = Colaborador.ColaboradorDAL()
+    df = dal.retorna_colaborador()
+    return df.to_dict(orient="records")
+
+@app.get("/ColaboradoresComboBox",tags=["Colaboradores"])
+async def Retorna_servico_combo(user: dict = Depends(get_current_user)):
+    dal = Colaborador.ColaboradorDAL()
+    df = dal.retorna_colaborador_combo()
+    return df.to_dict(orient="records")
+
+@app.post("/AlterarColaborador/",tags=["Colaboradores"])
+def Alterar_Colaborador(colaborador: ColaboradorSchema.ColaboradorSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Colaborador.ColaboradorDAL()
+        df = dal.alterar_colaborador(colaborador)
+        return {
+            "mensagem": "Colaborador Alterado com sucesso!",
+            "dados": {
+                "id_funcionario": colaborador.id_funcionario,
+                "nm_funcionario": colaborador.nm_funcionario
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Formato de data inválido: {str(e)}"}
+
+@app.post("/InserirColaborador/",tags=["Colaboradores"])
+def Inserir_Colaborador(colaborador: ColaboradorSchema.ColaboradorSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Colaborador.ColaboradorDAL()
+        df = dal.inserir_colaborador(colaborador)
+        return {
+            "mensagem": "Colaborador Inserido com sucesso!",
+            "dados": {
+                "id_funcionario": colaborador.id_funcionario,
+                "nm_funcionario": colaborador.nm_funcionario,
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
