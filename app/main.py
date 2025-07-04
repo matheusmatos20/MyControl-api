@@ -3,7 +3,7 @@ from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
 from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoClienteSchema as ServicoClienteSchema
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -276,6 +276,18 @@ def Inserir_Servico(servico: ServicoSchema.ServicoSchema, user: dict = Depends(g
     except ValueError as e:
         return {"erro": f"Falha na hora de inserir Serviço: {str(e)}"}
 
+@app.post("/InserirServicoCliente/",tags=["Serviços"])
+def Inserir_Servico_Cliente(servicoCliente: ServicoClienteSchema.ServicoClienteSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Servico.ServicoDAL()
+        df = dal.inserir_servico_cliente(servicoCliente)
+        return {
+            "mensagem": "Colaborador Inserido com sucesso!",
+            "dados": {}
+        }
+    except ValueError as e:
+        return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
+
 
 
 
@@ -323,14 +335,3 @@ def Inserir_Colaborador(colaborador: ColaboradorSchema.ColaboradorSchema, user: 
         return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
 
 
-@app.post("/InserirServicoCliente/",tags=["Colaboradores"])
-def Inserir_Servico_Cliente(servicoCliente: ServicoClienteSchema.ServicoClienteSchema, user: dict = Depends(get_current_user)):
-    try:
-        dal = Servico.ServicoDAL()
-        df = dal.inserir_servico_cliente(servicoCliente)
-        return {
-            "mensagem": "Colaborador Inserido com sucesso!",
-            "dados": {}
-        }
-    except ValueError as e:
-        return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
