@@ -106,7 +106,7 @@ class ServicoDAL:
         JOIN TB_SERVICOS		   S WITH(NOLOCK) ON S.ID_SERVICO = SC.ID_SERVICO
         JOIN TB_USUARIOS         U WITH(NOLOCK) ON C.ID_USUARIO = SC.ID_USUARIO
         WHERE S.FL_RECORRENTE = 0  AND CONVERT(DATE,DT_SERVICO,103)=CONVERT(DATE,GETDATE(),103)
-                                                  
+                                                   
         UNION
                                                   
         SELECT C.ID_CLIENTE       AS ID

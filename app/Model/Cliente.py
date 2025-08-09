@@ -18,7 +18,7 @@ class Cliente:
 
     def _connect(self):
         return pyodbc.connect(self.conexao.str_conn)
-
+ 
     def retorna_clientes(self):
         query = """
             SELECT 

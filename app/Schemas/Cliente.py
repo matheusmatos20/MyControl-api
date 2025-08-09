@@ -7,4 +7,4 @@ class ClienteSchema(BaseModel):
     dt_nascimento: str  # formato 'dd/mm/yyyy'
     cpf: str
     rg: str
-    telefone: str
+    telefone: str  

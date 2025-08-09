@@ -7,4 +7,4 @@ class ServicoClienteSchema(BaseModel):
     vl_servico: float
     vl_desconto: float
     dt_servico: Date
-    id_usuario: int
+    id_usuario: int 

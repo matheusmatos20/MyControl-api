@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from Model import Conn_DB
 from Schemas import Cargo as cargo
-
+ 
 class CargoDAL:
     def __init__(self):
         self.conexao = Conn_DB.Conn()

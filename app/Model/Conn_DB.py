@@ -11,4 +11,4 @@ class Conn:
 
     @property
     def str_conn(self):
-        return self._str_conn
+        return self._str_conn 

@@ -74,7 +74,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 # ---------------------
-# Endpoints protegidos
+# Endpoints protegidos 
 # ---------------------
 
 @app.get("/Representantes",tags=["Representantes"])

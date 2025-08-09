@@ -85,7 +85,7 @@ class RepresentanteDAL:
             CD_CPF = '{representante.cpf}',
             CD_RG = '{representante.rg}',
             NU_TELEFONE = '{representante.telefone}'
-        WHERE ID_REPRESENTANTE = {representante.id_cliente}
+        WHERE ID_REPRESENTANTE = {representante.id_cliente} 
         """
         try:
             with self._connect() as conn:

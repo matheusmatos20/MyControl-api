@@ -7,5 +7,5 @@ class ColaboradorSchema(BaseModel):
     dt_nascimento: Date
     cd_cpf: str
     cd_rg: str
-    id_usuario: int
+    id_usuario: int 
 

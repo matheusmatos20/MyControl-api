@@ -13,7 +13,7 @@ class Pagamento:
         self.dt_vencimento = None
         self.id_fornecedor = None
         self.vl_pagamento = None
-        self.id_forma_pagamento = None
+        self.id_forma_pagamento = None 
 
     def _connect(self):
         return pyodbc.connect(self.conexao.str_conn)

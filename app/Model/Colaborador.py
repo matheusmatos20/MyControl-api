@@ -45,7 +45,7 @@ class ColaboradorDAL:
            ,[DT_NASCIMENTO]
            ,[CD_CPF]
            ,[CD_RG]
-           ,[ID_USUARIO])
+           ,[ID_USUARIO]) 
      VALUES
            ('{colaborador.nm_funcionario}'
            ,'{colaborador.dt_nascimento}'
