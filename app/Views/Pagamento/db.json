@@ -1,0 +1,34 @@
+{
+  "fornecedores": [
+    {
+      "id": "1",
+      "nome": "Fornecedor A"
+    },
+    {
+      "id": "2",
+      "nome": "Fornecedor B"
+    }
+  ],
+  "formasPagamento": [
+    {
+      "id": "1",
+      "descricao": "Boleto"
+    },
+    {
+      "id": "2",
+      "descricao": "Cartão de Crédito"
+    }
+  ],
+  "pagamentos": [
+    {
+      "id": "e4dd",
+      "descricao": "Teste",
+      "dataVencimento": "2025-08-20",
+      "pago": false,
+      "dataPagamento": null,
+      "fornecedorId": "1",
+      "formaPagamentoId": "1",
+      "valor": 100
+    }
+  ]
+}

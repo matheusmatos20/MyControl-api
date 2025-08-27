@@ -1,0 +1,163 @@
+:root {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c7a89;
+  --primary: #2a9d8f;
+  --primary-700: #21867a;
+  --heading: #2a4d69;
+}
+
+.menu-lateral {
+  width: 220px;
+  background: var(--primary);
+  color: #fff;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s;
+  overflow-x: hidden;
+  z-index: 1000;
+}
+
+.menu-toggle {
+  cursor: pointer;
+  font-size: 24px;
+  padding: 10px;
+  color: white;
+  background-color: #1f7a6b;
+  text-align: center;
+  user-select: none;
+  margin-bottom: 10px;
+  border-radius: 0 10px 10px 0;
+  align-self: flex-start;
+  transition: background-color 0.3s;
+}
+.menu-toggle:hover {
+  background-color: #166354;
+}
+
+.menu-lateral .logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.menu-lateral .logo h2 {
+  font-size: 1.4rem;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.menu-lateral ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.menu-lateral ul li {
+  margin-bottom: 10px;
+}
+
+.menu-lateral ul li a {
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.menu-lateral ul li a:hover {
+  background: var(--primary-700);
+}
+
+.menu-lateral ul li.active a {
+  background: var(--bg);
+  color: var(--primary);
+  font-weight: bold;
+}
+
+/* Minimizado */
+.menu-lateral.minimizado {
+  width: 60px;
+}
+
+.menu-lateral.minimizado .logo h2 {
+  display: none;
+}
+
+.menu-lateral.minimizado .menu-lista li a {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.menu-lateral.minimizado .menu-lista li a {
+  font-size: 0; /* Esconde texto */
+}
+
+.menu-lateral.minimizado .menu-lista li a::before {
+  content: attr(data-icon);
+  font-size: 20px;
+  display: inline-block;
+}
+
+/* Ícones nos links para quando minimizado */
+.menu-lateral ul li a[data-icon]::before {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+/* Responsivo para telas pequenas */
+@media (max-width: 768px) {
+  .menu-lateral {
+    width: 60px;
+  }
+
+  .menu-lateral .logo h2 {
+    display: none;
+  }
+
+  .menu-lateral ul li a {
+    padding: 10px 0;
+    font-size: 0;
+  }
+
+  .menu-lateral ul li a::before {
+    content: attr(data-icon);
+    font-size: 1.2rem;
+    margin-right: 0;
+  }
+}
+
+
+
+.menu-lateral.minimizado {
+  width: 60px;
+}
+
+.menu-lateral.minimizado .logo h2 {
+  display: none;
+}
+
+.menu-lateral.minimizado .menu-lista li a {
+  font-size: 0;  /* Esconde texto */
+  justify-content: center; /* Centraliza o ícone */
+  padding: 10px 0;
+  position: relative;
+}
+
+/* Mostra o ícone do data-icon no menu minimizado */
+.menu-lateral.minimizado .menu-lista li a::before {
+  content: attr(data-icon);
+  font-size: 20px;
+  display: inline-block;
+  position: static;
+}

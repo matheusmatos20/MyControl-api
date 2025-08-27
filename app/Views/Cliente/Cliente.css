@@ -1,0 +1,84 @@
+:root {
+  --menu-width: 250px;
+  --menu-min: 60px;
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #333;
+  --primary: #4a90e2;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  display: flex;
+}
+
+/* Container que acompanha o menu */
+.container {
+  flex: 1;
+  padding: 2rem;
+  margin-left: var(--menu-width);
+  transition: margin-left 0.3s ease, max-width 0.3s ease;
+}
+
+/* Quando o menu for minimizado */
+.sidebar.minimized ~ .container {
+  margin-left: var(--menu-min);
+  max-width: calc(100% - var(--menu-min));
+}
+
+/* Grid do formulário */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+input {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.8rem 1.4rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #357ab8;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: var(--card);
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+th {
+  background: #eee;
+}

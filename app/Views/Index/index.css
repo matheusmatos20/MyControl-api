@@ -1,0 +1,229 @@
+:root {
+  --primary: #2a9d8f;
+  --primary-700: #21867a;
+  --background: #f5f7fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c7a89;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: var(--primary);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+header nav button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
+}
+
+header nav button:hover {
+  background: var(--primary-700);
+  transform: scale(1.05);
+}
+
+main {
+  flex: 1;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 4rem 2rem 2rem 2rem;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+
+.hero .btn {
+  font-size: 1rem;
+}
+
+/* Benefícios */
+.benefits {
+  padding: 2rem;
+  text-align: center;
+}
+
+.benefits h2 {
+  font-size: 1.8rem;
+  color: var(--primary);
+  margin-bottom: 2rem;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.benefit-card {
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.3s;
+  cursor: default;
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.benefit-card .icon {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 0.8rem;
+}
+
+.benefit-card h3 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.benefit-card p {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* CTA Final */
+.cta-final {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 3rem 2rem;
+  margin-top: 2rem;
+}
+
+.cta-final h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.cta-final p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Modal Login */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: var(--card);
+  margin: 10% auto;
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.modal-content h2 {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(42, 157, 143, 0.25);
+}
+
+.btn-primary {
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-700);
+  transform: scale(1.03);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

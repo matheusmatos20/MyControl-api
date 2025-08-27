@@ -1,0 +1,132 @@
+/* Paleta */
+:root {
+  --bg: #f5f7fa;
+  --sidebar: #2a9d8f;
+  --sidebar-hover: #21867a;
+  --card: #ffffff;
+  --text: #333333;
+  --heading: #2a4d69;
+  --muted: #6c7a89;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: var(--sidebar);
+  color: white;
+  height: 100vh;
+  position: fixed;
+  transition: width 0.3s;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar .toggle-btn {
+  background: var(--sidebar-hover);
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.sidebar ul {
+  list-style: none;
+  margin-top: 20px;
+}
+
+.sidebar ul li {
+  padding: 15px;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar ul li a .icon {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+.sidebar.collapsed ul li a .text {
+  display: none;
+}
+
+/* Conteúdo */
+.main-content {
+  margin-left: 220px;
+  padding: 30px;
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s, width 0.3s;
+}
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+/* Card do formulário */
+.form-container {
+  background: var(--card);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 600px;
+  margin: auto;
+}
+
+h2 {
+  color: var(--heading);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 5px;
+  background: #fff;
+  font-size: 14px;
+}
+
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: var(--sidebar);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--sidebar-hover);
+}

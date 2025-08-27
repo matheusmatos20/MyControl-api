@@ -1,0 +1,116 @@
+/* ===========================
+   Paleta e resets
+=========================== */
+:root{
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c7a89;
+  --primary: #2a9d8f;
+  --primary-700: #21867a;
+  --heading: #2a4d69;
+  --danger: #e76f51;
+  --warning: #f4a261;
+  --success: #2a9d8f;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 20px;
+}
+
+/* ===========================
+   Header
+=========================== */
+header h1{
+  font-size: 1.8rem;
+  color: var(--heading);
+  margin-bottom: 20px;
+}
+
+/* ===========================
+   Filtros
+=========================== */
+.filtros{
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filtros input,
+.filtros select{
+  padding: 8px 12px;
+  border: 1px solid var(--muted);
+  border-radius: 8px;
+  outline: none;
+}
+
+.filtros input:focus,
+.filtros select:focus{
+  border-color: var(--primary);
+}
+
+/* ===========================
+   Card da Tabela
+=========================== */
+.card{
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead{
+  background: var(--primary);
+  color: #fff;
+}
+
+th, td{
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover{
+  background: #f1f1f1;
+  transition: 0.2s;
+}
+
+/* ===========================
+   Status
+=========================== */
+.status{
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.status.pendente{
+  background: var(--warning);
+  color: #fff;
+}
+
+.status.pago{
+  background: var(--success);
+  color: #fff;
+}
+
+.status.atrasado{
+  background: var(--danger);
+  color: #fff;
+}

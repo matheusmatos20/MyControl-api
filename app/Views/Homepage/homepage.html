@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clínica de Repouso - Painel</title>
+  <link rel="stylesheet" href="homepage.css">
+</head>
+<body>
+  <header>
+    <h1>Bem-vindo à Clínica de Repouso</h1>
+    <p>Visão geral do sistema</p>
+  </header>
+
+  <main>
+    <div class="cards-container">
+      <div class="card">
+        <h2>Clientes</h2>
+        <p id="clientes-count">0</p>
+      </div>
+      <div class="card">
+        <h2>Pendências</h2>
+        <p id="pendencias-count">0</p>
+      </div>
+      <div class="card">
+        <h2>Serviços</h2>
+        <p id="servicos-count">0</p>
+      </div>
+      <div class="card">
+        <h2>Colaboradores</h2>
+        <p id="colaboradores-count">0</p>
+      </div>
+    </div>
+
+    <section class="resumo">
+      <h2>Últimas pendências</h2>
+      <table id="tabelaResumo">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dados inseridos via JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="homepage.js"></script>
+</body>
+</html>

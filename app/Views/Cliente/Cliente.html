@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Representante</title>
+  <link rel="stylesheet" href="Cliente.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
+</head>
+<body>
+  <!-- Container do Menu -->
+  <div id="menu-container"></div>
+
+  <!-- Conteúdo principal -->
+  <div class="container">
+    <div class="card">
+      <h1>Cadastro de Representante</h1>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" placeholder="Digite o nome">
+        </div>
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" placeholder="Digite o e-mail">
+        </div>
+        <div class="form-group">
+          <label for="telefone">Telefone</label>
+          <input type="text" id="telefone" placeholder="Digite o telefone">
+        </div>
+        <div class="form-group">
+          <label for="rg">RG</label>
+          <input type="text" id="rg" placeholder="Digite o RG">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn">Salvar</button>
+      </div>
+
+      <div class="table-container">
+        <table id="tabela">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Telefone</th>
+              <th>RG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>João Silva</td>
+              <td>joao@email.com</td>
+              <td>1199999999</td>
+              <td>1234567</td>
+            </tr>
+            <tr>
+              <td>Maria Oliveira</td>
+              <td>maria@email.com</td>
+              <td>1188888888</td>
+              <td>7654321</td>
+            </tr>
+            <tr>
+              <td>Pedro Santos</td>
+              <td>pedro@email.com</td>
+              <td>1177777777</td>
+              <td>2468101</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="Cliente.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <script>
+    // Carrega o menu dinamicamente
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      });
+  </script>
+</body>
+</html>

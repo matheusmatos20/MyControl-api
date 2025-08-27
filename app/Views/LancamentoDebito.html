@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lançamento de Despesas</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f6fa;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .container {
+      background: #fff;
+      width: 100%;
+      max-width: 800px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #2c3e50;
+      font-size: 1.8rem;
+    }
+
+    form {
+      display: grid;
+      gap: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    button {
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #3498db;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animação */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lançamento de Despesas</h1>
+    <form>
+      <div>
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" placeholder="Ex: Compra de equipamentos"></textarea>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label for="data">Data de Lançamento</label>
+          <input type="date" id="data">
+        </div>
+        <div>
+          <label for="valor">Valor (R$)</label>
+          <input type="text" id="valor" placeholder="R$ 0,00">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label for="parcelas">Parcelas</label>
+          <select id="parcelas">
+            <option>1</option>
+            <option>3</option>
+            <option>6</option>
+            <option>12</option>
+          </select>
+        </div>
+        <div>
+          <label for="garantia">Garantia (meses)</label>
+          <select id="garantia">
+            <option>0</option>
+            <option>3</option>
+            <option>6</option>
+            <option>12</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="fornecedor">Fornecedor</label>
+        <select id="fornecedor">
+          <option>1 - Supermercado Central</option>
+          <option>2 - Papelaria Ideal</option>
+          <option>3 - Informática Tech</option>
+        </select>
+      </div>
+
+      <button type="submit">Salvar Lançamento</button>
+    </form>
+  </div>
+</body>
+</html>
