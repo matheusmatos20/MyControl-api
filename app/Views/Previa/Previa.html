@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prévia Mensal</title>
   <link rel="stylesheet" href="Previa.css" />
+  <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
+  <div id="menu-container"></div>
   <div class="container">
     <h1>Prévia Mensal</h1>
 
@@ -61,5 +63,16 @@
   </div>
 
   <script src="Previa.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      });
+      </script>
 </body>
 </html>

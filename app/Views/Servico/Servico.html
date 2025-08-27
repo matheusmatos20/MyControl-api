@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Serviços Oferecidos</title>
   <link rel="stylesheet" href="Servico.css" />
+  <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
-  <nav id="menuContainer"></nav>
+  <div id="menuContainer"></div>
   <main class="container">
     <h1>Serviços Oferecidos</h1>
 
@@ -52,6 +53,17 @@
   </main>
 
   <script src="Servico.js"></script>
-  <script type="module" src="../Menu/Menu-init.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <!-- Script para carregar o menu dinamicamente -->
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menuContainer').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      }); 
+      </script>
 </body>
 </html>

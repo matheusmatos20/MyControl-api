@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pendências</title>
   <link rel="stylesheet" href="observacoes-gerais.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
-  <header>
+    <div id="menu-container"></div>
+    <header>
     <h1>Pendências</h1>
   </header>
 
@@ -43,6 +45,16 @@
   </main>
 
   <script src="observacoes-gerais.js"></script>
-  
+    <script src="../Menu/Menu.js"></script>
+    <!-- Script para carregar o menu dinamicamente -->  
+    <script>
+      fetch('../Menu/Menu.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('menu-container').innerHTML = html;
+        })
+        .catch(error => {
+          console.error('Erro ao carregar o menu:', error);
+        }); </script>
 </body>
 </html>

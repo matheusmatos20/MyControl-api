@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro de Representante</title>
   <link rel="stylesheet" href="cadastro-representante.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
   <header>
     Gestão Financeira - Cadastro de Representante
   </header>
-
+  <div id="menu-container"></div>
   <main>
     <div class="card">
       <h2>Novo Representante</h2>
@@ -50,5 +51,17 @@
   </main>
 
   <script src="cadastro-representante.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <!-- Script para carregar o menu dinamicamente -->
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      }); 
+      </script>
 </body>
 </html>

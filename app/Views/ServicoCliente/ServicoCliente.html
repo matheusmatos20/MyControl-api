@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <title>Clínica de Repouso - Serviços</title>
   <link rel="stylesheet" href="ServicoCliente.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
+  <div id="menu-container"></div>
   <div class="container">
     <h2>Contratação de Serviços - Clínica de Repouso</h2>
 
@@ -48,5 +50,16 @@
   </div>
 
   <script src="ServicoCliente.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      }); 
+      </script> 
 </body>
 </html>
