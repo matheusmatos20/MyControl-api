@@ -26,6 +26,7 @@ async function buscarPendencias() {
   }
 }
 
+
 // ================================
 // Renderizar tabela
 // ================================
@@ -101,3 +102,5 @@ document.querySelector("#filtroStatus").addEventListener("change", async (e) => 
 // Inicialização
 // ================================
 buscarPendencias();
+
+

@@ -3,22 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro de Colaborador</title>
+  <title>Cadastro de Colaboradores</title>
 
   <!-- CSS do menu -->
- <link rel="stylesheet" href="../Menu/Menu.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
   <!-- CSS da tela -->
   <link rel="stylesheet" href="ColaboradorCadastro.css">
 </head>
 <body>
-
   <!-- MENU LATERAL carregado dinamicamente -->
   <div id="menu-container"></div>
 
   <!-- CONTEÚDO PRINCIPAL -->
-  <main class="conteudo-principal">
+  <div class="content">
     <div class="container">
-      <h2>Cadastro de Colaborador</h2>
+      <header>
+        <h2>Cadastro de Colaborador</h2>
+        <button id="btnNovo" type="button">+ Novo</button>
+      </header>
+
+      <!-- Formulário -->
       <form id="formColaborador">
         <label>Nome:</label>
         <input type="text" id="nome" required>
@@ -30,47 +34,63 @@
         <input type="text" id="rg" required>
 
         <label>Data de Nascimento:</label>
-        <input type="date" id="dtNascimento" required>
+        <input type="date" id="nascimento" required>
 
         <label>Data de Admissão:</label>
-        <input type="date" id="dtAdmissao" required>
+        <input type="date" id="admissao" required>
 
         <label>Salário:</label>
         <input type="number" id="salario" required>
 
         <label>Vale Alimentação:</label>
-        <input type="number" id="valeAlimentacao" required>
+        <input type="number" id="va" required>
 
         <label>Vale Refeição:</label>
-        <input type="number" id="valeRefeicao" required>
+        <input type="number" id="vr" required>
 
         <label>Vale Transporte:</label>
-        <input type="number" id="valeTransporte" required>
+        <input type="number" id="vt" required>
 
         <label>Cargo:</label>
         <select id="cargo" required></select>
 
-        <button type="submit">Cadastrar</button>
+        <button type="submit" id="btnSalvar">Salvar</button>
       </form>
+
+      <!-- GRID -->
+      <section class="table-section">
+        <h3>Colaboradores</h3>
+        <table id="grid">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Cargo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </section>
+
       <div id="mensagem"></div>
     </div>
-  </main>
+  </div>
 
-  <!-- JS da funcionalidade -->
+  <!-- JS -->
   <script src="ColaboradorCadastro.js"></script>
   <script src="../Menu/Menu.js"></script>
 
-  <!-- Script para carregar o menu dinamicamente -->
+  <!-- Carregar o menu dinamicamente -->
   <script>
     fetch('../Menu/Menu.html')
       .then(response => response.text())
       .then(html => {
         document.getElementById('menu-container').innerHTML = html;
       })
-      .catch(error => {
-        console.error('Erro ao carregar o menu:', error);
-      });
+      .catch(error => console.error('Erro ao carregar o menu:', error));
   </script>
-
 </body>
 </html>

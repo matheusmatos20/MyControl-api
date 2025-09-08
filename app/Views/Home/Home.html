@@ -10,57 +10,62 @@
 <body>
   <div id="menu-container"></div>
 
-  <!-- Sidebar
-  <div class="sidebar">
-    <h2>Gran Tempo</h2>
-    <a href="#">🏠 Início</a>
-    <a href="#">📊 Financeiro</a>
-    <a href="#">👥 Colaboradores</a>
-    <a href="#">📦 Estoque</a>
-    <a href="#">📝 Pendências</a>
-    <a href="#">⚙ Configurações</a>
-    <a href="#">🚪 Sair</a>
-  </div> -->
-
-  <!-- Main Content -->
-  <div class="main">
-    <div class="header">
-      <h1>Gran Tempo</h1>
-      <p>Bem-vindo, usuário</p>
-    </div>
-
-    <div class="cards">
-      <div class="card pendencia">
-        <h3>Pendências</h3>
-        <p>2 pendências em aberto</p>
+  <!-- 🔹 Wrapper igual às outras telas -->
+  <div id="content" class="content">
+    <main class="container">
+      <div class="header">
+        <h1>Gran Tempo</h1>
+        <p>Bem-vindo, usuário</p>
       </div>
 
-      <div class="card alerta">
-        <h3>Alertas</h3>
-        <p>3 alertas recentes</p>
-      </div>
+      <div class="cards">
+        <div class="card pendencia">
+          <h3>Pendências</h3>
+          <p>2 pendências em aberto</p>
+        </div>
 
-      <div class="card financeiro">
-        <h3>Financeiro</h3>
-        <p>R$ 15.000,00 em caixa</p>
+        <div class="card alerta">
+          <h3>Alertas</h3>
+          <p>3 alertas recentes</p>
+        </div>
+
+        <div class="card financeiro">
+          <h3>Financeiro</h3>
+          <p>R$ 15.000,00 em caixa</p>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <script src="home.js"></script>
   <script src="../Menu/Menu.js"></script>
-
-  <!-- Script para carregar o menu dinamicamente -->
   <script>
+    // Carregar menu dinamicamente
     fetch('../Menu/Menu.html')
       .then(response => response.text())
       .then(html => {
         document.getElementById('menu-container').innerHTML = html;
       })
-      .catch(error => {
-        console.error('Erro ao carregar o menu:', error);
-      });
-  </script>
+      .catch(error => console.error('Erro ao carregar o menu:', error));
 
+    // 🔹 Ajuste dinâmico ao recolher o menu
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        const menu = document.querySelector(".menu");
+        const content = document.getElementById("content");
+        if (menu && content) {
+          content.classList.toggle("recolhido", menu.classList.contains("recolhido"));
+        }
+      });
+
+      const interval = setInterval(() => {
+        const menu = document.querySelector(".menu");
+        if (menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ["class"] });
+          clearInterval(interval);
+        }
+      }, 100);
+    });
+  </script>
 </body>
 </html>

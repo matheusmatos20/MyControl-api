@@ -1,76 +1,202 @@
+:root {
+  --primary: #2a9d8f;
+  --primary-700: #21867a;
+  --background: #f5f7fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c7a89;
+
+  --menu-width: 250px;
+  --menu-min: 80px;
+}
+
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  padding: 20px;
-  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
+.content {
+  transition: margin-left 0.3s ease;
+  margin-left: var(--menu-width);
+}
+.content.recolhido {
+  margin-left: var(--menu-min);
 }
 
-h1 {
+main.main {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* .card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 700px;
+  animation: fadeIn 0.3s ease-in-out;
+} */
+
+.card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;              /* 🔹 agora ocupa 100% do content */
+  max-width: 100%;          /* 🔹 remove limite de 700px */
+  animation: fadeIn 0.3s ease-in-out;
+  margin-bottom: 2rem;      /* 🔹 espaço entre formulário e tabela */
+}
+
+.card h1 {
+  margin-bottom: 2rem;
   text-align: center;
-  color: #333;
+  color: var(--primary);
+}
+
+.form-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.2rem;
 }
 
 .form-group {
-  margin-bottom: 15px;
   display: flex;
   flex-direction: column;
 }
 
 .form-group label {
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--muted);
 }
 
-.form-group input,
-.form-group select,
-.form-group button {
-  padding: 10px;
+input, select {
+  padding: 0.8rem;
   font-size: 1rem;
-  border-radius: 5px;
+  border-radius: 0.5rem;
   border: 1px solid #ccc;
+  transition: border-color 0.2s ease;
 }
 
-.form-group button {
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.form-group button:hover {
-  background-color: #0056b3;
+input:focus, select:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
 .checkbox-group {
   flex-direction: row;
   align-items: center;
+  gap: 10px;
 }
 
 .hidden {
   display: none;
 }
 
-/* Responsivo */
-@media (max-width: 600px) {
-  .container {
-    padding: 15px;
-  }
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
 
-  .form-group input,
-  .form-group select,
-  .form-group button {
-    font-size: 1rem;
+.btn {
+  padding: 0.9rem 1.2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--primary-700);
+  transform: scale(1.03);
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: var(--text);
+}
+.btn-secondary:hover {
+  background: #d1d5db;
+  transform: scale(1.03);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-section {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+thead {
+  background: var(--primary);
+  color: white;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.95rem;
+}
+
+tbody tr:hover {
+  background: #f0f4f8;
+}
+
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btn-delete:hover {
+  background: #c0392b;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  table {
+    font-size: 0.85rem;
+  }
+  th, td {
+    padding: 8px;
   }
 }

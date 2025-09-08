@@ -8,45 +8,60 @@
 </head>
 <body>
   <div id="menu-container"></div>
-  <div class="container">
-    <h2>Contratação de Serviços - Clínica de Repouso</h2>
 
-    <div class="form-group">
-      <label for="cliente">Paciente:</label>
-      <select id="cliente"></select>
-    </div>
+  <div id="content" class="content">
+    <main class="main">
+      <div class="card">
+        <h2>Contratação de Serviços - Clínica de Repouso</h2>
 
-    <div class="form-group">
-      <label for="servico">Serviço:</label>
-      <select id="servico"></select>
-    </div>
+        <form id="form-servico" class="form-container">
+          <div class="form-group">
+            <label for="cliente">Paciente:</label>
+            <select id="cliente"></select>
+          </div>
 
-    <div class="form-group">
-      <label for="valor">Valor:</label>
-      <input type="number" id="valor" placeholder="R$ 0,00">
-    </div>
+          <div class="form-group">
+            <label for="servico">Serviço:</label>
+            <select id="servico"></select>
+          </div>
 
-    <div class="form-group">
-      <label for="desconto">Desconto:</label>
-      <input type="number" id="desconto" placeholder="R$ 0,00">
-    </div>
+          <div class="form-group">
+            <label for="valor">Valor:</label>
+            <input type="number" id="valor" placeholder="R$ 0,00">
+          </div>
 
-    <button onclick="salvarServico()">Salvar Serviço</button>
+          <div class="form-group">
+            <label for="desconto">Desconto:</label>
+            <input type="number" id="desconto" placeholder="R$ 0,00">
+          </div>
 
-    <table id="grid">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Paciente</th>
-          <th>Serviço</th>
-          <th>Valor</th>
-          <th>Desconto</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- dados carregados pela API -->
-      </tbody>
-    </table>
+          <div class="actions">
+            <button type="button" onclick="salvarServico()" class="btn btn-primary">Salvar Serviço</button>
+            <button type="reset" class="btn btn-secondary">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Serviços Contratados</h2>
+        <div class="grid-view">
+          <table id="grid">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Paciente</th>
+                <th>Serviço</th>
+                <th>Valor</th>
+                <th>Desconto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- dados carregados pela API -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script src="ServicoCliente.js"></script>
@@ -57,9 +72,26 @@
       .then(html => {
         document.getElementById('menu-container').innerHTML = html;
       })
-      .catch(error => {
-        console.error('Erro ao carregar o menu:', error);
-      }); 
-      </script> 
+      .catch(error => console.error('Erro ao carregar o menu:', error));
+
+    // Responsividade com o menu recolhido
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        const menu = document.querySelector(".menu");
+        const content = document.getElementById("content");
+        if (menu && content) {
+          content.classList.toggle("recolhido", menu.classList.contains("recolhido"));
+        }
+      });
+
+      const interval = setInterval(() => {
+        const menu = document.querySelector(".menu");
+        if (menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ["class"] });
+          clearInterval(interval);
+        }
+      }, 100);
+    });
+  </script>
 </body>
 </html>

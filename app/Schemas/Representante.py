@@ -7,3 +7,4 @@ class RepresentanteSchema(BaseModel):
     cpf: str
     rg: str
     telefone: str 
+    email: str

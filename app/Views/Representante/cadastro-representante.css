@@ -5,8 +5,12 @@
   --card: #ffffff;
   --text: #333333;
   --muted: #6c7a89;
+
+  --menu-width: 250px;
+  --menu-min: 80px;
 }
 
+/* Reset e base */
 * {
   margin: 0;
   padding: 0;
@@ -18,55 +22,47 @@ body {
   background: var(--background);
   color: var(--text);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-header {
-  background: var(--primary);
-  color: white;
-  padding: 1rem 2rem;
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: bold;
-  letter-spacing: 1px;
+/* Wrapper responsivo */
+.content {
+  transition: margin-left 0.3s ease;
+  margin-left: var(--menu-width);
+}
+.content.recolhido {
+  margin-left: var(--menu-min);
 }
 
-main {
+/* Área principal */
+main.main {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 2rem;
   padding: 2rem;
 }
 
+/* Cartões, formulário e tabela continuam iguais... */
 .card {
   background: var(--card);
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 500px;
   animation: fadeIn 0.4s ease-in-out;
 }
+.card h2 { margin-bottom: 1.5rem; color: var(--primary); text-align: center; }
 
-.card h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: var(--primary);
+.form-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
 .form-group label {
-  display: block;
   font-weight: 600;
   margin-bottom: 0.4rem;
   color: var(--muted);
 }
-
 .form-group input {
   width: 100%;
   padding: 0.8rem;
@@ -75,7 +71,6 @@ main {
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-
 .form-group input:focus {
   border-color: var(--primary);
   outline: none;
@@ -83,46 +78,77 @@ main {
 }
 
 .actions {
+  grid-column: 1 / -1;
   display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
+  justify-content: flex-end;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .btn {
-  flex: 1;
-  padding: 0.9rem;
+  padding: 0.9rem 1.2rem;
   border: none;
   border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
 }
-
 .btn-primary {
   background: var(--primary);
   color: white;
 }
-
 .btn-primary:hover {
   background: var(--primary-700);
   transform: scale(1.03);
 }
-
 .btn-secondary {
   background: #e5e7eb;
   color: var(--text);
 }
-
 .btn-secondary:hover {
   background: #d1d5db;
   transform: scale(1.03);
 }
 
+/* Tabela responsiva */
+.grid-view {
+  width: 100%;
+  overflow-x: auto;
+}
+#tabela-representantes {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  min-width: 600px;
+}
+#tabela-representantes th,
+#tabela-representantes td {
+  border: 1px solid #e5e7eb;
+  padding: 0.8rem;
+  text-align: left;
+}
+#tabela-representantes th {
+  background: var(--primary);
+  color: white;
+}
+#tabela-representantes tr:nth-child(even) {
+  background: #f9fafb;
+}
+.acao-btn {
+  margin: 0 0.2rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.acao-btn.editar { background: #facc15; color: #333; }
+.acao-btn.excluir { background: #ef4444; color: white; }
+
 @media (max-width: 600px) {
-  .actions {
-    flex-direction: column;
-  }
+  .actions { flex-direction: column; align-items: stretch; }
+  #tabela-representantes th,
+  #tabela-representantes td { font-size: 0.85rem; }
 }
 
 @keyframes fadeIn {

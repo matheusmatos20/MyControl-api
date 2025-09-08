@@ -11,19 +11,30 @@ body {
   color: #333;
   line-height: 1.6;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+}
+
+/* 🔹 Wrapper que acompanha o menu lateral */
+.content {
+  margin-left: 220px; /* largura do menu aberto */
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
   padding: 20px;
 }
 
+/* Quando o menu está minimizado */
+.content.recolhido {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+/* Container de conteúdo (card) */
 .container {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
-  max-width: 800px;
-  width: 100%;
+  max-width: 100%;
   padding: 25px 30px;
+  position: relative;
 }
 
 h1 {
@@ -34,6 +45,33 @@ h1 {
 
 .form-section {
   margin-bottom: 30px;
+  position: relative;
+}
+
+/* 🔹 Cabeçalho da seção de formulário */
+.form-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+/* Botão Novo (apenas ícone +) */
+#btnNovo {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#btnNovo:hover {
+  background-color: #2980b9;
+  transform: scale(1.1);
 }
 
 .form-group {
@@ -57,7 +95,7 @@ h1 {
 }
 
 .form-group input[type="text"]:focus {
-  border-color: #2980b9;
+  border-color: #2a9d8f;
   outline: none;
 }
 
@@ -72,8 +110,13 @@ h1 {
   height: 18px;
 }
 
+.form-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 button#btnAction {
-  background-color: #2980b9;
+  background-color: #2a9d8f;
   color: white;
   border: none;
   padding: 12px 22px;
@@ -81,11 +124,11 @@ button#btnAction {
   font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  width: 100%;
+  flex: 2;
 }
 
 button#btnAction:hover {
-  background-color: #1c5980;
+  background-color: #21867a;
 }
 
 .error-message {
@@ -105,7 +148,7 @@ table {
 }
 
 thead {
-  background-color: #2980b9;
+  background-color: #2a9d8f;
   color: white;
 }
 
@@ -129,18 +172,33 @@ tbody tr.selected {
   background-color: #d1e7fd;
 }
 
+/* Responsivo */
 @media (max-width: 480px) {
-  body {
-    padding: 10px;
+  .content {
+    margin-left: 60px;
+    width: calc(100% - 60px);
   }
 
   .container {
     padding: 20px 15px;
   }
 
-  button#btnAction {
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  #btnAction, #btnNovo {
     font-size: 1rem;
     padding: 10px;
+    flex: unset;
+    width: 100%;
+    border-radius: 5px;
+  }
+
+  #btnNovo {
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
   }
 
   th, td {

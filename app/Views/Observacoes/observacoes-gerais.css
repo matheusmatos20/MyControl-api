@@ -114,3 +114,16 @@ tbody tr:hover{
   background: var(--danger);
   color: #fff;
 }
+
+.content {
+  margin-left: 220px; /* largura do menu aberto */
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  padding: 20px;
+}
+
+/* Quando o menu está minimizado */
+.content.recolhido {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}

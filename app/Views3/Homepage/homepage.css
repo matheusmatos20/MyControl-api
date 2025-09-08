@@ -1,0 +1,134 @@
+:root{
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #333333;
+  --muted: #6c7a89;
+  --primary: #2a9d8f;
+  --primary-700: #21867a;
+  --heading: #2a4d69;
+  --danger: #e76f51;
+  --warning: #f4a261;
+  --success: #2a9d8f;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 20px;
+}
+
+header{
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1{
+  font-size: 2rem;
+  color: var(--heading);
+}
+
+header p{
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* ===========================
+   Cards
+=========================== */
+.cards-container{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.card{
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.card:hover{
+  transform: translateY(-5px);
+}
+
+.card h2{
+  font-size: 1.2rem;
+  color: var(--primary-700);
+  margin-bottom: 10px;
+}
+
+.card p{
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--heading);
+}
+
+/* ===========================
+   Tabela Resumo
+=========================== */
+.resumo{
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.resumo h2{
+  margin-bottom: 15px;
+  color: var(--heading);
+}
+
+table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td{
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+thead{
+  background: var(--primary);
+  color: #fff;
+}
+
+tbody tr:hover{
+  background: #f1f1f1;
+  transition: 0.2s;
+}
+
+.status{
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.status.pendente{
+  background: var(--warning);
+  color: #fff;
+}
+
+.status.pago{
+  background: var(--success);
+  color: #fff;
+}
+
+.status.atrasado{
+  background: var(--danger);
+  color: #fff;
+}

@@ -1,118 +1,235 @@
-// Simulação de API (mock)
-const api = {
-  getClientes: async () => {
-    return [
-      { id: 1, nome: "João Silva" },
-      { id: 2, nome: "Maria Souza" },
-      { id: 3, nome: "Pedro Oliveira" }
-    ];
-  },
-  getServicos: async () => {
-    return [
-      { id: 1, nome: "Banho assistido" },
-      { id: 2, nome: "Acompanhamento médico" },
-      { id: 3, nome: "Fisioterapia" }
-    ];
-  },
-  getServicosCliente: async () => {
-    return [
-      { id: 101, cliente: "João Silva", servico: "Banho assistido", valor: 1200, desconto: 100 },
-      { id: 102, cliente: "Maria Souza", servico: "Fisioterapia", valor: 1500, desconto: 200 }
-    ];
+// ServicoCliente.js
+let tokenGlobal = null;
+
+// -----------------------------
+// Helpers
+// -----------------------------
+function extrairId(valor) {
+  // Recebe "1", "1 - Nome" ou  " 1 - Nome" e retorna 1 (number) ou null
+  if (valor === null || valor === undefined) return null;
+  const s = String(valor).trim();
+  if (!s) return null;
+  const m = s.match(/^(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function hojeISO() {
+  const hoje = new Date();
+  return hoje.toISOString().split("T")[0]; // yyyy-mm-dd
+}
+
+async function obterToken() {
+  // ajusta conforme seu endpoint de auth
+  const url = "http://127.0.0.1:8000/token";
+  const formData = new URLSearchParams();
+  formData.append("username", "usuario");
+  formData.append("password", "1234");
+  formData.append("grant_type", "password");
+
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
+    tokenGlobal = data.access_token;
+    return tokenGlobal;
+  } catch (err) {
+    console.error("Erro ao obter token:", err);
+    alert("Falha na autenticação (verifique backend).");
+    return null;
   }
-};
+}
 
-let editRow = null;
-
-// Inicialização da tela
-window.onload = async () => {
-  await carregarCombos();
-  await carregarGrid();
-};
-
-// Carregar opções de cliente e serviço
+// -----------------------------
+// Carregar combos (Clientes e Serviços)
+// -----------------------------
 async function carregarCombos() {
-  const clientes = await api.getClientes();
-  const servicos = await api.getServicos();
+  if (!tokenGlobal) await obterToken();
+  if (!tokenGlobal) return;
 
-  const cmbCliente = document.getElementById("cliente");
-  const cmbServico = document.getElementById("servico");
+  try {
+    // Clientes
+    const respClientes = await fetch("http://127.0.0.1:8000/Clientes", {
+      headers: { Authorization: `Bearer ${tokenGlobal}` }
+    });
+    if (!respClientes.ok) throw new Error("Erro ao buscar clientes");
+    const clientes = await respClientes.json();
 
-  cmbCliente.innerHTML = clientes.map(c => `<option value="${c.id}">${c.id} - ${c.nome}</option>`).join("");
-  cmbServico.innerHTML = servicos.map(s => `<option value="${s.id}">${s.id} - ${s.nome}</option>`).join("");
+    const cmbCliente = document.getElementById("cliente");
+    cmbCliente.innerHTML = `<option value="">Selecione...</option>`;
+    clientes.forEach(c => {
+      // tenta lidar com nomes diferentes de campos vindos da API
+      const id = c.id_cliente ?? c.id ?? c.Id ?? c.IdCliente;
+      const nome = c.Nome ?? c.nome ?? c.nome_cliente ?? "";
+      const opt = document.createElement("option");
+      opt.value = String(id); // garante que value = apenas o ID
+      opt.textContent = `${id} - ${nome}`;
+      cmbCliente.appendChild(opt);
+    });
+
+    // Serviços
+    const respServ = await fetch("http://127.0.0.1:8000/Servicos", {
+      headers: { Authorization: `Bearer ${tokenGlobal}` }
+    });
+    if (!respServ.ok) throw new Error("Erro ao buscar serviços");
+    const servicos = await respServ.json();
+
+    const cmbServico = document.getElementById("servico");
+    cmbServico.innerHTML = `<option value="">Selecione...</option>`;
+    servicos.forEach(s => {
+      const id = s.ID
+      const nome = s.Servico
+      const opt = document.createElement("option");
+      opt.value = String(id); // garante que value = apenas o ID
+      opt.textContent = `${id} - ${nome}`;
+      cmbServico.appendChild(opt);
+    });
+
+    //   const cmbServico = document.getElementById("servico");
+    // cmbServico.innerHTML = `<option value="">Selecione...</option>`;
+    // servicos.forEach(s => {
+    //   const opt = document.createElement("option");
+    //   opt.value = s.ID;
+    //   opt.textContent = `${s.ID} - ${s.Servico}`;
+    //   cmbServico.appendChild(opt);
+    // });
+
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao carregar combos (Clientes/Serviços).");
+  }
 }
 
-// Carregar serviços contratados
+// -----------------------------
+// Carregar grid de serviços contratados
+// -----------------------------
 async function carregarGrid() {
-  const dados = await api.getServicosCliente();
-  const tbody = document.querySelector("#grid tbody");
-  tbody.innerHTML = "";
+  if (!tokenGlobal) await obterToken();
+  if (!tokenGlobal) return;
 
-  dados.forEach(d => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${d.id}</td>
-      <td>${d.cliente}</td>
-      <td>${d.servico}</td>
-      <td>${d.valor}</td>
-      <td>${d.desconto}</td>
-    `;
-    row.onclick = () => preencherCampos(row);
-    tbody.appendChild(row);
-  });
+  try {
+    const resp = await fetch("http://127.0.0.1:8000/ServicosCliente", {
+      headers: { Authorization: `Bearer ${tokenGlobal}` }
+    });
+    if (!resp.ok) throw new Error("Erro ao buscar serviços contratados");
+    const dados = await resp.json();
+
+    const tbody = document.querySelector("#grid tbody");
+    tbody.innerHTML = "";
+
+    dados.forEach(d => {
+      const row = document.createElement("tr");
+      // campos esperados: id_servico_cliente, Cliente, Servico, vl_servico, vl_desconto
+      row.innerHTML = `
+        <td>${d.Id ?? d.id ?? ""}</td>
+        <td>${d.Cliente ?? d.cliente ?? ""}</td>
+        <td>${d.Servico ?? d.servico ?? ""}</td>
+        <td>${d.Valor ?? d.valor ?? ""}</td>
+        <td>${d.Desconto ?? d.desconto ?? ""}</td>
+      `;
+      row.addEventListener("click", () => preencherCampos(row));
+      tbody.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao carregar grid.");
+  }
 }
 
-// Preencher os campos ao clicar no grid
+// -----------------------------
+// Preencher campos ao clicar no grid
+// -----------------------------
 function preencherCampos(row) {
-  editRow = row;
   const cells = row.cells;
+  // cells[1] = paciente nome, cells[2] = serviço nome
+  const pacienteNome = cells[1]?.innerText?.trim() ?? "";
+  const servicoNome = cells[2]?.innerText?.trim() ?? "";
 
-  document.getElementById("cliente").value = [...document.getElementById("cliente").options]
-    .find(opt => opt.text.includes(cells[1].innerText)).value;
+  // Seleciona cliente procurando pelo texto da option
+  const clienteOpt = Array.from(document.getElementById("cliente").options)
+    .find(o => o.textContent.includes(pacienteNome));
+  if (clienteOpt) document.getElementById("cliente").value = clienteOpt.value;
 
-  document.getElementById("servico").value = [...document.getElementById("servico").options]
-    .find(opt => opt.text.includes(cells[2].innerText)).value;
+  const servicoOpt = Array.from(document.getElementById("servico").options)
+    .find(o => o.textContent.includes(servicoNome));
+  if (servicoOpt) document.getElementById("servico").value = servicoOpt.value;
 
-  document.getElementById("valor").value = cells[3].innerText;
-  document.getElementById("desconto").value = cells[4].innerText;
+  document.getElementById("valor").value = cells[3]?.innerText ?? "";
+  document.getElementById("desconto").value = cells[4]?.innerText ?? "";
 }
 
-// Salvar serviço (novo ou edição)
-function salvarServico() {
-  const clienteSel = document.getElementById("cliente");
-  const servicoSel = document.getElementById("servico");
-  const valor = document.getElementById("valor").value;
-  const desconto = document.getElementById("desconto").value;
+// -----------------------------
+// Salvar serviço contratado
+// -----------------------------
+async function salvarServico() {
+  if (!tokenGlobal) await obterToken();
+  if (!tokenGlobal) return;
 
-  if (!valor || !desconto) {
-    alert("Preencha todos os campos!");
+  const clienteRaw = document.getElementById("cliente").value;
+  const servicoRaw = document.getElementById("servico").value;
+  const valorRaw = document.getElementById("valor").value;
+  const descontoRaw = document.getElementById("desconto").value;
+
+  const id_cliente = extrairId(clienteRaw);
+  const id_servico = extrairId(servicoRaw);
+
+  // aceitar vírgula como separador decimal
+  const valor = valorRaw ? parseFloat(String(valorRaw).replace(",", ".")) : NaN;
+  const desconto = descontoRaw ? parseFloat(String(descontoRaw).replace(",", ".")) : 0;
+
+  if (!id_cliente || !id_servico || isNaN(valor)) {
+    alert("Preencha Cliente, Serviço e Valor corretamente!");
     return;
   }
 
-  if (editRow) {
-    // Atualiza registro existente
-    editRow.cells[1].innerText = clienteSel.options[clienteSel.selectedIndex].text.split(" - ")[1];
-    editRow.cells[2].innerText = servicoSel.options[servicoSel.selectedIndex].text.split(" - ")[1];
-    editRow.cells[3].innerText = valor;
-    editRow.cells[4].innerText = desconto;
-    editRow = null;
-    alert("Serviço atualizado com sucesso!");
-  } else {
-    // Insere novo registro
-    const tbody = document.querySelector("#grid tbody");
-    const newRow = tbody.insertRow();
-    newRow.innerHTML = `
-      <td>${Math.floor(Math.random() * 1000) + 200}</td>
-      <td>${clienteSel.options[clienteSel.selectedIndex].text.split(" - ")[1]}</td>
-      <td>${servicoSel.options[servicoSel.selectedIndex].text.split(" - ")[1]}</td>
-      <td>${valor}</td>
-      <td>${desconto}</td>
-    `;
-    newRow.onclick = () => preencherCampos(newRow);
-    alert("Serviço inserido com sucesso!");
-  }
+  const payload = {
+    id_servico: Number(id_servico),
+    id_cliente: Number(id_cliente),
+    vl_servico: Number(valor),
+    vl_desconto: Number(isNaN(desconto) ? 0 : desconto),
+    dt_servico: hojeISO(),
+    id_usuario: 3 // temporário conforme combinado
+  };
 
-  // Limpa campos
-  document.getElementById("valor").value = "";
-  document.getElementById("desconto").value = "";
+  try {
+    const resp = await fetch("http://127.0.0.1:8000/InserirServicoCliente", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${tokenGlobal}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(txt || "Erro ao salvar serviço");
+    }
+
+    alert("Serviço salvo com sucesso!");
+    document.getElementById("form-servico").reset();
+    carregarGrid();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao salvar serviço: " + (err.message || err));
+  }
 }
+
+// -----------------------------
+// Inicialização
+// -----------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+  // Se o HTML usa onclick="salvarServico()" você pode manter — 
+  // aqui também adiciono listener só por garantia
+  const btnSalvar = document.querySelector(".btn-primary");
+  // if (btnSalvar) btnSalvar.addEventListener("click", salvarServico);
+
+  await carregarCombos();
+  await carregarGrid();
+});

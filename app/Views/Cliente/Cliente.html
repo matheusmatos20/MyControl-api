@@ -1,92 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro de Representante</title>
-  <link rel="stylesheet" href="Cliente.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestão de Clientes</title>
+  <link rel="stylesheet" href="Cliente.css" />
   <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
-  <!-- Container do Menu -->
-  <div id="menu-container"></div>
+  <div id="menuContainer"></div>
 
-  <!-- Conteúdo principal -->
-  <div class="container">
-    <div class="card">
-      <h1>Cadastro de Representante</h1>
+  <!-- 🔹 Wrapper que acompanha o menu -->
+  <div id="content" class="content">
+    <main class="container">
+      <h1>Gestão de Clientes</h1>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="nome">Nome</label>
-          <input type="text" id="nome" placeholder="Digite o nome">
-        </div>
-        <div class="form-group">
-          <label for="email">E-mail</label>
-          <input type="email" id="email" placeholder="Digite o e-mail">
-        </div>
-        <div class="form-group">
-          <label for="telefone">Telefone</label>
-          <input type="text" id="telefone" placeholder="Digite o telefone">
-        </div>
-        <div class="form-group">
-          <label for="rg">RG</label>
-          <input type="text" id="rg" placeholder="Digite o RG">
-        </div>
+      <!-- BOTÃO + -->
+      <div class="acoes-topo">
+        <button id="btnNovo" class="btn-novo">+</button>
       </div>
 
-      <div class="form-actions">
-        <button class="btn">Salvar</button>
-      </div>
+      <!-- FORMULÁRIO -->
+      <section class="form-section">
+        <form id="cliente-form" novalidate>
+          <div class="form-grid">
 
-      <div class="table-container">
-        <table id="tabela">
+            <div class="form-group">
+              <label for="nome">Nome</label>
+              <input type="text" id="nome" name="nome" required />
+            </div>
+
+            <div class="form-group">
+              <label for="cpf">CPF</label>
+              <input type="text" id="cpf" name="cpf" required />
+            </div>
+
+            <div class="form-group">
+              <label for="rg">RG</label>
+              <input type="text" id="rg" name="rg" required />
+            </div>
+
+            <div class="form-group">
+              <label for="dataNasc">Data Nascimento</label>
+              <input type="date" id="dataNasc" name="dataNasc" required />
+            </div>
+
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input type="text" id="telefone" name="telefone" required />
+            </div>
+
+            <!-- <div class="form-group">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" required />
+            </div> -->
+
+            <!-- Combobox Representante -->
+            <div class="form-group">
+              <label for="representante">Representante</label>
+              <select id="representante" name="representante" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+
+          </div>
+          <button type="submit" id="btnSalvar">Salvar</button>
+        </form>
+      </section>
+
+      <!-- GRID -->
+      <section class="table-section">
+        <table id="clientes-table">
           <thead>
-            <tr>
+            <tr data-id="Clientes">
+              <th>ID</th>
               <th>Nome</th>
-              <th>Email</th>
-              <th>Telefone</th>
+              <th>CPF</th>
               <th>RG</th>
+              <th>Data Nasc.</th>
+              <th>Telefone</th>
+              <!-- <th>Email</th> -->
+              <th>Representante</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>João Silva</td>
-              <td>joao@email.com</td>
-              <td>1199999999</td>
-              <td>1234567</td>
-            </tr>
-            <tr>
-              <td>Maria Oliveira</td>
-              <td>maria@email.com</td>
-              <td>1188888888</td>
-              <td>7654321</td>
-            </tr>
-            <tr>
-              <td>Pedro Santos</td>
-              <td>pedro@email.com</td>
-              <td>1177777777</td>
-              <td>2468101</td>
-            </tr>
+            <!-- preenchido dinamicamente -->
           </tbody>
         </table>
-      </div>
-    </div>
-  </div>
+      </section>
+    </main>
+  </div> <!-- 🔹 fim do wrapper -->
 
-  <!-- Scripts -->
   <script src="Cliente.js"></script>
   <script src="../Menu/Menu.js"></script>
   <script>
-    // Carrega o menu dinamicamente
+    // Carrega menu dinamicamente
     fetch('../Menu/Menu.html')
       .then(response => response.text())
       .then(html => {
-        document.getElementById('menu-container').innerHTML = html;
+        document.getElementById('menuContainer').innerHTML = html;
       })
-      .catch(error => {
-        console.error('Erro ao carregar o menu:', error);
-      });
+      .catch(error => console.error('Erro ao carregar o menu:', error));
   </script>
 </body>
 </html>

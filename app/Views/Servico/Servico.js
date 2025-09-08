@@ -1,152 +1,199 @@
-(() => {
-  // Simulação inicial dos serviços (substituir com backend real)
-  let servicos = [
-    { id: 1, descricao: "Consultoria Financeira", valor: 1500.0, recorrente: true },
-    { id: 2, descricao: "Manutenção Técnica", valor: 500.0, recorrente: false },
-    { id: 3, descricao: "Desenvolvimento Web", valor: 3000.0, recorrente: false },
-  ];
+// -------------------------
+// Variáveis globais
+// -------------------------
+let tokenGlobal = null;
+let servicoSelecionado = null; // Guarda o serviço selecionado para edição
 
-  let acao = 1; // 1 = adicionar, 2 = alterar
-  let servicoSelecionadoId = null;
+// -------------------------
+// Função para obter o token
+// -------------------------
+async function obterToken() {
+    const url = 'http://localhost:8000/token';
+    const formData = new URLSearchParams();
+    formData.append('username', 'usuario');
+    formData.append('password', '1234');
+    formData.append('grant_type', 'password');
 
-  // DOM refs
-  const form = document.getElementById("formServico");
-  const txtServico = document.getElementById("txtServico");
-  const txtValor = document.getElementById("txtValor");
-  const chkRecorrente = document.getElementById("chkRecorrente");
-  const btnAction = document.getElementById("btnAction");
-  const tabelaBody = document.querySelector("#dgvServicos tbody");
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        });
 
-  // Formata valor para BRL
-  function formatCurrency(value) {
-    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
+        if (!response.ok) {
+            const erro = await response.text();
+            throw new Error(`Erro ao obter token: ${erro}`);
+        }
 
-  // Validação básica dos inputs
-  function validarFormulario() {
-    let valido = true;
+        const data = await response.json();
+        tokenGlobal = data.access_token;
+        return tokenGlobal;
 
-    // Descrição
-    if (!txtServico.value.trim()) {
-      mostrarErro(txtServico, true);
-      valido = false;
-    } else {
-      mostrarErro(txtServico, false);
+    } catch (err) {
+        console.error('Erro ao obter token:', err);
+        alert("Falha ao autenticar. Verifique o backend e abra via localhost:5501.");
+        return null;
+    }
+}
+
+// -------------------------
+// Função para carregar serviços
+// -------------------------
+async function carregarServicos() {
+    if (!tokenGlobal) {
+        await obterToken();
+        if (!tokenGlobal) return;
     }
 
-    // Valor - verifica se é número válido > 0
-    const valorNum = parseFloat(txtValor.value.replace(",", "."));
-    if (!valorNum || valorNum <= 0) {
-      mostrarErro(txtValor, true);
-      valido = false;
-    } else {
-      mostrarErro(txtValor, false);
+    const url = 'http://127.0.0.1:8000/Servicos';
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${tokenGlobal}` }
+        });
+
+        if (!response.ok) {
+            const erro = await response.text();
+            throw new Error(`Erro ao carregar serviços: ${erro}`);
+        }
+
+        const servicos = await response.json();
+
+        const tbody = document.querySelector('#gridServicos tbody');
+        tbody.innerHTML = '';
+
+        servicos.forEach(s => {
+            const tr = document.createElement('tr');
+            const valorFormatado = Number(s.Valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            tr.innerHTML = `
+                <td>${s.ID}</td>
+                <td>${s.Servico}</td>
+                <td>R$ ${valorFormatado}</td>
+                <td>${s.Recorrente ? 'Sim' : 'Não'}</td>
+            `;
+            tr.addEventListener('click', () => carregarFormulario(s, tr));
+            tbody.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error(err);
+        alert("Falha ao carregar serviços. Veja o console para detalhes.");
+    }
+}
+
+// -------------------------
+// Função para carregar formulário com serviço selecionado
+// -------------------------
+function carregarFormulario(servico, linha) {
+    servicoSelecionado = servico;
+    document.getElementById('txtServico').value = servico.Servico;
+    document.getElementById('txtValor').value = servico.Valor;
+    document.getElementById('chkRecorrente').checked = servico.Recorrente;
+    document.getElementById('btnAction').textContent = 'Alterar';
+
+    document.querySelectorAll('#gridServicos tbody tr').forEach(tr => tr.classList.remove('selected'));
+    linha.classList.add('selected');
+}
+
+// -------------------------
+// Função para limpar formulário
+// -------------------------
+function limparFormulario() {
+    servicoSelecionado = null;
+    document.getElementById('txtServico').value = '';
+    document.getElementById('txtValor').value = '';
+    document.getElementById('chkRecorrente').checked = false;
+    document.getElementById('btnAction').textContent = 'Salvar';
+
+    document.querySelectorAll('#gridServicos tbody tr').forEach(tr => tr.classList.remove('selected'));
+}
+
+// -------------------------
+// Função para salvar serviço (inserir ou alterar)
+// -------------------------
+async function salvarServico(event) {
+    event.preventDefault();
+
+    const dsServico = document.getElementById('txtServico').value.trim();
+    const valor = parseFloat(document.getElementById('txtValor').value.replace(',', '.'));
+    const recorrente = document.getElementById('chkRecorrente').checked ? 1 : 0;
+
+    if (!dsServico || isNaN(valor)) {
+        alert("Preencha todos os campos corretamente.");
+        return;
     }
 
-    return valido;
-  }
-
-  function mostrarErro(input, mostrar) {
-    const grupo = input.parentElement;
-    const erroMsg = grupo.querySelector(".error-message");
-    if (mostrar) {
-      erroMsg.hidden = false;
-      input.classList.add("input-error");
-    } else {
-      erroMsg.hidden = true;
-      input.classList.remove("input-error");
+    if (!tokenGlobal) {
+        await obterToken();
+        if (!tokenGlobal) return;
     }
-  }
 
-  // Atualiza tabela
-  function carregarGrid() {
-    tabelaBody.innerHTML = "";
+    const url = servicoSelecionado
+        ? 'http://127.0.0.1:8000/AlterarServico/'
+        : 'http://127.0.0.1:8000/InserirServico/';
 
-    servicos.forEach((servico) => {
-      const tr = document.createElement("tr");
-      tr.dataset.id = servico.id;
+    const payload = servicoSelecionado
+        ? { id_servico: servicoSelecionado.ID, ds_servico: dsServico, vl_servico: valor, fl_recorrente: recorrente }
+        : { id_servico: 0, ds_servico: dsServico, vl_servico: valor, fl_recorrente: recorrente };
 
-      tr.innerHTML = `
-        <td>${servico.id}</td>
-        <td>${servico.descricao}</td>
-        <td>${formatCurrency(servico.valor)}</td>
-        <td>${servico.recorrente ? "Sim" : "Não"}</td>
-      `;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${tokenGlobal}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-      tr.addEventListener("dblclick", () => {
-        selecionarServico(servico.id);
-      });
+        if (!response.ok) {
+            const erro = await response.text();
+            throw new Error(`Falha ao salvar serviço: ${erro}`);
+        }
 
-      tabelaBody.appendChild(tr);
+        const data = await response.json();
+        alert(data.mensagem || 'Serviço salvo com sucesso!');
+        limparFormulario();
+        carregarServicos();
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao salvar serviço. Veja o console para detalhes.");
+    }
+}
+
+async function AlterarServico(servico) {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/AlterarServico", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(servico),
     });
-  }
 
-  // Selecionar serviço para edição
-  function selecionarServico(id) {
-    const servico = servicos.find((s) => s.id === id);
-    if (!servico) return;
-
-    servicoSelecionadoId = servico.id;
-    txtServico.value = servico.descricao;
-    txtValor.value = servico.valor.toFixed(2).replace(".", ",");
-    chkRecorrente.checked = servico.recorrente;
-
-    acao = 2;
-    btnAction.textContent = "Alterar";
-
-    // Marca linha selecionada
-    [...tabelaBody.children].forEach((tr) => {
-      tr.classList.toggle("selected", parseInt(tr.dataset.id) === servico.id);
-    });
-  }
-
-  // Limpar formulário após ação
-  function limparFormulario() {
-    txtServico.value = "";
-    txtValor.value = "";
-    chkRecorrente.checked = false;
-    acao = 1;
-    servicoSelecionadoId = null;
-    btnAction.textContent = "Adicionar";
-    [...tabelaBody.children].forEach((tr) => tr.classList.remove("selected"));
-  }
-
-  // Adicionar ou alterar serviço
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    if (!validarFormulario()) return;
-
-    const descricao = txtServico.value.trim();
-    const valor = parseFloat(txtValor.value.replace(",", "."));
-    const recorrente = chkRecorrente.checked;
-
-    if (acao === 1) {
-      // Adicionar
-      const novoId = servicos.length ? Math.max(...servicos.map(s => s.id)) + 1 : 1;
-      servicos.push({ id: novoId, descricao, valor, recorrente });
-      alert("Serviço inserido com sucesso!");
-    } else if (acao === 2 && servicoSelecionadoId !== null) {
-      // Alterar
-      const index = servicos.findIndex(s => s.id === servicoSelecionadoId);
-      if (index > -1) {
-        servicos[index] = { id: servicoSelecionadoId, descricao, valor, recorrente };
-        alert("Serviço alterado com sucesso!");
-      }
+    if (!response.ok) {
+      throw new Error(`Erro ao alterar serviço: ${response.status}`);
     }
 
-    limparFormulario();
-    carregarGrid();
-  });
+    const data = await response.json();
+    alert("Serviço alterado com sucesso!");
+    carregarServicos(); // Atualiza a grid após alteração
+    limparFormulario(); // Reseta o formulário
+    return data;
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao alterar serviço");
+  }
+}
 
-  // Permite só números e vírgula no campo valor
-  txtValor.addEventListener("keypress", (e) => {
-    const allowedKeys = ["0","1","2","3","4","5","6","7","8","9",",","."];
-    if (!allowedKeys.includes(e.key) && e.key !== "Backspace") {
-      e.preventDefault();
-    }
-  });
-
-  // Inicializa a tabela e configurações
-  carregarGrid();
-})();
+// -------------------------
+// Inicializa ao carregar a página
+// -------------------------
+window.addEventListener('DOMContentLoaded', () => {
+    carregarServicos();
+    document.getElementById('formServico').addEventListener('submit', salvarServico);
+    document.getElementById('btnNovo').addEventListener('click', limparFormulario);
+});

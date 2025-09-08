@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pendências</title>
+  <link rel="stylesheet" href="observacoes-gerais.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
+  <link rel="stylesheet" href="../../assets/css/common.css">
+</head>
+<body>
+    <div id="menu-container"></div>
+    <header>
+    <h1>Pendências</h1>
+  </header>
+
+  <main>
+    <!-- Barra de busca e filtro -->
+    <div class="filtros">
+      <input type="text" id="busca" placeholder="Buscar pendência...">
+      <select id="filtroStatus">
+        <option value="">Todos</option>
+        <option value="Pendente">Pendente</option>
+        <option value="Pago">Pago</option>
+        <option value="Atrasado">Atrasado</option>
+      </select>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card">
+      <table id="tabelaPendencias">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dados inseridos via JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="observacoes-gerais.js"></script>
+    <script src="../Menu/Menu.js"></script>
+    <!-- Script para carregar o menu dinamicamente -->  
+    <script>
+      fetch('../Menu/Menu.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('menu-container').innerHTML = html;
+        })
+        .catch(error => {
+          console.error('Erro ao carregar o menu:', error);
+        }); </script>
+  <script src="../../assets/js/common.js"></script>
+</body>
+</html>

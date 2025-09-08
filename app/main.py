@@ -2,18 +2,34 @@ from pathlib import Path
 from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema
+from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(
-    title="Fast Api Fia",
-    version="0.1.0",
-    description="Minha api",
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # permite POST, GET, OPTIONS, etc
+    allow_headers=["*"],
 )
+
+
+
+# app = FastAPI(
+#     title="Fast Api Fia",
+#     version="0.1.0",
+#     description="Minha api",
+# )
 
 
 # Usuário simulado
@@ -76,6 +92,17 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 # ---------------------
 # Endpoints protegidos 
 # ---------------------
+@app.get("/RetornaDebito",tags=["Financeiro"])
+async def Consultar_Debitos(current_user: dict = Depends(get_current_user)):
+    dal = Financeiro.FinanceiroDAL()
+    df = dal.retorna_pagamentos()
+    return df.to_dict(orient="records")
+
+@app.get("/RetornaCredito",tags=["Financeiro"])
+async def Consultar_Creditos(current_user: dict = Depends(get_current_user)):
+    dal = Financeiro.FinanceiroDAL()
+    df = dal.retorna_creditos()
+    return df.to_dict(orient="records")
 
 @app.get("/Representantes",tags=["Representantes"])
 async def Consultar_Representantes(current_user: dict = Depends(get_current_user)):
@@ -288,7 +315,11 @@ def Inserir_Servico_Cliente(servicoCliente: ServicoClienteSchema.ServicoClienteS
     except ValueError as e:
         return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
 
-
+@app.get("/ServicosCliente",tags=["Serviços"])
+async def Retorna_Servico_cliente(user: dict = Depends(get_current_user)):
+    dal = Servico.ServicoDAL()
+    df = dal.retorna_servicos_cliente_grid()
+    return df.to_dict(orient="records")
 
 
 
@@ -334,4 +365,24 @@ def Inserir_Colaborador(colaborador: ColaboradorSchema.ColaboradorSchema, user: 
     except ValueError as e:
         return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
 
+@app.post("/InserirFornecedor/",tags=["Fornecedores"])
+def Inserir_Fornecedor(fornecedor: FornecedorSchema.FornecedorSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Fornecedor.FornecedorDAL()
+        df = dal.inserir_fornecedor(fornecedor)
+        return {
+            "mensagem": "Fornecedor Inserido com sucesso!",
+            "dados": {
+                "nm_fantasia": fornecedor.nm_fantasia,
+            }
+        }
+    except ValueError as e:
+        return {"erro": f"Falha na hora de inserir o Colaborador: {str(e)}"}
 
+
+
+@app.get("/RetornaFornecedores",tags=["Fornecedores"])
+async def Retorna_fornecedor(user: dict = Depends(get_current_user)):
+    dal = Fornecedor.FornecedorDAL()
+    df = dal.retorna_fornecedores()
+    return df.to_dict(orient="records")

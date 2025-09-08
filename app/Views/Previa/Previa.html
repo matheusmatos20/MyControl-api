@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
@@ -9,70 +9,98 @@
 </head>
 <body>
   <div id="menu-container"></div>
-  <div class="container">
-    <h1>Prévia Mensal</h1>
 
-    <div class="indicadores">
-      <div class="card"><strong>Ticket Médio:</strong> <span id="lblValorTicket">--</span></div>
-      <div class="card"><strong>Valor Bruto:</strong> <span id="lblValorBruto">--</span></div>
-      <div class="card"><strong>Descontos:</strong> <span id="lblTotalDescont">--</span></div>
-      <div class="card"><strong>Valor Líquido:</strong> <span id="lblTotalLiq">--</span></div>
-      <div class="card"><strong>% Lucro:</strong> <span id="lblPerc">--</span></div>
-    </div>
+  <!-- 🔹 Conteúdo principal -->
+  <div id="content" class="content">
+    <main class="container">
+      <h1>Prévia Mensal</h1>
 
-    <div class="tabela-wrapper">
-      <h2>Débitos (Pagamentos)</h2>
-      <table id="dgvDebito">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Descrição</th>
-            <th>Fornecedor</th>
-            <th>Vencimento</th>
-            <th>Pagamento</th>
-            <th>Valor</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div class="actions">
-        <button id="btnBaixarPagamento" class="hidden">Baixar</button>
-        <button id="btnExcluirPagamento" class="hidden danger">Excluir</button>
+      <!-- Indicadores -->
+      <div class="indicadores">
+        <div class="card"><strong>Ticket Médio:</strong> <span id="lblValorTicket">--</span></div>
+        <div class="card"><strong>Valor Bruto:</strong> <span id="lblValorBruto">--</span></div>
+        <div class="card"><strong>Descontos:</strong> <span id="lblTotalDescont">--</span></div>
+        <div class="card"><strong>Valor Líquido:</strong> <span id="lblTotalLiq">--</span></div>
+        <div class="card"><strong>% Lucro:</strong> <span id="lblPerc">--</span></div>
       </div>
-    </div>
 
-    <div class="tabela-wrapper">
-      <h2>Créditos (Serviços)</h2>
-      <table id="dgvCredito">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Data</th>
-            <th>Cliente</th>
-            <th>Serviço</th>
-            <th>Valor</th>
-            <th>Desconto</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div class="actions">
-        <button id="btnExcluirCredito" class="hidden danger">Excluir Crédito</button>
+      <!-- Tabela Débitos -->
+      <div class="tabela-wrapper">
+        <h2>Débitos (Pagamentos)</h2>
+        <table id="dgvDebito">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descrição</th>
+              <th>Fornecedor</th>
+              <th>Vencimento</th>
+              <th>Forma Pagamento</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="actions">
+          <button id="btnBaixarPagamento" class="hidden">Baixar</button>
+          <button id="btnExcluirPagamento" class="hidden danger">Excluir</button>
+        </div>
       </div>
-    </div>
+
+      <!-- Tabela Créditos -->
+      <div class="tabela-wrapper">
+        <h2>Créditos (Serviços)</h2>
+        <table id="dgvCredito">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Serviço</th>
+              <th>Valor</th>
+              <th>Desconto</th>
+              <th>Líquido</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="actions">
+          <button id="btnExcluirCredito" class="hidden danger">Excluir Crédito</button>
+        </div>
+      </div>
+    </main>
   </div>
 
+  <!-- Scripts -->
   <script src="Previa.js"></script>
   <script src="../Menu/Menu.js"></script>
   <script>
+    // Carregar menu
     fetch('../Menu/Menu.html')
       .then(response => response.text())
       .then(html => {
         document.getElementById('menu-container').innerHTML = html;
       })
-      .catch(error => {
-        console.error('Erro ao carregar o menu:', error);
+      .catch(error => console.error('Erro ao carregar o menu:', error));
+
+    // 🔹 Ajustar responsividade ao recolher o menu
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        const menu = document.querySelector(".menu");
+        const content = document.getElementById("content");
+        if (menu && content) {
+          content.classList.toggle("recolhido", menu.classList.contains("recolhido"));
+        }
       });
-      </script>
+
+      const interval = setInterval(() => {
+        const menu = document.querySelector(".menu");
+        if (menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ["class"] });
+          clearInterval(interval);
+        }
+      }, 100);
+    });
+  </script>
 </body>
 </html>

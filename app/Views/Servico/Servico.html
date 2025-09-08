@@ -9,61 +9,66 @@
 </head>
 <body>
   <div id="menuContainer"></div>
-  <main class="container">
-    <h1>Serviços Oferecidos</h1>
+  <div id="content" class="content">
+    <main class="container">
+      <h1>Serviços Oferecidos</h1>
 
-    <section class="form-section">
-      <form id="formServico" novalidate>
-        <div class="form-group">
-          <label for="txtServico">Descrição do Serviço</label>
-          <input type="text" id="txtServico" name="txtServico" required placeholder="Ex: Consultoria" />
-          <small class="error-message" hidden>Campo obrigatório</small>
+      <section class="form-section">
+        <div class="form-header">
+          <button type="button" id="btnNovo" class="btn-novo" title="Novo serviço">+</button>
         </div>
 
-        <div class="form-group">
-          <label for="txtValor">Valor (R$)</label>
-          <input type="text" id="txtValor" name="txtValor" required placeholder="Ex: 1500,00" />
-          <small class="error-message" hidden>Informe um valor válido</small>
-        </div>
+        <form id="formServico" novalidate>
+          <div class="form-group">
+            <label for="txtServico">Descrição do Serviço</label>
+            <input type="text" id="txtServico" name="txtServico" required placeholder="Ex: Consultoria" />
+            <small class="error-message" hidden>Campo obrigatório</small>
+          </div>
 
-        <div class="form-group checkbox-group">
-          <input type="checkbox" id="chkRecorrente" name="chkRecorrente" />
-          <label for="chkRecorrente">Serviço Recorrente</label>
-        </div>
+          <div class="form-group">
+            <label for="txtValor">Valor (R$)</label>
+            <input type="text" id="txtValor" name="txtValor" required placeholder="Ex: 1500,00" />
+            <small class="error-message" hidden>Informe um valor válido</small>
+          </div>
 
-        <button type="submit" id="btnAction">Adicionar</button>
-      </form>
-    </section>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="chkRecorrente" name="chkRecorrente" />
+            <label for="chkRecorrente">Serviço Recorrente</label>
+          </div>
 
-    <section class="table-section">
-      <table id="dgvServicos" aria-label="Tabela de serviços oferecidos">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Descrição</th>
-            <th>Valor (R$)</th>
-            <th>Recorrente</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Dados carregados pelo JS -->
-        </tbody>
-      </table>
-    </section>
-  </main>
+          <div class="form-buttons">
+            <button type="submit" id="btnAction">Salvar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="table-section">
+        <table id="gridServicos" aria-label="Tabela de serviços oferecidos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descrição</th>
+              <th>Valor (R$)</th>
+              <th>Recorrente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dados carregados pelo JS -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
 
   <script src="Servico.js"></script>
   <script src="../Menu/Menu.js"></script>
-  <!-- Script para carregar o menu dinamicamente -->
   <script>
     fetch('../Menu/Menu.html')
       .then(response => response.text())
       .then(html => {
         document.getElementById('menuContainer').innerHTML = html;
       })
-      .catch(error => {
-        console.error('Erro ao carregar o menu:', error);
-      }); 
-      </script>
+      .catch(error => console.error('Erro ao carregar o menu:', error));
+  </script>
 </body>
 </html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Fornecedor</title>
+
+  <!-- CSS do menu -->
+  <link rel="stylesheet" href="../Menu/Menu.css">
+  <!-- CSS da tela -->
+  <link rel="stylesheet" href="Fornecedor.css">
+</head>
+<body>
+  <!-- MENU LATERAL carregado dinamicamente -->
+  <div id="menu-container"></div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="content">
+    <div class="container">
+      <header>
+        <h2>Cadastro de Fornecedor</h2>
+        <button id="btnNovo" type="button">+ Novo</button>
+      </header>
+
+      <!-- Formulário -->
+      <form id="formFornecedor">
+        <label>Razão Social</label>
+        <input type="text" id="razaosocial" required>
+
+        <label>Nome Fantasia</label>
+        <input type="text" id="nomefantasia" maxlength="100" required>
+
+        <label>CNPJ</label>
+        <input type="text" id="cnpj" maxlength="14" required>
+
+        <label>Telefone</label>
+        <input type="text" id="telefone" maxlength="11" required>
+
+        <label>Endereço</label>
+        <input type="text" id="endereco" required>
+
+        <button type="submit" id="btnSalvar">Salvar</button>
+      </form>
+
+      <!-- GRID -->
+      <section class="table-section">
+        <h3>Fornecedores</h3>
+        <table id="grid">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Razão Social</th>
+              <th>Nome Fantasia</th>
+              <th>CNPJ</th>
+              <th>Telefone</th>
+              <th>Endereço</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </section>
+
+      <div id="mensagem"></div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="Fornecedor.js"></script>
+  <script src="../Menu/Menu.js"></script>
+
+  <!-- Carregar o menu dinamicamente -->
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => console.error('Erro ao carregar o menu:', error));
+  </script>
+</body>
+</html>

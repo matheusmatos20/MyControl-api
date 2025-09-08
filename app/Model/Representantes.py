@@ -41,8 +41,8 @@ class RepresentanteDAL:
 
     def inserir_representante(self,representante):
         query = f"""
-        INSERT INTO TB_REPRESENTANTES (NM_CLIENTE, DT_NASCIMENTO, CD_CPF, CD_RG, NU_TELEFONE)
-        SELECT '{representante.nm_cliente}', CONVERT(DATE, '{representante.dt_nascimento}', 103), '{representante.cpf}', '{representante.rg}', '{representante.telefone}'
+        INSERT INTO TB_REPRESENTANTES (NM_CLIENTE, DT_NASCIMENTO, CD_CPF, CD_RG, NU_TELEFONE,NM_EMAIL)
+        SELECT '{representante.nm_cliente}', CONVERT(DATE, '{representante.dt_nascimento}', 103), '{representante.cpf}', '{representante.rg}', '{representante.telefone}','{representante.email}'
         """
         try:
             with self._connect() as conn:
@@ -60,7 +60,8 @@ class RepresentanteDAL:
                DT_NASCIMENTO AS DtNascimento,
                CD_CPF AS CPF,
                CD_RG AS RG,
-               NU_TELEFONE AS Telefone
+               NU_TELEFONE AS Telefone,
+               NM_EMAIL AS Email
         FROM TB_REPRESENTANTES WITH(NOLOCK)
         """
         with self._connect() as conn:
@@ -78,15 +79,19 @@ class RepresentanteDAL:
             return False
 
     def alterar_representante(self,representante):
+        print("Aqui Alterar")
         query = f"""
         UPDATE TB_REPRESENTANTES
         SET NM_CLIENTE = '{representante.nm_cliente}',
             DT_NASCIMENTO = CONVERT(DATE, '{representante.dt_nascimento}', 103),
             CD_CPF = '{representante.cpf}',
             CD_RG = '{representante.rg}',
-            NU_TELEFONE = '{representante.telefone}'
+            NU_TELEFONE = '{representante.telefone}',
+            NM_EMAIL = '{representante.email}'
         WHERE ID_REPRESENTANTE = {representante.id_cliente} 
         """
+
+        print(query)
         try:
             with self._connect() as conn:
                 cursor = conn.cursor()

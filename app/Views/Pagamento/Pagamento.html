@@ -1,62 +1,89 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lançamento de Pagamentos</title>
   <link rel="stylesheet" href="Pagamento.css" />
-  <link rel="stylesheet" href="../Menu/Menu.css">
+  <link rel="stylesheet" href="../Menu/Menu.css" />
 </head>
 <body>
   <div id="menu-container"></div>
-  <div class="container">
-    <h1>Lançamento de Pagamentos</h1>
-    <form id="formPagamento">
-      <div class="form-group">
-        <label for="txtPagamento">Descrição do Pagamento</label>
-        <input type="text" id="txtPagamento" name="txtPagamento" required />
+
+  <div id="content" class="content">
+    <main class="main">
+      <div class="card">
+        <h1>Lançamento de Pagamentos</h1>
+        <form id="formPagamento" class="form-container">
+          <div class="form-group">
+            <label for="txtPagamento">Descrição do Pagamento</label>
+            <input type="text" id="txtPagamento" name="txtPagamento" required />
+          </div>
+
+          <div class="form-group">
+            <label for="dtpVencimento">Data de Vencimento</label>
+            <input type="date" id="dtpVencimento" name="dtpVencimento" required />
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" id="chkPago" name="chkPago" />
+              Pago?
+            </label>
+          </div>
+
+          <div class="form-group hidden" id="groupDtPagamento">
+            <label for="dtpPagamento">Data de Pagamento</label>
+            <input type="date" id="dtpPagamento" name="dtpPagamento" />
+          </div>
+
+          <div class="form-group">
+            <label for="cmbFornecedores">Fornecedor</label>
+            <select id="cmbFornecedores" name="cmbFornecedores" required>
+              <option value="">Selecione</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cmbFormaPagamento">Forma de Pagamento</label>
+            <select id="cmbFormaPagamento" name="cmbFormaPagamento" required>
+              <option value="">Selecione</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="txtValor">Valor</label>
+            <input type="text" id="txtValor" name="txtValor" placeholder="R$ 0,00" required />
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="btnSalvar" class="btn btn-primary">Salvar</button>
+            <button type="reset" class="btn btn-secondary">Cancelar</button>
+          </div>
+        </form>
       </div>
 
-      <div class="form-group">
-        <label for="dtpVencimento">Data de Vencimento</label>
-        <input type="date" id="dtpVencimento" name="dtpVencimento" required />
-      </div>
-
-      <div class="form-group checkbox-group">
-        <label>
-          <input type="checkbox" id="chkPago" name="chkPago" />
-          Pago?
-        </label>
-      </div>
-
-      <div class="form-group hidden" id="groupDtPagamento">
-        <label for="dtpPagamento">Data de Pagamento</label>
-        <input type="date" id="dtpPagamento" name="dtpPagamento" />
-      </div>
-
-      <div class="form-group">
-        <label for="cmbFornecedores">Fornecedor</label>
-        <select id="cmbFornecedores" name="cmbFornecedores" required>
-          <option value="">Selecione</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="cmbFormaPagamento">Forma de Pagamento</label>
-        <select id="cmbFormaPagamento" name="cmbFormaPagamento" required>
-          <option value="">Selecione</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="txtValor">Valor</label>
-        <input type="text" id="txtValor" name="txtValor" placeholder="R$ 0,00" required />
-      </div>
-
-      <div class="form-group">
-        <button type="submit" id="btnSalvar">Salvar</button>
-      </div>
-    </form>
+      <!-- 🔹 Grid de Pagamentos -->
+      <section class="table-section">
+        <table id="dgvPagamentos" aria-label="Tabela de Pagamentos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descrição</th>
+              <th>Vencimento</th>
+              <th>Pago</th>
+              <th>Valor</th>
+              <th>Fornecedor</th>
+              <th>Forma Pagamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </section>
+    </main>
   </div>
 
   <script src="Pagamento.js"></script>
@@ -70,7 +97,24 @@
       .catch(error => {
         console.error('Erro ao carregar o menu:', error);
       });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new MutationObserver(() => {
+        const menu = document.querySelector(".menu");
+        const content = document.getElementById("content");
+        if (menu && content) {
+          content.classList.toggle("recolhido", menu.classList.contains("recolhido"));
+        }
+      });
+
+      const interval = setInterval(() => {
+        const menu = document.querySelector(".menu");
+        if (menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ["class"] });
+          clearInterval(interval);
+        }
+      }, 100);
+    });
   </script>
-   
 </body>
 </html>

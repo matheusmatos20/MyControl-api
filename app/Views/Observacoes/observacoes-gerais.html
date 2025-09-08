@@ -8,53 +8,58 @@
   <link rel="stylesheet" href="../Menu/Menu.css">
 </head>
 <body>
-    <div id="menu-container"></div>
+  <div id="menu-container"></div>
+
+  <!-- 🔹 Wrapper de conteúdo -->
+  <div class="content">
     <header>
-    <h1>Pendências</h1>
-  </header>
+      <h1>Pendências</h1>
+    </header>
 
-  <main>
-    <!-- Barra de busca e filtro -->
-    <div class="filtros">
-      <input type="text" id="busca" placeholder="Buscar pendência...">
-      <select id="filtroStatus">
-        <option value="">Todos</option>
-        <option value="Pendente">Pendente</option>
-        <option value="Pago">Pago</option>
-        <option value="Atrasado">Atrasado</option>
-      </select>
-    </div>
+    <main>
+      <!-- Barra de busca e filtro -->
+      <div class="filtros">
+        <input type="text" id="busca" placeholder="Buscar pendência...">
+        <select id="filtroStatus">
+          <option value="">Todos</option>
+          <option value="Pendente">Pendente</option>
+          <option value="Pago">Pago</option>
+          <option value="Atrasado">Atrasado</option>
+        </select>
+      </div>
 
-    <!-- Tabela -->
-    <div class="card">
-      <table id="tabelaPendencias">
-        <thead>
-          <tr>
-            <th>Descrição</th>
-            <th>Categoria</th>
-            <th>Valor</th>
-            <th>Vencimento</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Dados inseridos via JS -->
-        </tbody>
-      </table>
-    </div>
-  </main>
+      <!-- Tabela -->
+      <div class="card">
+        <table id="tabelaPendencias">
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Valor</th>
+              <th>Vencimento</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dados inseridos via JS -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
 
   <script src="observacoes-gerais.js"></script>
-    <script src="../Menu/Menu.js"></script>
-    <!-- Script para carregar o menu dinamicamente -->  
-    <script>
-      fetch('../Menu/Menu.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('menu-container').innerHTML = html;
-        })
-        .catch(error => {
-          console.error('Erro ao carregar o menu:', error);
-        }); </script>
+  <script src="../Menu/Menu.js"></script>
+  <!-- Script para carregar o menu dinamicamente -->  
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      }); 
+  </script>
 </body>
 </html>

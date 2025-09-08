@@ -5,10 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('formPagamento');
   const cmbFornecedores = document.getElementById('cmbFornecedores');
   const cmbFormaPagamento = document.getElementById('cmbFormaPagamento');
+  const tabelaBody = document.querySelector("#dgvPagamentos tbody");
 
   const API_BASE = 'http://localhost:3000';
-
-  console.log("Script carregado");
 
   chkPago.addEventListener('change', () => {
     groupDtPagamento.classList.toggle('hidden', !chkPago.checked);
@@ -31,13 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const fornecedores = await respFornecedores.json();
       const formasPagamento = await respFormas.json();
 
-      console.log("Fornecedores recebidos:", fornecedores);
-
-      if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
-        alert("Nenhum fornecedor retornado da API");
-        return;
-      }
-
       fornecedores.forEach(f => {
         const option = document.createElement('option');
         option.value = f.id;
@@ -51,9 +43,45 @@ document.addEventListener('DOMContentLoaded', () => {
         option.textContent = fp.descricao;
         cmbFormaPagamento.appendChild(option);
       });
-
     } catch (error) {
       alert('Erro ao carregar dados: ' + error.message);
+    }
+  }
+
+  async function carregarGrid() {
+    tabelaBody.innerHTML = "";
+    try {
+      const response = await fetch(`${API_BASE}/pagamentos`);
+      const pagamentos = await response.json();
+
+      pagamentos.forEach(pg => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${pg.id}</td>
+          <td>${pg.descricao}</td>
+          <td>${pg.dataVencimento}</td>
+          <td>${pg.pago ? "Sim" : "Não"}</td>
+          <td>R$ ${pg.valor.toFixed(2)}</td>
+          <td>${pg.fornecedorId}</td>
+          <td>${pg.formaPagamentoId}</td>
+          <td><button class="btn-delete" data-id="${pg.id}">Excluir</button></td>
+        `;
+        tabelaBody.appendChild(tr);
+      });
+
+      // Ações de excluir
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          if (confirm("Deseja realmente excluir este pagamento?")) {
+            await fetch(`${API_BASE}/pagamentos/${id}`, { method: "DELETE" });
+            carregarGrid();
+          }
+        });
+      });
+
+    } catch (error) {
+      alert("Erro ao carregar pagamentos: " + error.message);
     }
   }
 
@@ -81,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Pagamento lançado com sucesso!');
         form.reset();
         groupDtPagamento.classList.add('hidden');
+        carregarGrid();
       } else {
         alert('Erro ao salvar pagamento.');
       }
@@ -90,4 +119,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   carregarSelects();
+  carregarGrid();
 });

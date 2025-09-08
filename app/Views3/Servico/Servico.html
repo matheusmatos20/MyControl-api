@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Serviços Oferecidos</title>
+  <link rel="stylesheet" href="Servico.css" />
+  <link rel="stylesheet" href="../Menu/Menu.css">
+  <link rel="stylesheet" href="../../assets/css/common.css">
+</head>
+<body>
+  <div id="menuContainer"></div>
+  <main class="container">
+    <h1>Serviços Oferecidos</h1>
+
+    <section class="form-section">
+      <form id="formServico" novalidate>
+        <div class="form-group">
+          <label for="txtServico">Descrição do Serviço</label>
+          <input type="text" id="txtServico" name="txtServico" required placeholder="Ex: Consultoria" />
+          <small class="error-message" hidden>Campo obrigatório</small>
+        </div>
+
+        <div class="form-group">
+          <label for="txtValor">Valor (R$)</label>
+          <input type="text" id="txtValor" name="txtValor" required placeholder="Ex: 1500,00" />
+          <small class="error-message" hidden>Informe um valor válido</small>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="chkRecorrente" name="chkRecorrente" />
+          <label for="chkRecorrente">Serviço Recorrente</label>
+        </div>
+
+        <button type="submit" id="btnAction">Adicionar</button>
+      </form>
+    </section>
+
+    <section class="table-section">
+      <table id="dgvServicos" aria-label="Tabela de serviços oferecidos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Descrição</th>
+            <th>Valor (R$)</th>
+            <th>Recorrente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dados carregados pelo JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="Servico.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <!-- Script para carregar o menu dinamicamente -->
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menuContainer').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      }); 
+      </script>
+  <script src="../../assets/js/common.js"></script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+/* Reset básico */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,19 +9,40 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f5f7fa;
   color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* 🔹 Wrapper que acompanha o menu lateral */
+.content {
+  margin-left: 220px;
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
   padding: 20px;
 }
 
+/* Quando o menu está minimizado */
+.content.recolhido {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+/* Container */
 .container {
-  max-width: 1200px;
-  margin: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
+  max-width: 100%;
+  padding: 25px 30px;
 }
 
 h1, h2 {
   margin-bottom: 15px;
   color: #2c3e50;
+  text-align: center;
 }
 
+/* Indicadores */
 .indicadores {
   display: flex;
   flex-wrap: wrap;
@@ -34,8 +56,10 @@ h1, h2 {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   flex: 1 1 180px;
+  text-align: center;
 }
 
+/* Tabelas */
 .tabela-wrapper {
   margin-bottom: 40px;
 }
@@ -55,7 +79,7 @@ thead {
 }
 
 th, td {
-  padding: 12px;
+  padding: 12px 15px;
   text-align: left;
 }
 
@@ -63,6 +87,7 @@ tbody tr:nth-child(even) {
   background-color: #f0f0f0;
 }
 
+/* Ações */
 .actions {
   margin-top: 10px;
   display: flex;
@@ -87,7 +112,17 @@ button.hidden {
   display: none;
 }
 
+/* 🔹 Responsividade */
 @media (max-width: 768px) {
+  .content {
+    margin-left: 60px;
+    width: calc(100% - 60px);
+  }
+
+  .container {
+    padding: 20px 15px;
+  }
+
   .indicadores {
     flex-direction: column;
   }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Clínica de Repouso - Serviços</title>
+  <link rel="stylesheet" href="ServicoCliente.css">
+  <link rel="stylesheet" href="../Menu/Menu.css">
+  <link rel="stylesheet" href="../../assets/css/common.css">
+</head>
+<body>
+  <div id="menu-container"></div>
+  <div class="container">
+    <h2>Contratação de Serviços - Clínica de Repouso</h2>
+
+    <div class="form-group">
+      <label for="cliente">Paciente:</label>
+      <select id="cliente"></select>
+    </div>
+
+    <div class="form-group">
+      <label for="servico">Serviço:</label>
+      <select id="servico"></select>
+    </div>
+
+    <div class="form-group">
+      <label for="valor">Valor:</label>
+      <input type="number" id="valor" placeholder="R$ 0,00">
+    </div>
+
+    <div class="form-group">
+      <label for="desconto">Desconto:</label>
+      <input type="number" id="desconto" placeholder="R$ 0,00">
+    </div>
+
+    <button onclick="salvarServico()">Salvar Serviço</button>
+
+    <table id="grid">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Paciente</th>
+          <th>Serviço</th>
+          <th>Valor</th>
+          <th>Desconto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- dados carregados pela API -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="ServicoCliente.js"></script>
+  <script src="../Menu/Menu.js"></script>
+  <script>
+    fetch('../Menu/Menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('menu-container').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar o menu:', error);
+      }); 
+      </script> 
+  <script src="../../assets/js/common.js"></script>
+</body>
+</html>

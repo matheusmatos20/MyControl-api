@@ -72,16 +72,16 @@ class ServicoDAL:
     def inserir_servico_cliente(self,servico_cliente):
         query = f""" 
 
-        INSERT INTO TB_SERVICOS_CLIENTE(ID_CLIENTE" +
-                    "                                                   ,ID_SERVICO" +
-                    "                                                   ,VL_SERVICO" +
-                    "                                                   ,VL_DESCONTO" +
-                    "                                                   ,ID_USUARIO) " +
-                    "SELECT " + {servico_cliente.id_cliente} +
-                    "," {servico_cliente.id_servico}
-                    ",convert(numeric(19,2),REPLACE('" + {servico_cliente.vl_servico} + "',',','.'))"+
-                    ",convert(numeric(19,2),REPLACE('" + {servico_cliente.vl_desconto} + "',',','.'))" +
-                    ","+{servico_cliente.id_usuario} """
+        INSERT INTO TB_SERVICOS_CLIENTE(ID_CLIENTE
+                                                                       ,ID_SERVICO
+                                                                       ,VL_SERVICO 
+                                                                       ,VL_DESCONTO 
+                                                                       ,ID_USUARIO)  
+                    SELECT   {servico_cliente.id_cliente} 
+                    , {servico_cliente.id_servico}
+                    ,convert(numeric(19,2),REPLACE('{servico_cliente.vl_servico}',',','.'))
+                    ,convert(numeric(19,2),REPLACE('{servico_cliente.vl_desconto}',',','.'))
+                    ,{servico_cliente.id_usuario} """
         print(query)
         try:
             with self._connect() as conn:
@@ -121,6 +121,25 @@ class ServicoDAL:
         JOIN TB_SERVICOS		 S WITH(NOLOCK) ON S.ID_SERVICO = SC.ID_SERVICO
         JOIN TB_USUARIOS         U WITH(NOLOCK) ON C.ID_USUARIO = SC.ID_USUARIO
         WHERE S.FL_RECORRENTE = 1   
+
+        """
+        with self._connect() as conn:
+            return pd.read_sql(query, conn)
+
+    def retorna_servicos_cliente_grid(self):
+        query = """
+                SELECT 
+                        SC.ID_SERVICO_CLIENTE									AS Id
+                        ,CONVERT(INT,CONVERT(VARCHAR(6),SC.DT_SERVICO,112)) AS Competencia
+                        ,CONCAT(S.ID_SERVICO, ' - ',S.DS_SERVICO)			AS Servico
+                        ,CONCAT( C.ID_CLIENTE,' - ', C.NM_CLIENTE)			AS Cliente
+                        ,sc.VL_SERVICO										AS Valor
+                        ,sc.VL_DESCONTO										AS Desconto
+                        
+                        FROM TB_SERVICOS_CLIENTE		SC  WITH(NOLOCK)
+                        LEFT JOIN TB_CLIENTES			C  WITH(NOLOCK) ON C.ID_CLIENTE = SC.ID_CLIENTE
+                        LEFT JOIN TB_SERVICOS			S WITH(NOLOCK) ON S.ID_SERVICO = SC.ID_SERVICO
+                WHERE CONVERT(INT,CONVERT(VARCHAR(6),SC.DT_SERVICO,112))	= CONVERT(INT,CONVERT(VARCHAR(6),GETDATE(),112))
 
         """
         with self._connect() as conn:
