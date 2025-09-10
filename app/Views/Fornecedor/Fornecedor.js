@@ -90,7 +90,7 @@ async function salvarFornecedor(e) {
     nm_razao_social: document.getElementById("razaosocial").value,
     nm_fantasia: document.getElementById("nomefantasia").value,
     cd_cnpj: document.getElementById("cnpj").value,
-    nu_telefone: document.getElementById("telefone").value,
+    nu_telefone: document.getElementById("nutelefone").value,
     ds_endereco: document.getElementById("endereco").value
   };
 

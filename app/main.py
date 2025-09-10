@@ -386,3 +386,73 @@ async def Retorna_fornecedor(user: dict = Depends(get_current_user)):
     dal = Fornecedor.FornecedorDAL()
     df = dal.retorna_fornecedores()
     return df.to_dict(orient="records")
+
+
+# ...existing code...
+
+from Model import ColaboradorCargo as ColaboradorCargoModel
+from Schemas import ColaboradorCargo as ColaboradorCargoSchema
+
+@app.get("/ColaboradoresCargos",tags=["ColaboradoresCargos"])
+async def Consultar_Colaborador_Cargos(current_user: dict = Depends(get_current_user)):
+    dal = ColaboradorCargoModel.ColaboradorCargoDAL()
+    df = dal.retorna_cargos_colaborador()
+    return df.to_dict(orient="records")
+
+@app.post("/InserirColaboradorCargo/",tags=["ColaboradoresCargos"])
+def Inserir_Colaborador_Cargo(cargo: ColaboradorCargoSchema.ColaboradorCargoSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = ColaboradorCargoModel.ColaboradorCargoDAL()
+        dal.inserir_cargo_colaborador(cargo)
+        return {
+            "mensagem": "Cargo de colaborador inserido com sucesso!",
+            "dados": cargo.dict()
+        }
+    except Exception as e:
+        return {"erro": f"Falha ao inserir cargo do colaborador: {str(e)}"}
+
+@app.post("/AlterarColaboradorCargo/",tags=["ColaboradoresCargos"])
+def Alterar_Colaborador_Cargo(cargo: ColaboradorCargoSchema.ColaboradorCargoSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = ColaboradorCargoModel.ColaboradorCargoDAL()
+        dal.alterar_cargo_colaborador(cargo)
+        return {
+            "mensagem": "Cargo de colaborador alterado com sucesso!",
+            "dados": cargo.dict()
+        }
+    except Exception as e:
+        return {"erro": f"Falha ao alterar cargo do colaborador: {str(e)}"}
+    
+# ...existing code...
+
+from Model import Colaborador as ColaboradorModel
+from Schemas import Colaborador as ColaboradorSchema, ColaboradorCargo as ColaboradorCargoSchema
+
+@app.post("/InserirColaboradorComCargo/", tags=["Colaboradores"])
+def Inserir_Colaborador_Com_Cargo(
+    colaborador: ColaboradorSchema.ColaboradorSchema,
+    colaborador_cargo: ColaboradorCargoSchema.ColaboradorCargoSchema,
+    user: dict = Depends(get_current_user)
+):
+    print('main')
+    dal = ColaboradorModel.ColaboradorDAL()
+    resultado = dal.inserir_colaborador_cargo(colaborador, colaborador_cargo)
+    if resultado:
+        return {"mensagem": "Colaborador e cargo inseridos com sucesso!"}
+    else:
+        raise HTTPException(status_code=400, detail="Erro ao inserir colaborador e cargo")    
+    
+@app.post("/AlterarColaboradorComCargo/", tags=["Colaboradores"])
+def Alterar_Colaborador_Com_Cargo(
+    
+    colaborador: ColaboradorSchema.ColaboradorSchema,
+    colaborador_cargo: ColaboradorCargoSchema.ColaboradorCargoSchema,
+    user: dict = Depends(get_current_user)
+):
+    print('mainAlterar')
+    dal = ColaboradorModel.ColaboradorDAL()
+    resultado = dal.atualiza_colaborador_cargo(colaborador, colaborador_cargo)
+    if resultado:
+        return {"mensagem": "Colaborador e cargo atualizado com sucesso!"}
+    else:
+        raise HTTPException(status_code=400, detail="Erro ao inserir colaborador e cargo")    

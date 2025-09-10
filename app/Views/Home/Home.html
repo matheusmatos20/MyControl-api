@@ -19,28 +19,32 @@
       </div>
 
       <div class="cards">
-        <div class="card pendencia">
+        <div class="card pendencia" id="cardPendencias">
           <h3>Pendências</h3>
           <p>2 pendências em aberto</p>
         </div>
 
-        <div class="card alerta">
+        <div class="card alerta" id="cardAlertas">
           <h3>Alertas</h3>
           <p>3 alertas recentes</p>
         </div>
 
-        <div class="card financeiro">
+        <div class="card financeiro" id="cardFinanceiro">
           <h3>Financeiro</h3>
           <p>R$ 15.000,00 em caixa</p>
         </div>
       </div>
+
+      <!-- 🔹 Área dinâmica onde a grid será carregada -->
+      <div id="areaExpansivel"></div>
     </main>
   </div>
 
   <script src="home.js"></script>
   <script src="../Menu/Menu.js"></script>
+  
+  <!-- Carregar menu dinamicamente -->
   <script>
-    // Carregar menu dinamicamente
     fetch('../Menu/Menu.html')
       .then(response => response.text())
       .then(html => {
@@ -48,7 +52,7 @@
       })
       .catch(error => console.error('Erro ao carregar o menu:', error));
 
-    // 🔹 Ajuste dinâmico ao recolher o menu
+    // Ajuste dinâmico ao recolher o menu
     document.addEventListener("DOMContentLoaded", () => {
       const observer = new MutationObserver(() => {
         const menu = document.querySelector(".menu");

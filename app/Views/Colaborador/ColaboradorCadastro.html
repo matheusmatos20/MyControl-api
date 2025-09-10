@@ -24,37 +24,49 @@
 
       <!-- Formulário -->
       <form id="formColaborador">
+        <!-- ADICIONADO: campo hidden para controlar insert / update -->
+        <input type="hidden" id="id_funcionario" />
+
         <label>Nome:</label>
-        <input type="text" id="nome" required>
+        <input type="text" id="nm_funcionario" required>
 
         <label>CPF:</label>
-        <input type="text" id="cpf" maxlength="11" required>
+        <input type="text" id="cd_cpf" maxlength="11" required>
 
         <label>RG:</label>
-        <input type="text" id="rg" required>
+        <input type="text" id="cd_rg" required>
 
         <label>Data de Nascimento:</label>
-        <input type="date" id="nascimento" required>
+        <input type="date" id="dt_nascimento" required>
 
         <label>Data de Admissão:</label>
-        <input type="date" id="admissao" required>
+        <input type="date" id="dt_cargo" required>
 
         <label>Salário:</label>
-        <input type="number" id="salario" required>
+        <input type="number" id="vl_salario" required>
 
         <label>Vale Alimentação:</label>
-        <input type="number" id="va" required>
+        <input type="number" id="vl_alimentacao">
 
         <label>Vale Refeição:</label>
-        <input type="number" id="vr" required>
+        <input type="number" id="vl_refeicao">
 
         <label>Vale Transporte:</label>
-        <input type="number" id="vt" required>
+        <input type="number" id="vl_transporte">
+
+        <label>INSS:</label>
+        <input type="number" id="vl_inss">
+
+        <label>FGTS:</label>
+        <input type="number" id="vl_fgts">
+
+        <label>Plano de Saúde:</label>
+        <input type="number" id="vl_plano_saude">
 
         <label>Cargo:</label>
-        <select id="cargo" required></select>
+        <select id="id_cargo" required></select>
 
-        <button type="submit" id="btnSalvar">Salvar</button>
+        <button type="button" id="btnSalvar">Salvar</button>
       </form>
 
       <!-- GRID -->
@@ -65,17 +77,38 @@
             <tr>
               <th>ID</th>
               <th>Nome</th>
+              <th>DtNascimento</th>
               <th>CPF</th>
-              <th>Cargo</th>
+              <th>RG</th>
+              <th>Status</th>
+              <th>Cargo Atual</th>
+              <th>Ações</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- Preenchido via JS -->
-          </tbody>
+          <tbody id="tbodyColaboradores"></tbody>
         </table>
       </section>
 
       <div id="mensagem"></div>
+    </div>
+  </div>
+
+  <!-- POPUP HISTÓRICO -->
+  <div id="historicoModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeHistorico">&times;</span>
+      <h3>Histórico do Colaborador</h3>
+      <table id="gridHistorico">
+        <thead>
+          <tr>
+            <th>Data Cargo</th>
+            <th>Salário</th>
+            <th>Cargo</th>
+            <th>Data Desligamento</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyHistorico"></tbody>
+      </table>
     </div>
   </div>
 
