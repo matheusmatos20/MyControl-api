@@ -2,36 +2,39 @@ let fornecedores = [];
 let fornecedorSelecionado = null;
 let tokenGlobal = null;
 
-async function obterToken() {
-  const url = "http://localhost:8000/token";
-  const formData = new URLSearchParams();
-  formData.append("username", "usuario");
-  formData.append("password", "1234");
-  formData.append("grant_type", "password");
+// async function obterToken() {
+//   const url = "http://localhost:8000/token";
+//   const formData = new URLSearchParams();
+//   formData.append("username", "usuario");
+//   formData.append("password", "1234");
+//   formData.append("grant_type", "password");
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData
-    });
+//   try {
+//     const response = await fetch(url, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: formData
+//     });
 
-    if (!response.ok) throw new Error(await response.text());
+//     if (!response.ok) throw new Error(await response.text());
 
-    const data = await response.json();
-    tokenGlobal = data.access_token;
-    return tokenGlobal;
+//     const data = await response.json();
+//     tokenGlobal = data.access_token;
+//     return tokenGlobal;
 
-  } catch (err) {
-    console.error("Erro ao obter token:", err);
-    alert("Falha ao autenticar. Verifique o backend.");
-    return null;
-  }
-}
+//   } catch (err) {
+//     console.error("Erro ao obter token:", err);
+//     alert("Falha ao autenticar. Verifique o backend.");
+//     return null;
+//   }
+// }
 
 async function carregarFornecedores() {
-  const token = await obterToken();
-  if (!token) return;
+  
+  if (!await validarToken()) {
+        return
+    }
+    const token =localStorage.getItem("token");
 
   try {
     const resp = await fetch("http://localhost:8000/RetornaFornecedores", {
@@ -82,8 +85,13 @@ function preencherForm(f) {
 
 async function salvarFornecedor(e) {
   e.preventDefault();
-  const token = await obterToken();
+  
   if (!token) return;
+
+  if (!await validarToken()) {
+        return
+    }
+    const token = localStorage.getItem("token");
 
   const fornecedor = {
     id_fornecedor: fornecedorSelecionado ? fornecedorSelecionado.id_fornecedor : 0,

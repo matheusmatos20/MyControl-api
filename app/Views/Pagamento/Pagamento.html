@@ -70,11 +70,11 @@
             <tr>
               <th>ID</th>
               <th>Descrição</th>
-              <th>Vencimento</th>
-              <th>Pago</th>
-              <th>Valor</th>
               <th>Fornecedor</th>
+              <th>Vencimento</th>
+              <th>Valor</th>
               <th>Forma Pagamento</th>
+              <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -86,6 +86,8 @@
     </main>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
   <script src="Pagamento.js"></script>
   <script src="../Menu/Menu.js"></script>
   <script>

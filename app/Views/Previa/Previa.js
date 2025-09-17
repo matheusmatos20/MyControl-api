@@ -5,35 +5,7 @@
   let selectedCreditoId = null;
 
   // -------------------------
-  async function obterToken() {
-    const url = `${API_BASE}/token`;
-    const formData = new URLSearchParams();
-    formData.append('username', 'usuario');
-    formData.append('password', '1234');
-    formData.append('grant_type', 'password');
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-      });
-
-      if (!response.ok) {
-        const erro = await response.text();
-        throw new Error(`Erro ao obter token: ${erro}`);
-      }
-
-      const data = await response.json();
-      tokenGlobal = data.access_token;
-      console.log("Token obtido:", tokenGlobal);
-      return tokenGlobal;
-    } catch (err) {
-      console.error('Erro ao obter token:', err);
-      alert("Falha ao autenticar. Verifique o backend e abra via localhost:5501.");
-      return null;
-    }
-  }
+ 
 
   // -------------------------
   function formatCurrency(value) {
@@ -91,10 +63,10 @@
 
   // -------------------------
   async function carregarPagamentos(tableDebitoBody, btnBaixar, btnExcluirPag) {
-    if (!tokenGlobal) {
-      await obterToken();
-      if (!tokenGlobal) return;
+    if (!await validarToken()) {
+        return
     }
+    tokenGlobal =localStorage.getItem("token");
 
     try {
       const resp = await fetch(`${API_BASE}/RetornaDebito`, {
@@ -121,11 +93,10 @@
   }
 
   async function carregarCreditos(tableCreditoBody, btnExcluirCred) {
-    if (!tokenGlobal) {
-      await obterToken();
-      if (!tokenGlobal) return;
+if (!await validarToken()) {
+        return
     }
-
+    tokenGlobal =localStorage.getItem("token");
     try {
       const resp = await fetch(`${API_BASE}/RetornaCredito`, {
         headers: { 'Authorization': `Bearer ${tokenGlobal}` }
@@ -150,11 +121,10 @@
   }
 
   async function carregarIndicadores(lblValorTicket, lblValorBruto, lblTotalDescont, lblTotalLiq, lblPerc) {
-    if (!tokenGlobal) {
-      await obterToken();
-      if (!tokenGlobal) return;
+if (!await validarToken()) {
+        return
     }
-
+    tokenGlobal =localStorage.getItem("token");
     try {
       const resp = await fetch(`${API_BASE}/RetornaCredito`, {
         headers: { 'Authorization': `Bearer ${tokenGlobal}` }

@@ -21,9 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Simulação de login
+  // Login real
   formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const email = document.getElementById("email-login").value.trim();
     const senha = document.getElementById("senha-login").value.trim();
 
@@ -37,22 +38,44 @@ document.addEventListener("DOMContentLoaded", () => {
     btnSubmit.innerText = "Entrando...";
 
     try {
-      // Simulação de API de login
-      const response = await fakeApiLogin({ email, senha });
+      // Preparar body x-www-form-urlencoded
+      const params = new URLSearchParams();
+      params.append("username", email);
+      params.append("password", senha);
 
-      if (response.success) {
+
+      
+      // Requisição real para API de login
+      const response = await fetch("http://localhost:8000/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+
+      // Recebe JSON do backend
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         // Login bem-sucedido
         alert("✅ Login realizado com sucesso!");
         modalLogin.style.display = "none";
         formLogin.reset();
 
-        // Redirecionar para outra página
-        window.location.href = "Home.html"; // coloque o caminho da página desejada
+        // Salvar token para usar em outras páginas
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", email);
+        localStorage.setItem("password", encrypt(senha)); // ✅ criptografado
+
+        
+        // Redirecionar para Home
+        window.location.href = "../Home/Home.html"; // ajuste o caminho se necessário
       } else {
         alert("❌ E-mail ou senha inválidos!");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Erro:", err);
       alert("⚠ Erro na comunicação com o servidor.");
     } finally {
       btnSubmit.disabled = false;
@@ -60,14 +83,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Função simulando API de login
+  // -------------------------------
+  // JSON auxiliar (mock) para debug
+  // -------------------------------
+  const loginMockData = [
+    { email: "admin@teste.com", senha: "123456", success: true, token: "abc123token" },
+    { email: "user@teste.com", senha: "123456", success: false, token: "" },
+  ];
+
+  // Função opcional para teste offline
   function fakeApiLogin(data) {
     return new Promise((resolve) => {
       console.log("📡 Tentando login (simulado)...", data);
       setTimeout(() => {
-        // Sucesso se email contém "admin"
-        resolve({ success: data.email.includes("admin") });
-      }, 1200);
+        const match = loginMockData.find(u => u.email === data.email && u.senha === data.senha);
+        resolve(match || { success: false, token: "" });
+      }, 800);
     });
   }
 });

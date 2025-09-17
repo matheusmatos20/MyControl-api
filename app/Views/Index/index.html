@@ -64,11 +64,11 @@
   <div class="modal" id="login-modal">
     <div class="modal-content">
       <span class="close" id="close-login">&times;</span>
-      <h2>Login / Assinar</h2>
+      <h2>Login</h2>
       <form id="form-login">
         <div class="form-group">
-          <label for="email-login">E-mail</label>
-          <input type="email" id="email-login" name="email" placeholder="Digite seu e-mail" required>
+          <label for="email-login">Usuario</label>
+          <input type="text" id="email-login" name="email" placeholder="Digite seu usuario" required>
         </div>
         <div class="form-group">
           <label for="senha-login">Senha</label>
@@ -78,7 +78,8 @@
       </form>
     </div>
   </div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
   <script src="index.js"></script>
 </body>
 </html>

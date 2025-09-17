@@ -191,6 +191,17 @@ tbody tr:hover {
   background: #c0392b;
 }
 
+.btn-primary {
+  background: #3785ec;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+
 /* Responsivo */
 @media (max-width: 768px) {
   table {

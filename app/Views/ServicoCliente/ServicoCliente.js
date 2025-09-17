@@ -47,9 +47,12 @@ async function obterToken() {
 // Carregar combos (Clientes e Serviços)
 // -----------------------------
 async function carregarCombos() {
-  if (!tokenGlobal) await obterToken();
-  if (!tokenGlobal) return;
-
+  // if (!tokenGlobal) await obterToken();
+  // if (!tokenGlobal) return;
+  if (!await validarToken()) {
+        return
+    }
+    tokenGlobal =localStorage.getItem("token");
   try {
     // Clientes
     const respClientes = await fetch("http://127.0.0.1:8000/Clientes", {
@@ -108,9 +111,12 @@ async function carregarCombos() {
 // Carregar grid de serviços contratados
 // -----------------------------
 async function carregarGrid() {
-  if (!tokenGlobal) await obterToken();
-  if (!tokenGlobal) return;
-
+  // if (!tokenGlobal) await obterToken();
+  // if (!tokenGlobal) return;
+  if (!await validarToken()) {
+        return
+    }
+    tokenGlobal =localStorage.getItem("token");
   try {
     const resp = await fetch("http://127.0.0.1:8000/ServicosCliente", {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
@@ -167,8 +173,13 @@ function preencherCampos(row) {
 // Salvar serviço contratado
 // -----------------------------
 async function salvarServico() {
-  if (!tokenGlobal) await obterToken();
-  if (!tokenGlobal) return;
+  // if (!tokenGlobal) await obterToken();
+  // if (!tokenGlobal) return;
+
+  if (!await validarToken()) {
+        return
+    }
+  tokenGlobal =localStorage.getItem("token");
 
   const clienteRaw = document.getElementById("cliente").value;
   const servicoRaw = document.getElementById("servico").value;

@@ -4,47 +4,18 @@
 let tokenGlobal = null;
 let representanteSelecionado = null; // Guarda o representante selecionado para edição
 
-// -------------------------
-// Função para obter token
-// -------------------------
-async function obterToken() {
-    const url = 'http://localhost:8000/token';
-    const formData = new URLSearchParams();
-    formData.append('username', 'usuario');
-    formData.append('password', '1234');
-    formData.append('grant_type', 'password');
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
-        });
-
-        if (!response.ok) {
-            const erro = await response.text();
-            throw new Error(`Erro ao obter token: ${erro}`);
-        }
-
-        const data = await response.json();
-        tokenGlobal = data.access_token;
-        return tokenGlobal;
-
-    } catch (err) {
-        console.error('Erro ao obter token:', err);
-        alert("Falha ao autenticar. Verifique o backend e abra via localhost:5501.");
-        return null;
+if (!await validarToken()) {
+        return
     }
-}
-
+    tokenGlobal =localStorage.getItem("token");
 // -------------------------
 // Função para carregar representantes
 // -------------------------
 async function carregarRepresentantes() {
-    if (!tokenGlobal) {
-        await obterToken();
-        if (!tokenGlobal) return;
+    if (!await validarToken()) {
+        return
     }
+    tokenGlobal =localStorage.getItem("token");
 
     const url = 'http://127.0.0.1:8000/Representantes';
 
@@ -147,10 +118,10 @@ async function salvarRepresentante(event) {
         return;
     }
 
-    if (!tokenGlobal) {
-        await obterToken();
-        if (!tokenGlobal) return;
+    if (!await validarToken()) {
+        return
     }
+    tokenGlobal =localStorage.getItem("token");
 
     const url = representanteSelecionado
         ? 'http://127.0.0.1:8000/AlterarRepresentante'
@@ -188,10 +159,10 @@ async function salvarRepresentante(event) {
 async function excluirRepresentante(id) {
     if (!confirm("Deseja realmente excluir este representante?")) return;
 
-    if (!tokenGlobal) {
-        await obterToken();
-        if (!tokenGlobal) return;
+    if (!await validarToken()) {
+        return
     }
+    tokenGlobal =localStorage.getItem("token");
 
     try {
         const response = await fetch(`http://127.0.0.1:8000/ExcluirRepresentante/${id}`, {

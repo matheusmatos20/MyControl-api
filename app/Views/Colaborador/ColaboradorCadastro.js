@@ -6,7 +6,10 @@ let colaboradorSelecionado = null;
 
 // Inicialização
 window.onload = async () => {
-  await obterToken();
+  if (!await validarToken()) {
+        return
+    }
+    
   // garantia: carregar cargos primeiro para o select já estar preenchido quando usuário clicar na grid
   await carregarCargos();
   await carregarColaboradores();
@@ -19,25 +22,25 @@ window.onload = async () => {
 };
 
 // Obter token
-async function obterToken() {
-  try {
-    const resp = await fetch(`${api_base}/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        username: "usuario",   // <<< ajuste para o user correto
-        password: "1234"       // <<< ajuste para a senha correta
-      })
-    });
+// async function obterToken() {
+//   try {
+//     const resp = await fetch(`${api_base}/token`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: new URLSearchParams({
+//         username: "usuario",   // <<< ajuste para o user correto
+//         password: "1234"       // <<< ajuste para a senha correta
+//       })
+//     });
 
-    if (!resp.ok) throw new Error("Falha ao autenticar");
-    const data = await resp.json();
-    localStorage.setItem("token", data.access_token);
-  } catch (err) {
-    console.error("Erro ao obter token:", err);
-    alert("Erro ao autenticar no backend");
-  }
-}
+//     if (!resp.ok) throw new Error("Falha ao autenticar");
+//     const data = await resp.json();
+//     localStorage.setItem("token", data.access_token);
+//   } catch (err) {
+//     console.error("Erro ao obter token:", err);
+//     alert("Erro ao autenticar no backend");
+//   }
+// }
 
 // Buscar cargos do backend
 async function carregarCargos() {

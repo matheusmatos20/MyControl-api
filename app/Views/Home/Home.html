@@ -40,9 +40,12 @@
     </main>
   </div>
 
-  <script src="home.js"></script>
+  <!-- 🔹 Bibliotecas e scripts (ordem importa) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
+  <script src="home.js"></script>    <!-- Scripts específicos da Home -->
   <script src="../Menu/Menu.js"></script>
-  
+
   <!-- Carregar menu dinamicamente -->
   <script>
     fetch('../Menu/Menu.html')

@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema
+from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor, Pagamento as Pagamento, Conn_DB as Conn    
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema   
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -11,34 +11,19 @@ from passlib.context import CryptContext
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+
 app = FastAPI()
 
+# Configurações CORS
 origins = ["*"]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # permite POST, GET, OPTIONS, etc
+    allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-
-# app = FastAPI(
-#     title="Fast Api Fia",
-#     version="0.1.0",
-#     description="Minha api",
-# )
-
-
-# Usuário simulado
-fake_user = {
-    "username": "usuario",
-    "hashed_password": "$2b$12$fCkQx68K20XyyUxjzY4RjeQYN.ukU5C/09UkSvVdsqYd2iFbZxIhW",  # Substitua com um hash real
-}
-
-# Configurações do JWT
+# Configurações JWT
 SECRET_KEY = "sua_chave_secreta_segura"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -46,26 +31,44 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+# Autenticação usando banco
+# def authenticate_user(username: str, password: str):
+#     conn = Conn()
+#     user = conn.get_usuario(username, password=None)  # Busca usuário pelo login
+#     if not user:
+#         return False
+#     hashed_password = user.get("DS_SENHA") or user.get("senha")  # Ajuste conforme sua coluna
+#     if not pwd_context.verify(password, hashed_password):
+#         return False
+#     return {"username": user["NM_LOGIN"]}
 
 def authenticate_user(username: str, password: str):
-    if username != fake_user["username"]:
+    conn = Conn.Conn()
+    user = conn.get_usuario(username)
+    if not user:
         return False
-    if not verify_password(password, fake_user["hashed_password"]):
-        return False
-    return {"username": username}
 
+    # Converta para str simples
+    hashed_password = str(user["DS_SENHA"])
+
+    print("Senha fornecida:", repr(password))
+    print("Hash do banco:", repr(hashed_password))
+
+    if not pwd_context.verify(password, hashed_password):
+        print("Senha inválida")
+        return False
+
+    return {"username": user["NM_LOGIN"]}
+
+
+# Criar token JWT
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# Função para extrair e validar o token JWT
+# Função para obter usuário atual a partir do token
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -76,22 +79,55 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido")
 
+# Endpoint para login
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
-        raise HTTPException(status_code=400, detail="Credenciais incorretas")
-    
+        raise HTTPException(status_code=401, detail="Credenciais incorretas")
+
     access_token = create_access_token(
-        data={"sub": user["username"]}, 
+        data={"sub": user["username"]},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    return {"access_token": access_token, "token_type": "bearer"}
-
+    return {"success": True, "token": access_token}
 
 # ---------------------
 # Endpoints protegidos 
 # ---------------------
+@app.post("/InserirDebito",tags=["Financeiro"])
+async def Consultar_Debitos(pagamento:PagamentoSchema.PagamentoSchema ,current_user: dict = Depends(get_current_user)):
+    try:
+
+        print("entrou no inserir debito")
+        dal = Pagamento.PagamentoDAL()
+        df = dal.inserir_pagamento(pagamento)
+        return {"mensagem": "Débito inserido com sucesso!"}
+    except Exception as e:
+        return {"erro": f"Erro ao inserir débito: {str(e)}"}
+
+@app.post("/BaixarDebito",tags=["Financeiro"])
+async def Baixar_Debitos(id_pagamento,id_usuario ,current_user: dict = Depends(get_current_user)):
+    try:
+        print(id_pagamento)
+        dal = Pagamento.PagamentoDAL()
+        df = dal.baixar_pagamento(id_pagamento,id_usuario)
+        return {"mensagem": "Débito baixado com sucesso!"}
+    except Exception as e:
+        return {"erro": f"Erro ao inserir débito: {str(e)}"}
+
+@app.get("/ListarDebitos",tags=["Financeiro"])
+async def Listar_Debitos(current_user: dict = Depends(get_current_user)):
+    dal = Pagamento.PagamentoDAL()
+    df = dal.listar_debitos()
+    return df.to_dict(orient="records")
+
+@app.get("/ListarDebitosEmAberto",tags=["Financeiro"])
+async def Listar_Debitos(current_user: dict = Depends(get_current_user)):
+    dal = Pagamento.PagamentoDAL()
+    df = dal.listar_debitos_em_aberto()
+    return df.to_dict(orient="records")
+
 @app.get("/RetornaDebito",tags=["Financeiro"])
 async def Consultar_Debitos(current_user: dict = Depends(get_current_user)):
     dal = Financeiro.FinanceiroDAL()

@@ -28,42 +28,45 @@ function limparFormulario() {
 // -----------------------------
 // Autenticação
 // -----------------------------
-async function obterToken() {
-  const url = "http://localhost:8000/token";
-  const formData = new URLSearchParams();
-  formData.append("username", "usuario");
-  formData.append("password", "1234");
-  formData.append("grant_type", "password");
+// async function obterToken() {
+//   const url = "http://localhost:8000/token";
+//   const formData = new URLSearchParams();
+//   formData.append("username", "usuario");
+//   formData.append("password", "1234");
+//   formData.append("grant_type", "password");
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData
-    });
+//   try {
+//     const response = await fetch(url, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: formData
+//     });
 
-    if (!response.ok) {
-      const erro = await response.text();
-      throw new Error(`Erro ao obter token: ${erro}`);
-    }
+//     if (!response.ok) {
+//       const erro = await response.text();
+//       throw new Error(`Erro ao obter token: ${erro}`);
+//     }
 
-    const data = await response.json();
-    tokenGlobal = data.access_token;
-    return tokenGlobal;
+//     const data = await response.json();
+//     tokenGlobal = data.access_token;
+//     return tokenGlobal;
 
-  } catch (err) {
-    console.error("Erro ao obter token:", err);
-    alert("Falha ao autenticar. Verifique o backend.");
-    return null;
-  }
-}
+//   } catch (err) {
+//     console.error("Erro ao obter token:", err);
+//     alert("Falha ao autenticar. Verifique o backend.");
+//     return null;
+//   }
+// }
 
 // -----------------------------
 // Carregar representantes
 // -----------------------------
 async function carregarRepresentantes() {
-  if (!tokenGlobal) await obterToken();
-  if (!tokenGlobal) return;
+  
+  if (!await validarToken()) {
+        return
+    }
+    const tokenGlobal =localStorage.getItem("token");
 
   try {
     const response = await fetch("http://127.0.0.1:8000/RepresentantesComboBox", {
@@ -93,8 +96,10 @@ async function carregarRepresentantes() {
 // Carregar clientes
 // -----------------------------
 async function carregarClientes() {
-  if (!tokenGlobal) await obterToken();
-  if (!tokenGlobal) return;
+  if (!await validarToken()) {
+        return
+    }
+    const tokenGlobal =localStorage.getItem("token");
 
   try {
     const response = await fetch("http://127.0.0.1:8000/Clientes", {
