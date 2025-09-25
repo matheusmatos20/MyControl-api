@@ -1,45 +1,29 @@
+const API_BASE = "http://localhost:8000";
 let fornecedores = [];
 let fornecedorSelecionado = null;
 let tokenGlobal = null;
 
-// async function obterToken() {
-//   const url = "http://localhost:8000/token";
-//   const formData = new URLSearchParams();
-//   formData.append("username", "usuario");
-//   formData.append("password", "1234");
-//   formData.append("grant_type", "password");
-
-//   try {
-//     const response = await fetch(url, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//       body: formData
-//     });
-
-//     if (!response.ok) throw new Error(await response.text());
-
-//     const data = await response.json();
-//     tokenGlobal = data.access_token;
-//     return tokenGlobal;
-
-//   } catch (err) {
-//     console.error("Erro ao obter token:", err);
-//     alert("Falha ao autenticar. Verifique o backend.");
-//     return null;
-//   }
-// }
-
 async function carregarFornecedores() {
-  
   if (!await validarToken()) {
-        return
-    }
-    const token =localStorage.getItem("token");
+    return;
+  }
+
+  tokenGlobal = localStorage.getItem("token");
+  if (!tokenGlobal) {
+    console.error("Token não localizado no armazenamento.");
+    alert("Sessão expirada. Faça login novamente.");
+    return;
+  }
 
   try {
-    const resp = await fetch("http://localhost:8000/RetornaFornecedores", {
-      headers: { "Authorization": "Bearer " + token }
+    const resp = await fetch(`${API_BASE}/RetornaFornecedores`, {
+      headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
+
+    if (!resp.ok) {
+      throw new Error(await resp.text());
+    }
+
     fornecedores = await resp.json();
     renderGrid();
   } catch (err) {
@@ -50,75 +34,87 @@ async function carregarFornecedores() {
 
 function renderGrid() {
   const tbody = document.querySelector("#grid tbody");
+  if (!tbody) {
+    return;
+  }
+
   tbody.innerHTML = "";
-  fornecedores.forEach(f => {
+  fornecedores.forEach((fornecedor) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${f.id_fornecedor}</td>
-      <td>${f.nm_razao_social}</td>
-      <td>${f.nm_fantasia}</td>
-      <td>${f.cd_cnpj}</td>
-      <td>${f.nu_telefone}</td>
-      <td>${f.ds_endereco}</td>
+      <td>${fornecedor.id_fornecedor}</td>
+      <td>${fornecedor.nm_razao_social ?? ""}</td>
+      <td>${fornecedor.nm_fantasia ?? ""}</td>
+      <td>${fornecedor.cd_cnpj ?? ""}</td>
+      <td>${fornecedor.nu_telefone ?? ""}</td>
+      <td>${fornecedor.ds_endereco ?? ""}</td>
     `;
-    tr.onclick = () => selecionarFornecedor(f, tr);
+    tr.addEventListener("click", () => selecionarFornecedor(fornecedor, tr));
     tbody.appendChild(tr);
   });
 }
 
-function selecionarFornecedor(f, row) {
-  document.querySelectorAll("#grid tbody tr").forEach(tr => tr.classList.remove("selected"));
-  row.classList.add("selected");
-
-  fornecedorSelecionado = f;
-  preencherForm(f);
+function selecionarFornecedor(fornecedor, linha) {
+  document.querySelectorAll("#grid tbody tr").forEach((tr) => tr.classList.remove("selected"));
+  linha.classList.add("selected");
+  fornecedorSelecionado = fornecedor;
+  preencherForm(fornecedor);
   document.getElementById("btnSalvar").textContent = "Atualizar";
 }
 
-function preencherForm(f) {
-  document.getElementById("razaosocial").value = f.nm_razao_social || "";
-  document.getElementById("nomefantasia").value = f.nm_fantasia || "";
-  document.getElementById("cnpj").value = f.cd_cnpj || "";
-  document.getElementById("telefone").value = f.nu_telefone || "";
-  document.getElementById("endereco").value = f.ds_endereco || "";
+function preencherForm(fornecedor) {
+  document.getElementById("razaosocial").value = fornecedor.nm_razao_social || "";
+  document.getElementById("nomefantasia").value = fornecedor.nm_fantasia || "";
+  document.getElementById("cnpj").value = fornecedor.cd_cnpj || "";
+  document.getElementById("telefone").value = fornecedor.nu_telefone || "";
+  document.getElementById("endereco").value = fornecedor.ds_endereco || "";
 }
 
-async function salvarFornecedor(e) {
-  e.preventDefault();
-  
-  if (!token) return;
+async function salvarFornecedor(event) {
+  event.preventDefault();
 
   if (!await validarToken()) {
-        return
-    }
-    const token = localStorage.getItem("token");
+    return;
+  }
+
+  tokenGlobal = localStorage.getItem("token");
+  if (!tokenGlobal) {
+    alert("Sessão expirada. Faça login novamente.");
+    return;
+  }
 
   const fornecedor = {
-    id_fornecedor: fornecedorSelecionado ? fornecedorSelecionado.id_fornecedor : 0,
-    nm_razao_social: document.getElementById("razaosocial").value,
-    nm_fantasia: document.getElementById("nomefantasia").value,
-    cd_cnpj: document.getElementById("cnpj").value,
-    nu_telefone: document.getElementById("nutelefone").value,
-    ds_endereco: document.getElementById("endereco").value
+    id_fornecedor: fornecedorSelecionado ? Number(fornecedorSelecionado.id_fornecedor) : 0,
+    nm_razao_social: document.getElementById("razaosocial").value.trim(),
+    nm_fantasia: document.getElementById("nomefantasia").value.trim(),
+    cd_cnpj: document.getElementById("cnpj").value.trim(),
+    nu_telefone: document.getElementById("telefone").value.trim(),
+    ds_endereco: document.getElementById("endereco").value.trim()
   };
 
+  const estaEditando = Boolean(fornecedorSelecionado);
+  const endpoint = estaEditando ? `${API_BASE}/AlterarFornecedor` : `${API_BASE}/InserirFornecedor`;
+  const mensagemSucesso = estaEditando ? "Fornecedor alterado com sucesso!" : "Fornecedor salvo com sucesso!";
+
   try {
-    const resp = await fetch("http://localhost:8000/InserirFornecedor", {
+    const resp = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
+        Authorization: `Bearer ${tokenGlobal}`
       },
       body: JSON.stringify(fornecedor)
     });
 
-    if (!resp.ok) throw new Error(await resp.text());
+    if (!resp.ok) {
+      throw new Error(await resp.text());
+    }
 
-    alert("Fornecedor salvo com sucesso!");
+    alert(mensagemSucesso);
+    fornecedorSelecionado = null;
     limparForm();
     await carregarFornecedores();
     document.getElementById("btnSalvar").textContent = "Salvar";
-
   } catch (err) {
     console.error("Erro ao salvar fornecedor:", err);
     alert("Erro ao salvar fornecedor");
@@ -128,17 +124,27 @@ async function salvarFornecedor(e) {
 function novoFornecedor() {
   fornecedorSelecionado = null;
   limparForm();
-  document.querySelectorAll("#grid tbody tr").forEach(tr => tr.classList.remove("selected"));
+  document.querySelectorAll("#grid tbody tr").forEach((tr) => tr.classList.remove("selected"));
   document.getElementById("btnSalvar").textContent = "Salvar";
 }
 
 function limparForm() {
-  document.getElementById("formFornecedor").reset();
+  const form = document.getElementById("formFornecedor");
+  if (form) {
+    form.reset();
+  }
 }
 
-// Inicializar
-window.onload = () => {
+window.addEventListener("load", () => {
   carregarFornecedores();
-  document.getElementById("formFornecedor").addEventListener("submit", salvarFornecedor);
-  document.getElementById("btnNovo").addEventListener("click", novoFornecedor);
-};
+  const form = document.getElementById("formFornecedor");
+  const btnNovo = document.getElementById("btnNovo");
+
+  if (form) {
+    form.addEventListener("submit", salvarFornecedor);
+  }
+
+  if (btnNovo) {
+    btnNovo.addEventListener("click", novoFornecedor);
+  }
+});

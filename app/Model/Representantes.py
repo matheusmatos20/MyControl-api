@@ -100,3 +100,26 @@ class RepresentanteDAL:
                 return True
         except Exception:
             return False
+
+def alterar_representante(self,representante):
+        print("Aqui Alterar")
+        query = f"""
+        UPDATE TB_REPRESENTANTES
+        SET NM_CLIENTE = '{representante.nm_cliente}',
+            DT_NASCIMENTO = CONVERT(DATE, '{representante.dt_nascimento}', 103),
+            CD_CPF = '{representante.cpf}',
+            CD_RG = '{representante.rg}',
+            NU_TELEFONE = '{representante.telefone}',
+            NM_EMAIL = '{representante.email}'
+        WHERE ID_REPRESENTANTE = {representante.id_cliente} 
+        """
+
+        print(query)
+        try:
+            with self._connect() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query)
+                conn.commit()
+                return True
+        except Exception:
+            return False

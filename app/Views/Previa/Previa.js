@@ -3,6 +3,7 @@
   let tokenGlobal = null;
   let selectedPagamentoId = null;
   let selectedCreditoId = null;
+  let currentCompetencia = null;
 
   // -------------------------
  
@@ -14,6 +15,21 @@
 
   function clearSelection(tableBody) {
     [...tableBody.querySelectorAll('tr')].forEach(tr => tr.classList.remove('selected'));
+  }
+
+  function buildQueryString(competencia) {
+    if (!competencia) {
+      return '';
+    }
+    return `?competencia=${competencia}`;
+  }
+
+  function parseCompetenciaValue(value) {
+    if (!value) return null;
+    const [ano, mes] = value.split('-');
+    if (!ano || !mes) return null;
+    const numero = parseInt(`${ano}${mes}`, 10);
+    return Number.isNaN(numero) ? null : numero;
   }
 
   // -------------------------
@@ -62,14 +78,15 @@
   }
 
   // -------------------------
-  async function carregarPagamentos(tableDebitoBody, btnBaixar, btnExcluirPag) {
+  async function carregarPagamentos(tableDebitoBody, btnBaixar, btnExcluirPag, competenciaParam = currentCompetencia) {
     if (!await validarToken()) {
-        return
+      return;
     }
-    tokenGlobal =localStorage.getItem("token");
+    tokenGlobal = localStorage.getItem("token");
 
+    const queryString = buildQueryString(competenciaParam);
     try {
-      const resp = await fetch(`${API_BASE}/RetornaDebito`, {
+      const resp = await fetch(`${API_BASE}/RetornaDebito${queryString}`, {
         headers: { 'Authorization': `Bearer ${tokenGlobal}` }
       });
 
@@ -92,13 +109,16 @@
     }
   }
 
-  async function carregarCreditos(tableCreditoBody, btnExcluirCred) {
-if (!await validarToken()) {
-        return
+
+  async function carregarCreditos(tableCreditoBody, btnExcluirCred, competenciaParam = currentCompetencia) {
+    if (!await validarToken()) {
+      return;
     }
-    tokenGlobal =localStorage.getItem("token");
+    tokenGlobal = localStorage.getItem("token");
+
+    const queryString = buildQueryString(competenciaParam);
     try {
-      const resp = await fetch(`${API_BASE}/RetornaCredito`, {
+      const resp = await fetch(`${API_BASE}/RetornaCredito${queryString}`, {
         headers: { 'Authorization': `Bearer ${tokenGlobal}` }
       });
 
@@ -120,13 +140,16 @@ if (!await validarToken()) {
     }
   }
 
-  async function carregarIndicadores(lblValorTicket, lblValorBruto, lblTotalDescont, lblTotalLiq, lblPerc) {
-if (!await validarToken()) {
-        return
+
+  async function carregarIndicadores(lblValorTicket, lblValorBruto, lblTotalDescont, lblTotalLiq, lblPerc, competenciaParam = currentCompetencia) {
+    if (!await validarToken()) {
+      return;
     }
-    tokenGlobal =localStorage.getItem("token");
+    tokenGlobal = localStorage.getItem("token");
+
+    const queryString = buildQueryString(competenciaParam);
     try {
-      const resp = await fetch(`${API_BASE}/RetornaCredito`, {
+      const resp = await fetch(`${API_BASE}/RetornaCredito${queryString}`, {
         headers: { 'Authorization': `Bearer ${tokenGlobal}` }
       });
 
@@ -150,11 +173,18 @@ if (!await validarToken()) {
         lblTotalDescont.textContent = formatCurrency(totalDescontos);
         lblTotalLiq.textContent = formatCurrency(totalLiquido);
         lblPerc.textContent = percentual.toFixed(2) + "%";
+      } else {
+        lblValorTicket.textContent = '--';
+        lblValorBruto.textContent = '--';
+        lblTotalDescont.textContent = '--';
+        lblTotalLiq.textContent = '--';
+        lblPerc.textContent = '--';
       }
     } catch (err) {
       console.error("Falha ao carregar indicadores:", err);
     }
   }
+
 
   // -------------------------
   async function init() {
@@ -169,17 +199,33 @@ if (!await validarToken()) {
     const lblTotalDescont = document.getElementById("lblTotalDescont");
     const lblTotalLiq = document.getElementById("lblTotalLiq");
     const lblPerc = document.getElementById("lblPerc");
+    const inputCompetencia = document.getElementById("filterCompetencia");
+    const btnAplicarFiltro = document.getElementById("btnAplicarFiltro");
+    const btnLimparFiltro = document.getElementById("btnLimparFiltro");
 
-    // Garantir que os elementos existem
-    if (!tableDebitoBody || !tableCreditoBody || !btnBaixar || !btnExcluirPag || !btnExcluirCred) {
+    if (!tableDebitoBody || !tableCreditoBody || !btnBaixar || !btnExcluirPag || !btnExcluirCred || !inputCompetencia || !btnAplicarFiltro || !btnLimparFiltro) {
       console.error("Algum elemento não foi encontrado no DOM.");
       return;
     }
 
-    // Botões ocultos por padrão
     btnBaixar.hidden = true;
     btnExcluirPag.hidden = true;
     btnExcluirCred.hidden = true;
+
+    const atualizarDados = async () => {
+      await carregarCreditos(tableCreditoBody, btnExcluirCred);
+      await carregarPagamentos(tableDebitoBody, btnBaixar, btnExcluirPag);
+      await carregarIndicadores(lblValorTicket, lblValorBruto, lblTotalDescont, lblTotalLiq, lblPerc);
+    };
+
+    const aplicarFiltro = async (valor) => {
+      const novaCompetencia = parseCompetenciaValue(valor);
+      if (novaCompetencia === currentCompetencia) {
+        return;
+      }
+      currentCompetencia = novaCompetencia;
+      await atualizarDados();
+    };
 
     btnBaixar.addEventListener('click', async () => {
       if (!selectedPagamentoId) return;
@@ -215,9 +261,34 @@ if (!await validarToken()) {
       }
     });
 
-    await carregarCreditos(tableCreditoBody, btnExcluirCred);
-    await carregarPagamentos(tableDebitoBody, btnBaixar, btnExcluirPag);
-    await carregarIndicadores(lblValorTicket, lblValorBruto, lblTotalDescont, lblTotalLiq, lblPerc);
+    btnAplicarFiltro.addEventListener('click', async (event) => {
+      event.preventDefault();
+      await aplicarFiltro(inputCompetencia.value);
+    });
+
+    btnLimparFiltro.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (inputCompetencia.value) {
+        inputCompetencia.value = '';
+      }
+      if (currentCompetencia !== null) {
+        currentCompetencia = null;
+        await atualizarDados();
+      }
+    });
+
+    inputCompetencia.addEventListener('change', async () => {
+      await aplicarFiltro(inputCompetencia.value);
+    });
+
+    inputCompetencia.addEventListener('keyup', async (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        await aplicarFiltro(inputCompetencia.value);
+      }
+    });
+
+    await atualizarDados();
   }
 
   window.addEventListener('DOMContentLoaded', init);

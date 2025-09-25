@@ -56,5 +56,33 @@ class FornecedorDAL:
                 return True
         except Exception:
             return False
-   
-    
+    def alterar_fornecedor(self, fornecedor):
+        query = """
+            UPDATE TB_FORNECEDORES
+               SET NM_RAZAO_SOCIAL = ?,
+                   NM_FANTASIA = ?,
+                   CD_CNPJ_CPF = ?,
+                   DS_ENDERECO = ?,
+                   NU_TELEFONE = ?
+             WHERE ID_FORNECEDOR = ?
+        """
+        try:
+            with self._connect() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (
+                    fornecedor.nm_razao_social,
+                    fornecedor.nm_fantasia,
+                    fornecedor.cd_cnpj,
+                    fornecedor.ds_endereco,
+                    fornecedor.nu_telefone,
+                    fornecedor.id_fornecedor,
+                ))
+                if cursor.rowcount == 0:
+                    return False
+                conn.commit()
+                return True
+        except Exception as e:
+            print('Erro em alterar_fornecedor:', e)
+            return False
+
+

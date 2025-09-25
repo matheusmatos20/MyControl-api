@@ -2,27 +2,19 @@
 // Variáveis globais
 // -------------------------
 let tokenGlobal = null;
-let representanteSelecionado = null; // Guarda o representante selecionado para edição
+let representanteSelecionado = null;
 
-if (!await validarToken()) {
-        return
-    }
-    tokenGlobal =localStorage.getItem("token");
 // -------------------------
-// Função para carregar representantes
+// Carregar representantes
 // -------------------------
 async function carregarRepresentantes() {
-    if (!await validarToken()) {
-        return
-    }
-    tokenGlobal =localStorage.getItem("token");
-
-    const url = 'http://127.0.0.1:8000/Representantes';
+    if (!await validarToken()) return;
+    tokenGlobal = localStorage.getItem("token");
 
     try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${tokenGlobal}` }
+        const response = await fetch("http://127.0.0.1:8000/Representantes", {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${tokenGlobal}` }
         });
 
         if (!response.ok) {
@@ -31,58 +23,51 @@ async function carregarRepresentantes() {
         }
 
         const representantes = await response.json();
-        const tbody = document.querySelector('#tabela-representantes tbody');
-        tbody.innerHTML = '';
+        const tbody = document.querySelector("#tabela-representantes tbody");
+        tbody.innerHTML = "";
 
         representantes.forEach(r => {
-            const tr = document.createElement('tr');
+            const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td>${r.Cliente || ''}</td>
-                <td>${r.RG !== "None" ? r.RG : ''}</td>
-                <td>${r.CPF !== "None" ? r.CPF : ''}</td>
-                <td>${r.Telefone !== "None" ? r.Telefone : ''}</td>
-                <td>${r.DtNascimento !== "None" ? r.DtNascimento : ''}</td>
-                <td>${r.Email !== "None" ? r.Email : ''}</td>
-                <td>
-                    <button class="acao-btn editar" data-id="${r.Id}">Editar</button>
-                    <button class="acao-btn excluir" data-id="${r.Id}">Excluir</button>
-                </td>
-            `;
+                <td>${r.Cliente || ""}</td>
+                <td>${r.RG !== "None" ? r.RG : ""}</td>
+                <td>${r.CPF !== "None" ? r.CPF : ""}</td>
+                <td>${r.Telefone !== "None" ? r.Telefone : ""}</td>
+                <td>${r.DtNascimento !== "None" ? r.DtNascimento : ""}</td>
+                <td>${r.Email !== "None" ? r.Email : ""}</td>`;
+                // <td>
+                //      <button class="acao-btn excluir" data-id="${r.Id}">Excluir</button>
+                // </td>
+            // `;
 
-            tr.addEventListener('click', () => carregarFormulario(r, tr));
+            tr.addEventListener("click", () => carregarFormulario(r, tr));
             tbody.appendChild(tr);
         });
 
     } catch (err) {
         console.error(err);
-        alert("Falha ao carregar representantes. Veja o console para detalhes.");
+        alert("Falha ao carregar representantes.");
     }
 }
 
 // -------------------------
-// Carrega formulário para edição
+// Carregar formulário
 // -------------------------
 function carregarFormulario(rep, linha) {
     representanteSelecionado = rep;
-    const form = document.getElementById('form-representante');
+    const form = document.getElementById("form-representante");
 
-    form.nome.value = rep.Cliente || '';
-    form.rg.value = rep.RG !== "None" ? rep.RG : '';
-    form.cpf.value = rep.CPF !== "None" ? rep.CPF : '';
-    form.telefone.value = rep.Telefone !== "None" ? rep.Telefone : '';
-    form.email.value = rep.Email !== "None" ? rep.Email : '';
-
-    if (rep.DtNascimento && rep.DtNascimento !== "None") {
-        const [ano, mes, dia] = rep.DtNascimento.split("-");
-        form.dataNasc.value = `${ano}-${mes}-${dia}`;
-    } else {
-        form.dataNasc.value = '';
-    }
+    form.nome.value = rep.Cliente || "";
+    form.rg.value = rep.RG !== "None" ? rep.RG : "";
+    form.cpf.value = rep.CPF !== "None" ? rep.CPF : "";
+    form.telefone.value = rep.Telefone !== "None" ? rep.Telefone : "";
+    form.email.value = rep.Email !== "None" ? rep.Email : "";
+    form.dataNasc.value = (rep.DtNascimento && rep.DtNascimento !== "None") ? rep.DtNascimento.split("T")[0] : "";
 
     form.querySelector("button[type=submit]").textContent = "Atualizar";
 
-    document.querySelectorAll('#tabela-representantes tbody tr').forEach(tr => tr.classList.remove('selected'));
-    linha.classList.add('selected');
+    document.querySelectorAll("#tabela-representantes tbody tr").forEach(tr => tr.classList.remove("selected"));
+    linha.classList.add("selected");
 }
 
 // -------------------------
@@ -90,18 +75,18 @@ function carregarFormulario(rep, linha) {
 // -------------------------
 function limparFormulario() {
     representanteSelecionado = null;
-    const form = document.getElementById('form-representante');
+    const form = document.getElementById("form-representante");
     form.reset();
     form.querySelector("button[type=submit]").textContent = "Salvar";
-    document.querySelectorAll('#tabela-representantes tbody tr').forEach(tr => tr.classList.remove('selected'));
+    document.querySelectorAll("#tabela-representantes tbody tr").forEach(tr => tr.classList.remove("selected"));
 }
 
 // -------------------------
-// Salvar ou Alterar Representante
+// Salvar representante
 // -------------------------
 async function salvarRepresentante(event) {
     event.preventDefault();
-    const form = document.getElementById('form-representante');
+    const form = document.getElementById("form-representante");
 
     const rep = {
         id_cliente: representanteSelecionado?.Id ?? 0,
@@ -118,38 +103,33 @@ async function salvarRepresentante(event) {
         return;
     }
 
-    if (!await validarToken()) {
-        return
-    }
-    tokenGlobal =localStorage.getItem("token");
+    if (!await validarToken()) return;
+    tokenGlobal = localStorage.getItem("token");
 
     const url = representanteSelecionado
-        ? 'http://127.0.0.1:8000/AlterarRepresentante'
-        : 'http://127.0.0.1:8000/InserirRepresentante';
+        ? "http://127.0.0.1:8000/AlterarRepresentante"
+        : "http://127.0.0.1:8000/InserirRepresentante";
 
     try {
         const response = await fetch(url, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Authorization': `Bearer ${tokenGlobal}`,
-                'Content-Type': 'application/json'
+                "Authorization": `Bearer ${tokenGlobal}`,
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(rep)
         });
 
-        if (!response.ok) {
-            const erro = await response.text();
-            throw new Error(`Erro ao salvar representante: ${erro}`);
-        }
+        if (!response.ok) throw new Error("Erro ao salvar representante.");
 
         const data = await response.json();
-        alert(data.mensagem || 'Representante salvo com sucesso!');
+        alert(data.mensagem || "Representante salvo com sucesso!");
         limparFormulario();
         carregarRepresentantes();
 
     } catch (err) {
         console.error(err);
-        alert("Erro ao salvar representante. Veja o console para detalhes.");
+        alert("Erro ao salvar representante.");
     }
 }
 
@@ -159,18 +139,16 @@ async function salvarRepresentante(event) {
 async function excluirRepresentante(id) {
     if (!confirm("Deseja realmente excluir este representante?")) return;
 
-    if (!await validarToken()) {
-        return
-    }
-    tokenGlobal =localStorage.getItem("token");
+    if (!await validarToken()) return;
+    tokenGlobal = localStorage.getItem("token");
 
     try {
         const response = await fetch(`http://127.0.0.1:8000/ExcluirRepresentante/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${tokenGlobal}` }
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${tokenGlobal}` }
         });
 
-        if (!response.ok) throw new Error(`Erro ao excluir representante: ${response.status}`);
+        if (!response.ok) throw new Error("Erro ao excluir representante.");
         alert("Representante excluído com sucesso!");
         carregarRepresentantes();
 
@@ -181,7 +159,7 @@ async function excluirRepresentante(id) {
 }
 
 // -------------------------
-// Formatar data para dd/mm/yyyy
+// Formatar data
 // -------------------------
 function formatarData(inputDate) {
     if (!inputDate) return "";
@@ -190,20 +168,42 @@ function formatarData(inputDate) {
 }
 
 // -------------------------
+// Filtro por Nome
+// -------------------------
+function normalizarTexto(texto) {
+    return texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+function aplicarFiltro() {
+    const filtro = normalizarTexto(document.getElementById("filtroNome").value);
+    const linhas = document.querySelectorAll("#tabela-representantes tbody tr");
+
+    linhas.forEach(linha => {
+        const nome = normalizarTexto(linha.querySelector("td")?.textContent || "");
+        linha.style.display = nome.includes(filtro) ? "" : "none";
+    });
+}
+
+// -------------------------
 // Inicialização
 // -------------------------
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
     carregarRepresentantes();
 
-    const form = document.getElementById('form-representante');
-    form.addEventListener('submit', salvarRepresentante);
-    form.addEventListener('reset', limparFormulario);
+    const form = document.getElementById("form-representante");
+    form.addEventListener("submit", salvarRepresentante);
+    form.addEventListener("reset", limparFormulario);
 
-    const tabela = document.querySelector('#tabela-representantes tbody');
-    tabela.addEventListener('click', (e) => {
-        if (e.target.classList.contains('excluir')) {
+    const tabela = document.querySelector("#tabela-representantes tbody");
+    tabela.addEventListener("click", (e) => {
+        if (e.target.classList.contains("excluir")) {
             const id = Number(e.target.dataset.id);
             excluirRepresentante(id);
         }
     });
+
+    document.getElementById("filtroNome").addEventListener("input", aplicarFiltro);
 });

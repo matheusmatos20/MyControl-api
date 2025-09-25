@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -10,13 +10,12 @@
 <body>
   <div id="menu-container"></div>
 
-  <!-- Wrapper para acompanhar o menu (como em Serviços/Clientes) -->
+  <!-- Wrapper para acompanhar o menu -->
   <div id="content" class="content">
     <main class="main">
       <div class="card">
         <h2>Novo Representante</h2>
         <form id="form-representante" class="form-container">
-          <!-- Campos do formulário aqui -->
           <div class="form-group">
             <label for="nome">Nome Completo</label>
             <input type="text" id="nome" name="nome" placeholder="Digite o nome completo" required>
@@ -49,7 +48,14 @@
       </div>
 
       <div class="card">
-        <h2>Representantes Cadastrados</h2>
+        <h2>Responsáveis</h2>
+
+        <!-- Campo de filtro -->
+        <div class="filtro-container">
+          <label for="filtroNome">Filtrar por Nome:</label>
+          <input type="text" id="filtroNome" placeholder="Digite o nome do representante...">
+        </div>
+
         <div class="grid-view">
           <table id="tabela-representantes">
             <thead>
@@ -59,8 +65,8 @@
                 <th>CPF</th>
                 <th>Telefone</th>
                 <th>DtNasc</th>
-                 <th>Email</th>
-                <th>Ações</th> 
+                <th>Email</th>
+                <!-- <th>Ações</th>  -->
               </tr>
             </thead>
             <tbody>
@@ -71,8 +77,9 @@
       </div>
     </main>
   </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-  <script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
+  <script src="../auth.js"></script>
   <script src="cadastro-representante.js"></script>
   <script src="../Menu/Menu.js"></script>
   <script>
@@ -82,8 +89,7 @@
         document.getElementById('menu-container').innerHTML = html;
       })
       .catch(error => console.error('Erro ao carregar o menu:', error));
-  </script>
-  <script>
+
     document.addEventListener("DOMContentLoaded", () => {
       const observer = new MutationObserver(() => {
         const menu = document.querySelector(".menu");

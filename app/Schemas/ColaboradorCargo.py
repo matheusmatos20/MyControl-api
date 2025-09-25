@@ -4,7 +4,7 @@ from typing import Optional
 class ColaboradorCargoSchema(BaseModel):
     id_cargo_funcionario: Optional[int] = None
     id_funcionario: int
-    dt_cargo: str
+    dt_cargo: Optional[str] = None
     vl_salario: float
     id_usuario: int
     vl_transporte: Optional[float] = None
@@ -15,3 +15,5 @@ class ColaboradorCargoSchema(BaseModel):
     vl_fgts: Optional[float] = None
     dt_desligamento: Optional[str] = None
     id_cargo: int
+
+    

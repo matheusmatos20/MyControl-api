@@ -68,6 +68,29 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+def _resolver_competencia(mes: Optional[int] = None, ano: Optional[int] = None, competencia: Optional[int] = None) -> Optional[int]:
+    if competencia is not None:
+        try:
+            comp_int = int(competencia)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Competência inválida. Use o formato YYYYMM.")
+        if comp_int < 190001 or comp_int > 999912:
+            raise HTTPException(status_code=400, detail="Competência fora do intervalo permitido.")
+        return comp_int
+    if mes is not None or ano is not None:
+        if mes is None or ano is None:
+            raise HTTPException(status_code=400, detail="Informe mês e ano juntos.")
+        try:
+            mes_int = int(mes)
+            ano_int = int(ano)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Mês e ano devem ser numéricos.")
+        if mes_int < 1 or mes_int > 12:
+            raise HTTPException(status_code=400, detail="Mês deve estar entre 1 e 12.")
+        return int(f"{ano_int:04d}{mes_int:02d}")
+    return None
+
+
 # Função para obter usuário atual a partir do token
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -129,15 +152,27 @@ async def Listar_Debitos(current_user: dict = Depends(get_current_user)):
     return df.to_dict(orient="records")
 
 @app.get("/RetornaDebito",tags=["Financeiro"])
-async def Consultar_Debitos(current_user: dict = Depends(get_current_user)):
+async def Consultar_Debitos(
+    mes: Optional[int] = None,
+    ano: Optional[int] = None,
+    competencia: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    filtro_competencia = _resolver_competencia(mes, ano, competencia)
     dal = Financeiro.FinanceiroDAL()
-    df = dal.retorna_pagamentos()
+    df = dal.retorna_pagamentos(filtro_competencia)
     return df.to_dict(orient="records")
 
 @app.get("/RetornaCredito",tags=["Financeiro"])
-async def Consultar_Creditos(current_user: dict = Depends(get_current_user)):
+async def Consultar_Creditos(
+    mes: Optional[int] = None,
+    ano: Optional[int] = None,
+    competencia: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    filtro_competencia = _resolver_competencia(mes, ano, competencia)
     dal = Financeiro.FinanceiroDAL()
-    df = dal.retorna_creditos()
+    df = dal.retorna_creditos(filtro_competencia)
     return df.to_dict(orient="records")
 
 @app.get("/Representantes",tags=["Representantes"])
@@ -417,6 +452,30 @@ def Inserir_Fornecedor(fornecedor: FornecedorSchema.FornecedorSchema, user: dict
 
 
 
+@app.post("/AlterarFornecedor/",tags=["Fornecedores"])
+def Alterar_Fornecedor(fornecedor: FornecedorSchema.FornecedorSchema, user: dict = Depends(get_current_user)):
+    try:
+        dal = Fornecedor.FornecedorDAL()
+        atualizado = dal.alterar_fornecedor(fornecedor)
+        if not atualizado:
+            raise HTTPException(status_code=404, detail="Fornecedor não encontrado.")
+        return {
+            "mensagem": "Fornecedor alterado com sucesso!",
+            "dados": {
+                "id_fornecedor": fornecedor.id_fornecedor,
+                "nm_razao_social": fornecedor.nm_razao_social,
+                "nm_fantasia": fornecedor.nm_fantasia,
+                "cd_cnpj": fornecedor.cd_cnpj,
+                "ds_endereco": fornecedor.ds_endereco,
+                "nu_telefone": fornecedor.nu_telefone
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Falha ao alterar fornecedor: {str(e)}")
+
+
 @app.get("/RetornaFornecedores",tags=["Fornecedores"])
 async def Retorna_fornecedor(user: dict = Depends(get_current_user)):
     dal = Fornecedor.FornecedorDAL()
@@ -435,15 +494,29 @@ async def Consultar_Colaborador_Cargos(current_user: dict = Depends(get_current_
     df = dal.retorna_cargos_colaborador()
     return df.to_dict(orient="records")
 
+@app.get("/CargosColaborador",tags=["ColaboradoresCargos"])
+async def Consultar_Colaborador_Cargos(current_user: dict = Depends(get_current_user), id_funcionario: int = None):
+    dal = ColaboradorCargoModel.ColaboradorCargoDAL()
+    df = dal.retorna_cargo_colaborador(id_funcionario)
+    return df.to_dict(orient="records")
+
+
+
 @app.post("/InserirColaboradorCargo/",tags=["ColaboradoresCargos"])
 def Inserir_Colaborador_Cargo(cargo: ColaboradorCargoSchema.ColaboradorCargoSchema, user: dict = Depends(get_current_user)):
     try:
         dal = ColaboradorCargoModel.ColaboradorCargoDAL()
-        dal.inserir_cargo_colaborador(cargo)
-        return {
-            "mensagem": "Cargo de colaborador inserido com sucesso!",
-            "dados": cargo.dict()
-        }
+        resp = dal.inserir_cargo_colaborador(cargo)
+        print(resp)
+        if(resp):
+
+            return {
+                "mensagem": "Cargo de colaborador inserido com sucesso!",
+                "dados": cargo.dict()
+            }
+        else:
+            return {"erro": "Falha ao inserir cargo do colaborador."}
+        
     except Exception as e:
         return {"erro": f"Falha ao inserir cargo do colaborador: {str(e)}"}
 

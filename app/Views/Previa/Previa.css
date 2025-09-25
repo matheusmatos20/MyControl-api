@@ -50,6 +50,26 @@ h1, h2 {
   margin-bottom: 30px;
 }
 
+.filtros {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.filtros label {
+  font-weight: 600;
+}
+
+.filtros input[type="month"] {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
 .card {
   background-color: white;
   padding: 15px 20px;
@@ -104,6 +124,10 @@ button {
   font-size: 0.95rem;
 }
 
+button.secondary {
+  background-color: #7f8c8d;
+}
+
 button.danger {
   background-color: #c0392b;
 }
@@ -125,6 +149,16 @@ button.hidden {
 
   .indicadores {
     flex-direction: column;
+  }
+
+  .filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtros input[type="month"],
+  .filtros button {
+    width: 100%;
   }
 
   table, thead, tbody, th, td, tr {

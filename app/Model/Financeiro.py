@@ -121,16 +121,19 @@ class FinanceiroDAL:
             print("Erro em insere_salarios_mes:", e)
             return False
         
-    def retorna_pagamentos(self): 
+    def retorna_pagamentos(self, competencia=None):
+        competencia_int = competencia
+        if competencia_int is None:
+            competencia_int = int(datetime.now().strftime('%Y%m'))
         query = """
           select 
                     P.ID_PAGAMENTO									AS Id
-                    ,CONVERT(INT,CONVERT(VARCHAR(6),GETDATE(),112)) AS Competencia
-                    ,P.DT_VENCIMENTO								AS DtVencimento
-                    ,DS_PAGAMENTO									AS Descricao
-                    ,F.NM_FANTASIA									AS Fornecedor
-                    ,FP.NM_FORMA_PAGAMENTO							AS FormaPagamento
-                    ,P.VL_PAGAMENTO									AS Valor
+                    ,CONVERT(INT,CONVERT(VARCHAR(6),P.DT_VENCIMENTO,112)) AS Competencia
+                    ,P.DT_VENCIMENTO							AS DtVencimento
+                    ,DS_PAGAMENTO								AS Descricao
+                    ,F.NM_FANTASIA								AS Fornecedor
+                    ,FP.NM_FORMA_PAGAMENTO						AS FormaPagamento
+                    ,P.VL_PAGAMENTO								AS Valor
                     ,CASE WHEN(P.DT_PAGAMENTO IS NULL) 
                         THEN 'Pago'
                         ELSE 'Pendente'
@@ -138,38 +141,40 @@ class FinanceiroDAL:
                     FROM TB_PAGAMENTOS		P  WITH(NOLOCK)
                     LEFT JOIN TB_FORNECEDORES		F  WITH(NOLOCK) ON F.ID_FORNECEDOR = P.ID_FORNECEDOR
                     LEFT JOIN TB_FORMA_PAGAMENTOS	FP WITH(NOLOCK) ON FP.ID = P.ID_FORMA_PAGAMENTO
-                    WHERE CONVERT(INT,CONVERT(VARCHAR(6),P.DT_VENCIMENTO,112))	= CONVERT(INT,CONVERT(VARCHAR(6),GETDATE(),112))
+                    WHERE CONVERT(INT,CONVERT(VARCHAR(6),P.DT_VENCIMENTO,112)) = ?
         """
         try:
-                with self._connect() as conn:
-                    df = pd.read_sql(query, conn)
-                    return df
+            with self._connect() as conn:
+                df = pd.read_sql(query, conn, params=[competencia_int])
+                return df
         except Exception as e:
-                print("Erro em retornar :", e)
+            print('Erro em retorna_pagamentos:', e)
         return pd.DataFrame()
-    def retorna_creditos(self): 
-            
-            query = """
+    def retorna_creditos(self, competencia=None):
+        competencia_int = competencia
+        if competencia_int is None:
+            competencia_int = int(datetime.now().strftime('%Y%m'))
+        query = """
                  SELECT 
-                        SC.ID_SERVICO_CLIENTE                                                                                                                                         AS Id
+                        SC.ID_SERVICO_CLIENTE											 AS Id
                         ,CONVERT(INT,CONVERT(VARCHAR(6),SC.DT_SERVICO,112)) AS Competencia
-                        ,SC.DT_SERVICO                                                                                                                                                        AS DtVencimento
-                        ,S.DS_SERVICO                                                                                                                                                         AS Servico
-                        ,C.NM_CLIENTE                                                                                                                                                         AS Cliente
-                        --,FP.NM_FORMA_PAGAMENTO                                                                                                                                AS FormaPagamento
-                        ,sc.VL_SERVICO                                                                                                                                                        AS Valor
-                        ,sc.VL_DESCONTO                                                                                                                                                 AS Desconto
-                        ,round((sc.VL_SERVICO - sc.VL_DESCONTO),2)                                        AS VlLiquido
-                        FROM TB_SERVICOS_CLIENTE                                SC        WITH(NOLOCK)
-                        LEFT JOIN TB_CLIENTES                                   C        WITH(NOLOCK) ON C.ID_CLIENTE = SC.ID_CLIENTE
-                        LEFT JOIN TB_SERVICOS                                   S WITH(NOLOCK) ON S.ID_SERVICO = SC.ID_SERVICO
-                        WHERE CONVERT(INT,CONVERT(VARCHAR(6),SC.DT_SERVICO,112))                = CONVERT(INT,CONVERT(VARCHAR(6),GETDATE(),112))
+                        ,SC.DT_SERVICO										 AS DtVencimento
+                        ,S.DS_SERVICO											 AS Servico
+                        ,C.NM_CLIENTE											 AS Cliente
+                        --,FP.NM_FORMA_PAGAMENTO								 AS FormaPagamento
+                        ,sc.VL_SERVICO										 AS Valor
+                        ,sc.VL_DESCONTO									 AS Desconto
+                        ,round((sc.VL_SERVICO - sc.VL_DESCONTO),2)			 AS VlLiquido
+                        FROM TB_SERVICOS_CLIENTE					SC        WITH(NOLOCK)
+                        LEFT JOIN TB_CLIENTES						   C        WITH(NOLOCK) ON C.ID_CLIENTE = SC.ID_CLIENTE
+                        LEFT JOIN TB_SERVICOS						   S WITH(NOLOCK) ON S.ID_SERVICO = SC.ID_SERVICO
+                        WHERE CONVERT(INT,CONVERT(VARCHAR(6),SC.DT_SERVICO,112)) = ?
 
                                 """
-            try:
-                with self._connect() as conn:
-                    df = pd.read_sql(query, conn)
-                    return df
-            except Exception as e:
-                print("Erro em retornar :", e)
-            return pd.DataFrame()
+        try:
+            with self._connect() as conn:
+                df = pd.read_sql(query, conn, params=[competencia_int])
+                return df
+        except Exception as e:
+            print('Erro em retorna_creditos:', e)
+        return pd.DataFrame()

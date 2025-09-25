@@ -42,7 +42,7 @@ main.main {
   padding: 2rem;
 }
 
-/* Cartões, formulário e tabela continuam iguais... */
+/* Cartões */
 .card {
   background: var(--card);
   padding: 2rem;
@@ -51,8 +51,13 @@ main.main {
   width: 100%;
   animation: fadeIn 0.4s ease-in-out;
 }
-.card h2 { margin-bottom: 1.5rem; color: var(--primary); text-align: center; }
+.card h2 {
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+  text-align: center;
+}
 
+/* Formulário */
 .form-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -77,6 +82,7 @@ main.main {
   box-shadow: 0 0 0 2px rgba(42, 157, 143, 0.25);
 }
 
+/* Ações */
 .actions {
   grid-column: 1 / -1;
   display: flex;
@@ -134,6 +140,14 @@ main.main {
 #tabela-representantes tr:nth-child(even) {
   background: #f9fafb;
 }
+
+/* Destaque ao passar o mouse */
+#tabela-representantes tbody tr:hover {
+  background: rgba(42, 157, 143, 0.1);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
 .acao-btn {
   margin: 0 0.2rem;
   padding: 0.4rem 0.8rem;
@@ -142,16 +156,61 @@ main.main {
   cursor: pointer;
   font-size: 0.9rem;
 }
-.acao-btn.editar { background: #facc15; color: #333; }
-.acao-btn.excluir { background: #ef4444; color: white; }
-
-@media (max-width: 600px) {
-  .actions { flex-direction: column; align-items: stretch; }
-  #tabela-representantes th,
-  #tabela-representantes td { font-size: 0.85rem; }
+.acao-btn.editar {
+  background: #facc15;
+  color: #333;
+}
+.acao-btn.excluir {
+  background: #ef4444;
+  color: white;
 }
 
+/* Responsividade */
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #tabela-representantes th,
+  #tabela-representantes td {
+    font-size: 0.85rem;
+  }
+}
+
+/* Animação */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filtro-container {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filtro-container label {
+  font-weight: bold;
+  color: #333;
+}
+
+.filtro-container input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.filtro-container input:focus {
+  border-color: #007bff;
+  outline: none;
 }

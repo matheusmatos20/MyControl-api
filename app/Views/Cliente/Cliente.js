@@ -26,47 +26,11 @@ function limparFormulario() {
 }
 
 // -----------------------------
-// Autenticação
-// -----------------------------
-// async function obterToken() {
-//   const url = "http://localhost:8000/token";
-//   const formData = new URLSearchParams();
-//   formData.append("username", "usuario");
-//   formData.append("password", "1234");
-//   formData.append("grant_type", "password");
-
-//   try {
-//     const response = await fetch(url, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//       body: formData
-//     });
-
-//     if (!response.ok) {
-//       const erro = await response.text();
-//       throw new Error(`Erro ao obter token: ${erro}`);
-//     }
-
-//     const data = await response.json();
-//     tokenGlobal = data.access_token;
-//     return tokenGlobal;
-
-//   } catch (err) {
-//     console.error("Erro ao obter token:", err);
-//     alert("Falha ao autenticar. Verifique o backend.");
-//     return null;
-//   }
-// }
-
-// -----------------------------
 // Carregar representantes
 // -----------------------------
 async function carregarRepresentantes() {
-  
-  if (!await validarToken()) {
-        return
-    }
-    const tokenGlobal =localStorage.getItem("token");
+  if (!await validarToken()) return;
+  const tokenGlobal = localStorage.getItem("token");
 
   try {
     const response = await fetch("http://127.0.0.1:8000/RepresentantesComboBox", {
@@ -96,10 +60,8 @@ async function carregarRepresentantes() {
 // Carregar clientes
 // -----------------------------
 async function carregarClientes() {
-  if (!await validarToken()) {
-        return
-    }
-    const tokenGlobal =localStorage.getItem("token");
+  if (!await validarToken()) return;
+  const tokenGlobal = localStorage.getItem("token");
 
   try {
     const response = await fetch("http://127.0.0.1:8000/Clientes", {
@@ -113,7 +75,6 @@ async function carregarClientes() {
 
     lista.forEach(c => {
       const tr = document.createElement("tr");
-      // tr.dataset.id = c.id_cliente;
       tr.dataset.id = c.Id;
 
       tr.innerHTML = `
@@ -126,7 +87,7 @@ async function carregarClientes() {
         <td>${c.Representante || ""}</td>
       `;
 
-      // Ao clicar na linha, seleciona e preenche o formulário
+      // Clique para editar
       tr.addEventListener("click", () => {
         carregarFormulario(c, tr);
       });
@@ -150,15 +111,12 @@ function carregarFormulario(cliente, linha) {
   form.cpf.value = cliente.Cpf || "";
   form.rg.value = cliente.Rg || "";
 
-  if (cliente.DtNascimento) {
-    form.dataNasc.value = formatarDataParaInput(cliente.DtNascimento);
+  if (cliente.DtNascimento && cliente.DtNascimento !== "None") {
+    const [ano, mes, dia] = cliente.DtNascimento.split("-");
+    form.dataNasc.value = `${ano}-${mes}-${dia}`;
+  } else {
+    form.dataNasc.value = "";
   }
-     if (cliente.DtNascimento && cliente.DtNascimento !== "None") {
-        const [ano, mes, dia] = cliente.DtNascimento.split("-");
-        form.dataNasc.value = `${ano}-${mes}-${dia}`;
-    } else {
-        form.dataNasc.value = '';
-    }
 
   form.telefone.value = cliente.Telefone || "";
 
@@ -189,7 +147,6 @@ function carregarFormulario(cliente, linha) {
     combo.value = "";
   }
 
-  // Marca a linha como selecionada
   editando = linha;
   document.getElementById("btnSalvar").textContent = "Atualizar";
 
@@ -205,10 +162,10 @@ function carregarFormulario(cliente, linha) {
 // -----------------------------
 async function salvarCliente(e) {
   e.preventDefault();
+  if (!await validarToken()) return;
+  tokenGlobal = localStorage.getItem("token");
 
   const form = document.getElementById("cliente-form");
-
-  // Agora usamos a classe correta: 'selected'
   const linhaSelecionada = document.querySelector("#clientes-table tbody tr.selected");
   const idCliente = linhaSelecionada ? parseInt(linhaSelecionada.dataset.id) : 0;
 
@@ -254,10 +211,26 @@ async function salvarCliente(e) {
 }
 
 // -----------------------------
+// Filtro da tabela
+// -----------------------------
+function aplicarFiltroClientes() {
+  const termo = document.getElementById("filtroClientes").value.toLowerCase();
+  const linhas = document.querySelectorAll("#clientes-table tbody tr");
+
+  linhas.forEach(linha => {
+    const textoLinha = linha.textContent.toLowerCase();
+    linha.style.display = textoLinha.includes(termo) ? "" : "none";
+  });
+}
+
+// -----------------------------
 // Inicialização
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btnNovo").addEventListener("click", limparFormulario);
   document.getElementById("cliente-form").addEventListener("submit", salvarCliente);
   carregarRepresentantes().then(() => carregarClientes());
+
+  // Filtro em tempo real
+  document.getElementById("filtroClientes").addEventListener("input", aplicarFiltroClientes);
 });
