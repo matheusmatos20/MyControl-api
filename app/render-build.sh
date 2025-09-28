@@ -6,11 +6,24 @@ trap 'echo "[render-build] Failed at line ${LINENO}: ${BASH_COMMAND}" >&2' ERR
 
 echo "[render-build] Starting build script inside $(pwd)"
 
+echo "[render-build] Running as user: $(id -u -n) (uid=$(id -u))"
+
 # Determine sudo availability (Render builds run as non-root)
-if [[ $EUID -ne 0 ]] && command -v sudo >/dev/null 2>&1; then
-  SUDO="sudo"
+SUDO=""
+if [[ $(id -u) -ne 0 ]]; then
+  if command -v sudo >/dev/null 2>&1; then
+    echo "[render-build] sudo available at $(command -v sudo)"
+    if sudo -n true 2>/dev/null; then
+      SUDO="sudo"
+      echo "[render-build] sudo usable without password"
+    else
+      echo "[render-build] sudo present but requires password; skipping"
+    fi
+  else
+    echo "[render-build] sudo not available; running without it"
+  fi
 else
-  SUDO=""
+  echo "[render-build] Running as root user"
 fi
 
 # Base dirs for apt caches/lists to avoid read-only FS
@@ -22,9 +35,14 @@ APT_ARGS=("-o" "Dir::State::lists=$APT_LISTS_DIR" "-o" "Dir::Cache::archives=$AP
 
 APT_GET() {
   if [[ -n "$SUDO" ]]; then
-    "$SUDO" apt-get "${APT_ARGS[@]}" "$@"
-  else
+    "${SUDO}" apt-get "${APT_ARGS[@]}" "$@"
+  elif [[ $(id -u) -eq 0 ]]; then
     apt-get "${APT_ARGS[@]}" "$@"
+  else
+    echo "[render-build] ERROR: apt-get requires sudo or root privileges." >&2
+    echo "[render-build]       Current user $(id -u -n) lacks permission to install packages." >&2
+    echo "[render-build]       Consider switching the service to a Docker deployment or Render native root build." >&2
+    exit 100
   fi
 }
 
@@ -40,8 +58,8 @@ APT_GET install -y --no-install-recommends curl ca-certificates gnupg apt-transp
 echo "[render-build] Configuring Microsoft package repository"
 MICROSOFT_KEYRING=/usr/share/keyrings/microsoft-prod.gpg
 if [[ -n "$SUDO" ]]; then
-  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | $SUDO tee "$MICROSOFT_KEYRING" > /dev/null
-  echo "deb [arch=amd64 signed-by=$MICROSOFT_KEYRING] https://packages.microsoft.com/config/debian/12/prod/ stable main"     | $SUDO tee /etc/apt/sources.list.d/microsoft-prod.list
+  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | ${SUDO} tee "$MICROSOFT_KEYRING" > /dev/null
+  echo "deb [arch=amd64 signed-by=$MICROSOFT_KEYRING] https://packages.microsoft.com/config/debian/12/prod/ stable main"     | ${SUDO} tee /etc/apt/sources.list.d/microsoft-prod.list
 else
   curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee "$MICROSOFT_KEYRING" > /dev/null
   echo "deb [arch=amd64 signed-by=$MICROSOFT_KEYRING] https://packages.microsoft.com/config/debian/12/prod/ stable main"     | tee /etc/apt/sources.list.d/microsoft-prod.list
@@ -56,7 +74,7 @@ ACCEPT_EULA=Y APT_GET install -y --no-install-recommends msodbcsql18 unixodbc un
 echo "[render-build] Cleaning apt caches"
 APT_GET clean
 if [[ -n "$SUDO" ]]; then
-  $SUDO rm -rf "$APT_WORKDIR"
+  ${SUDO} rm -rf "$APT_WORKDIR"
 else
   rm -rf "$APT_WORKDIR"
 fi
