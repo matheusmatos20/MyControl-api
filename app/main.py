@@ -18,7 +18,7 @@ app = FastAPI()
 # Configurações CORS
 origins = [
     "http://localhost:5501",
-    "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com/"
+    "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com"
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -27,7 +27,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+    
 
 @app.get("/keepalive")
 async def keepalive():
