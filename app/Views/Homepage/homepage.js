@@ -1,3 +1,6 @@
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
 // ================================
 // Dados de teste (mockados)
 // ================================
@@ -44,7 +47,7 @@ function initDashboard() {
 async function fetchDashboardData() {
   // 🔗 Quando a API estiver pronta, descomente:
   /*
-  const response = await fetch("http://localhost:8000/dashboard");
+  const response = await fetch(buildApiUrl('/dashboard'));
   const data = await response.json();
   dashboardData = data;
   */

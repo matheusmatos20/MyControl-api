@@ -1,3 +1,6 @@
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
 // ================================
 // Função para buscar pendências
 // ================================
@@ -5,7 +8,7 @@ async function buscarPendencias() {
   try {
     // 🔗 QUANDO SUA API ESTIVER PRONTA, DESCOMENTE ESSA PARTE:
     /*
-    const response = await fetch("http://localhost:8000/pendencias"); 
+    const response = await fetch(buildApiUrl('/pendencias')); 
     if (!response.ok) throw new Error("Erro ao consultar API");
 
     const data = await response.json();
@@ -60,7 +63,7 @@ document.querySelector("#busca").addEventListener("input", async (e) => {
 
   // 🔗 QUANDO SUA API ESTIVER PRONTA, DESCOMENTE E USE QUERY PARAMS:
   /*
-  const response = await fetch(`http://localhost:8000/pendencias?busca=${termo}`);
+  const response = await fetch(buildApiUrl(`/pendencias?busca=${termo}`));
   const pendencias = await response.json();
   carregarPendencias(pendencias);
   */
@@ -81,7 +84,7 @@ document.querySelector("#filtroStatus").addEventListener("change", async (e) => 
 
   // 🔗 QUANDO SUA API ESTIVER PRONTA, DESCOMENTE E USE QUERY PARAMS:
   /*
-  const response = await fetch(`http://localhost:8000/pendencias?status=${status}`);
+  const response = await fetch(buildApiUrl(`/pendencias?status=${status}`));
   const pendencias = await response.json();
   carregarPendencias(pendencias);
   */

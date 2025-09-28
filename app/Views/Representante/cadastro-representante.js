@@ -4,6 +4,9 @@
 let tokenGlobal = null;
 let representanteSelecionado = null;
 
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
 // -------------------------
 // Carregar representantes
 // -------------------------
@@ -12,7 +15,7 @@ async function carregarRepresentantes() {
     tokenGlobal = localStorage.getItem("token");
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/Representantes", {
+        const response = await fetch(buildApiUrl('/Representantes'), {
             method: "GET",
             headers: { "Authorization": `Bearer ${tokenGlobal}` }
         });
@@ -107,8 +110,8 @@ async function salvarRepresentante(event) {
     tokenGlobal = localStorage.getItem("token");
 
     const url = representanteSelecionado
-        ? "http://127.0.0.1:8000/AlterarRepresentante"
-        : "http://127.0.0.1:8000/InserirRepresentante";
+        ? buildApiUrl('/AlterarRepresentante')
+        : buildApiUrl('/InserirRepresentante');
 
     try {
         const response = await fetch(url, {
@@ -143,7 +146,7 @@ async function excluirRepresentante(id) {
     tokenGlobal = localStorage.getItem("token");
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/ExcluirRepresentante/${id}`, {
+        const response = await fetch(buildApiUrl(`/ExcluirRepresentante/${id}`), {
             method: "DELETE",
             headers: { "Authorization": `Bearer ${tokenGlobal}` }
         });

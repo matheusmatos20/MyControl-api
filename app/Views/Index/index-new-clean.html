@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Control | Portal de Gestão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index-new-clean.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="navbar container">
+      <div class="brand">
+        <img src="https://dummyimage.com/40x40/16a34a/ffffff&text=MC" alt="My Control" class="brand-icon" loading="lazy">
+        <div class="brand-text">
+          <strong>My Control</strong>
+          <span>Gestão financeira integrada</span>
+        </div>
+      </div>
+      <nav class="nav-actions">
+        <a href="#recursos">Recursos</a>
+        <a href="#modulos">Módulos</a>
+        <button id="btn-login" class="btn ghost">Entrar</button>
+        <button id="btn-cta" class="btn primary">Criar acesso</button>
+      </nav>
+    </div>
+
+    <div class="hero-content container">
+      <div class="hero-text">
+        <span class="tag">Sistema interno</span>
+        <h1>Organize cadastros, pagamentos e avisos em um só lugar.</h1>
+        <p>My Control conecta representantes, clientes, serviços e pendências em um painel objetivo, com autenticação segura e fluxos alinhados ao que desenvolvemos.</p>
+        <div class="hero-actions">
+          <button class="btn primary" id="btn-cta-hero">Começar agora</button>
+          <button class="btn link" id="btn-ver-demo">Explorar recursos</button>
+        </div>
+        <div class="highlights">
+          <div>
+            <strong>Cadastros completos</strong>
+            <span>Representantes, clientes, fornecedores e serviços padronizados</span>
+          </div>
+          <div>
+            <strong>Financeiro confiável</strong>
+            <span>Pagamentos, pendências e avisos de NF centralizados</span>
+          </div>
+          <div>
+            <strong>Acesso seguro</strong>
+            <span>Login com token JWT reutilizado em todas as páginas internas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-panel">
+        <h2>Status diário</h2>
+        <div class="panel-item">
+          <span>Pendências abertas</span>
+          <strong>Visíveis na Home</strong>
+        </div>
+        <div class="panel-item">
+          <span>Pagamentos recentes</span>
+          <strong>Atualizados pelo módulo Financeiro</strong>
+        </div>
+        <div class="panel-item">
+          <span>Avisos de NF</span>
+          <strong>Consultados no módulo dedicado</strong>
+        </div>
+        <div class="panel-footnote">Dados alimentados pelos DALs de Pagamento, Colaborador e Aviso NF.</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="recursos" class="section features">
+      <div class="container">
+        <h2>Por que usar o My Control</h2>
+        <p class="section-intro">A Home, os cadastros e o fluxo financeiro foram desenvolvidos juntos para manter as equipes com a mesma informação e reduzir retrabalho.</p>
+        <div class="grid">
+          <article class="card">
+            <h3>Visão inicial clara</h3>
+            <p>Cards de pendências e alertas na Home indicam rapidamente o que precisa ser tratado ao acessar o sistema.</p>
+          </article>
+          <article class="card">
+            <h3>Cadastros conectados</h3>
+            <p>Representantes, clientes, colaboradores e cargos utilizam schemas Pydantic e DALs para manter vínculos consistentes.</p>
+          </article>
+          <article class="card">
+            <h3>Financeiro no detalhe</h3>
+            <p>O módulo de Pagamentos registra débitos, quitações e integra com avisos de nota fiscal emitidos.</p>
+          </article>
+          <article class="card">
+            <h3>Autenticação confiável</h3>
+            <p>Login com FastAPI, CryptoJS e armazenamento local do token garante acesso rápido e seguro às telas.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="modulos" class="section modules">
+      <div class="container">
+        <h2>Módulos desenvolvidos</h2>
+        <div class="modules-grid">
+          <div class="module-item">
+            <h3>Home</h3>
+            <span>Resumo diário com cards dinâmicos e grid de detalhes.</span>
+          </div>
+          <div class="module-item">
+            <h3>Representantes</h3>
+            <span>Cadastro, consulta e alteração com validações.</span>
+          </div>
+          <div class="module-item">
+            <h3>Clientes</h3>
+            <span>Gestão de contratos e dados fiscais.</span>
+          </div>
+          <div class="module-item">
+            <h3>Pagamentos</h3>
+            <span>Inserção, atualização e alertas de vencimento.</span>
+          </div>
+          <div class="module-item">
+            <h3>Colaboradores &amp; Cargos</h3>
+            <span>Fluxo integrado para cadastro e atualização.</span>
+          </div>
+          <div class="module-item">
+            <h3>Avisos de NF</h3>
+            <span>Dashboard específico para acompanhar emissões.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section testimonial">
+      <div class="container testimonial-card">
+        <p class="quote">“Com o My Control, o time acessa cadastros e pagamentos em um único portal. As pendências ficam claras logo na abertura do sistema.”</p>
+        <span class="author">Equipe Financeira</span>
+      </div>
+    </section>
+
+    <section class="section cta-final">
+      <div class="container cta-box">
+        <div>
+          <h2>Continue evoluindo a plataforma</h2>
+          <p>Adicione novos relatórios, refine cadastros e mantenha o ritmo de desenvolvimento com segurança e padronização.</p>
+        </div>
+        <div class="cta-actions">
+          <button class="btn primary" id="btn-cta-final">Acessar agora</button>
+          <button class="btn ghost" id="btn-fale-conosco">Falar com o time</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <div>
+        <strong>My Control</strong>
+        <span>© 2025. Sistema interno de gestão.</span>
+      </div>
+      <div class="footer-links">
+        <a href="#recursos">Recursos</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#">Contato</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="modal" id="login-modal">
+    <div class="modal-content">
+      <button class="close" id="close-login" aria-label="Fechar">×</button>
+      <div class="modal-header">
+        <h2>Entrar</h2>
+        <p>Use seu usuário e senha cadastrados no sistema.</p>
+      </div>
+      <form id="form-login" class="modal-form">
+        <div class="form-group">
+          <label for="email-login">Usuário</label>
+          <input type="text" id="email-login" name="email" placeholder="Digite seu usuário" required>
+        </div>
+        <div class="form-group">
+          <label for="senha-login">Senha</label>
+          <input type="password" id="senha-login" name="senha" placeholder="Digite sua senha" required>
+        </div>
+        <button type="submit" class="btn primary">Entrar</button>
+      </form>
+      <div class="modal-footer">
+        <span>Precisa de ajuda? <a href="#">Contate o suporte interno</a></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="../config.js"></script>
+<script src="../auth.js"></script>
+  <script src="index-new.js"></script>
+</body>
+</html>

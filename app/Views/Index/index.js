@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLogin = document.getElementById("close-login");
   const formLogin = document.getElementById("form-login");
 
+  const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8080';
+  const resolvedAuthBase = (window.AUTH_BASE_URL || window.API_BASE_URL || DEFAULT_AUTH_BASE).replace(/\/$/, '');
+  const tokenEndpoint = window.buildAuthUrl ? window.buildAuthUrl('/token') : `${resolvedAuthBase}/token`;
+
   // Abrir modal
   btnLogin.addEventListener("click", () => {
     modalLogin.style.display = "block";
@@ -46,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       
       // Requisição real para API de login
-      const response = await fetch("http://localhost:8000/token", {
+      const response = await fetch(tokenEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -67,6 +71,14 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("username", email);
         localStorage.setItem("password", encrypt(senha)); // ✅ criptografado
+        if (data.empresa) {
+          localStorage.setItem("empresa", data.empresa);
+        }
+        if (data.usuario) {
+          localStorage.setItem("usuario", data.usuario);
+        } else {
+          localStorage.setItem("usuario", email);
+        }
 
         
         // Redirecionar para Home
@@ -102,3 +114,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+

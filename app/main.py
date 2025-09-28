@@ -1,14 +1,15 @@
-from pathlib import Path
+﻿from pathlib import Path
 from typing import Annotated, Any, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
 from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor, Pagamento as Pagamento, Conn_DB as Conn    
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema   
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema, NotaFiscalAviso as NotaFiscalAvisoSchema   
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import FastAPI
+from Services.email_service import send_nf_notification, EmailDispatchError
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -58,7 +59,7 @@ def authenticate_user(username: str, password: str):
         print("Senha inválida")
         return False
 
-    return {"username": user["NM_LOGIN"]}
+    return {"username": user["NM_LOGIN"], "empresa": user["EMPRESA"]}
 
 
 # Criar token JWT
@@ -113,7 +114,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         data={"sub": user["username"]},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    return {"success": True, "token": access_token}
+    return {"success": True, "token": access_token
+            , "empresa": user["empresa"]
+            , "usuario": user["username"]}
 
 # ---------------------
 # Endpoints protegidos 
@@ -129,6 +132,59 @@ async def Consultar_Debitos(pagamento:PagamentoSchema.PagamentoSchema ,current_u
     except Exception as e:
         return {"erro": f"Erro ao inserir débito: {str(e)}"}
 
+@app.post("/AvisoNotaFiscal",tags=["Financeiro"])
+async def Aviso_NotaFiscal(aviso: NotaFiscalAvisoSchema.NotaFiscalAvisoSchema):
+    dal = Pagamento.PagamentoDAL()
+    print(aviso.cnpj_fornecedor)
+    fornecedor = dal.obter_fornecedor_por_cnpj(aviso.cnpj_fornecedor)
+    if not fornecedor:
+        raise HTTPException(status_code=404, detail="Fornecedor não encontrado para o CNPJ informado.")
+    empresa = dal.obter_empresa_por_cnpj(aviso.cnpj_empresa)
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada para o CNPJ informado.")
+
+    id_usuario_padrao = 1
+
+    try:
+        sucesso = dal.registrar_aviso_nf(
+            id_usuario=id_usuario_padrao,
+            fornecedor=fornecedor,
+            empresa=empresa,
+            valor=aviso.valor,
+            data_emissao=aviso.data_emissao,
+            data_vencimento=aviso.data_vencimento,
+            numero_nf=aviso.numero_nf,
+            serie_nf=aviso.serie_nf,
+            chave_nf=aviso.chave_nf,
+            observacao=aviso.observacao
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao registrar aviso de nota fiscal: {exc}")
+
+    if not sucesso:
+        raise HTTPException(status_code=500, detail="Não foi possível registrar o aviso de nota fiscal.")
+
+    email_enviado = False
+    try:
+        send_nf_notification(aviso, fornecedor, empresa)
+        email_enviado = True
+    except EmailDispatchError as exc:
+        print(f"Falha ao enviar e-mail de aviso de NF: {exc}")
+
+    return {
+        "mensagem": "Aviso de nota fiscal registrado com sucesso!",
+        "dados": {
+            "fornecedor": fornecedor.get("NM_FANTASIA"),
+            "empresa": empresa.get("NM_FANTASIA"),
+            "valor": float(aviso.valor),
+            "data_emissao": aviso.data_emissao.isoformat(),
+            "data_vencimento": aviso.data_vencimento.isoformat(),
+            "numero_nf": aviso.numero_nf,
+            "serie_nf": aviso.serie_nf,
+            "chave_nf": aviso.chave_nf,
+        },
+        "email_enviado": email_enviado
+    }
 @app.post("/BaixarDebito",tags=["Financeiro"])
 async def Baixar_Debitos(id_pagamento,id_usuario ,current_user: dict = Depends(get_current_user)):
     try:
@@ -138,6 +194,14 @@ async def Baixar_Debitos(id_pagamento,id_usuario ,current_user: dict = Depends(g
         return {"mensagem": "Débito baixado com sucesso!"}
     except Exception as e:
         return {"erro": f"Erro ao inserir débito: {str(e)}"}
+
+@app.delete("/ExcluirDebito/{id_pagamento}",tags=["Financeiro"])
+async def Excluir_Debito(id_pagamento: int, current_user: dict = Depends(get_current_user)):
+    dal = Pagamento.PagamentoDAL()
+    removido = dal.delete_pagamento(id_pagamento)
+    if not removido:
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado.")
+    return {"mensagem": "Pagamento excluído com sucesso!", "id_pagamento": id_pagamento}
 
 @app.get("/ListarDebitos",tags=["Financeiro"])
 async def Listar_Debitos(current_user: dict = Depends(get_current_user)):
@@ -565,3 +629,11 @@ def Alterar_Colaborador_Com_Cargo(
         return {"mensagem": "Colaborador e cargo atualizado com sucesso!"}
     else:
         raise HTTPException(status_code=400, detail="Erro ao inserir colaborador e cargo")    
+
+
+
+
+
+
+
+

@@ -1,0 +1,242 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gran Tempo | Plataforma Inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index-new.css">
+</head>
+<body>
+  <div class="decor decor-1"></div>
+  <div class="decor decor-2"></div>
+  <header class="hero">
+    <div class="navbar container">
+      <div class="brand">
+        <span class="brand-icon">GT</span>
+        <div class="brand-text">
+          <strong>Gran Tempo</strong>
+          <span>Gestão integrada</span>
+        </div>
+      </div>
+      <nav class="nav-actions">
+        <button id="btn-login" class="btn ghost">Entrar</button>
+        <button id="btn-cta" class="btn primary">Teste gratuito</button>
+      </nav>
+    </div>
+
+    <div class="hero-content container">
+      <div class="hero-text">
+        <span class="tag">Novo visual · Gestão integrada</span>
+        <h1>Controle financeiro e operacional no ritmo da sua equipe.</h1>
+        <p>Centralize cadastros de representantes, clientes, serviços e pagamentos. Acompanhe pendências, alertas e avisos em um painel simples, conectado ao mesmo fluxo que você usa no dia a dia.</p>
+        <div class="hero-actions">
+          <button class="btn primary" id="btn-cta-hero">Começar agora</button>
+          <button class="btn soft" id="btn-ver-demo">Ver funcionalidades</button>
+        </div>
+        <div class="stats">
+          <div class="stat-card">
+            <strong>5 módulos</strong>
+            <span>cadastros, financeiro, avisos e relatórios</span>
+          </div>
+          <div class="stat-card">
+            <strong>Visão única</strong>
+            <span>pendências, alertas e fluxos organizados</span>
+          </div>
+          <div class="stat-card">
+            <strong>Equipe segura</strong>
+            <span>acesso autenticado com token JWT</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-panel">
+        <div class="panel-header">
+          <span>Resumo do dia</span>
+          <span class="status">Sincronizado com o sistema</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-placeholder">
+            <div class="chart-bar bar-1"></div>
+            <div class="chart-bar bar-2"></div>
+            <div class="chart-bar bar-3"></div>
+            <div class="chart-line"></div>
+          </div>
+          <div class="panel-metrics">
+            <div>
+              <span>Pendências abertas</span>
+              <strong>Consultadas no Home</strong>
+            </div>
+            <div>
+              <span>Pagamentos recentes</span>
+              <strong>Registro em tempo real</strong>
+            </div>
+          </div>
+          <ul class="panel-list">
+            <li>
+              <span class="indicator success"></span>
+              Cadastros de representantes e clientes centralizados
+            </li>
+            <li>
+              <span class="indicator warning"></span>
+              Alertas de pagamentos em atraso destacados na Home
+            </li>
+            <li>
+              <span class="indicator info"></span>
+              Avisos de notas fiscais disponíveis no módulo dedicado
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="trusted-by container">
+      <span>Confiado pelo time interno para manter os dados sempre alinhados</span>
+      <div class="logo-strip">
+        <span>Financeiro</span>
+        <span>Representantes</span>
+        <span>Clientes</span>
+        <span>Serviços</span>
+        <span>Gestão</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section features" id="descobrir">
+      <div class="container">
+        <div class="section-heading">
+          <span class="tag">Experiência Gran Tempo</span>
+          <h2>Um ambiente único para o controle que você construiu.</h2>
+          <p>Todos os recursos foram pensados para espelhar a operação real: cadastros conectados, Home com indicadores claros e processos financeiros alinhados.</p>
+        </div>
+        <div class="cards-grid">
+          <article class="feature-card">
+            <div class="icon">📇</div>
+            <h3>Cadastros centralizados</h3>
+            <p>Cadastre representantes, clientes, fornecedores e serviços com campos padronizados e vínculos entre módulos.</p>
+          </article>
+          <article class="feature-card">
+            <div class="icon">📊</div>
+            <h3>Painéis objetivos</h3>
+            <p>Acompanhe pendências, alertas e avisos na Home com cartões e grids dinâmicas prontas para consulta.</p>
+          </article>
+          <article class="feature-card">
+            <div class="icon">🔐</div>
+            <h3>Autenticação segura</h3>
+            <p>Proteja o acesso com login, criptografia local e tokens JWT reaproveitados em todas as telas internas.</p>
+          </article>
+          <article class="feature-card">
+            <div class="icon">🛠️</div>
+            <h3>Fluxos operacionais</h3>
+            <p>Use o mesmo fluxo para registrar pagamentos, cargos de colaboradores e notas fiscais sem sair da plataforma.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section experience">
+      <div class="container experience-content">
+        <div class="bento primary">
+          <h3>Visualizações que facilitam a rotina</h3>
+          <p>Combine filtros, grids e cards para entender rapidamente o que precisa de atenção antes de abrir cada módulo.</p>
+          <ul>
+            <li>Filtros por representante, cliente, serviço e período</li>
+            <li>Atualização automática dos cards na Home</li>
+            <li>Histórico de alterações registrado pelos DALs</li>
+          </ul>
+        </div>
+        <div class="bento secondary">
+          <h3>Módulos falando a mesma língua</h3>
+          <p>O backend FastAPI e os schemas Pydantic garantem que cadastros de pagamentos e colaboradores estejam sincronizados.</p>
+        </div>
+        <div class="bento highlight">
+          <h3>Time alinhado</h3>
+          <p>O portal foi desenhado para que financeiro, representantes e gestão trabalhem com as mesmas informações.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section testimonials">
+      <div class="container testimonial-card">
+        <div class="quote">“Agora registramos representantes, clientes e pagamentos em um único fluxo. A Home mostra pendências do dia em segundos.”</div>
+        <div class="quote-author">
+          <span>Equipe Financeira Gran Tempo</span>
+          <small>Projeto interno de controle</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="section security">
+      <div class="container security-content">
+        <div>
+          <span class="tag">Segurança &amp; Compliance</span>
+          <h2>Login seguro e dados blindados desde o primeiro acesso.</h2>
+          <p>Autenticação robusta, criptografia nativa com CryptoJS e monitoramento dos tokens garantem que somente pessoas autorizadas acessem informações sensíveis.</p>
+        </div>
+        <ul class="security-list">
+          <li><span>✓</span> Tokens JWT renováveis e armazenamento protegido</li>
+          <li><span>✓</span> Logs auditáveis e rastreabilidade nas DALs</li>
+          <li><span>✓</span> Fluxo de login reaproveitado em todas as páginas</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section final-cta">
+      <div class="container final-cta-content">
+        <h2>Pronto para continuar evoluindo a plataforma?</h2>
+        <p>Aprimore cadastros, adicione novos relatórios e mantenha o time conectado no mesmo ambiente.</p>
+        <div class="final-buttons">
+          <button class="btn primary" id="btn-cta-final">Criar minha conta</button>
+          <button class="btn ghost" id="btn-fale-conosco">Falar com especialista</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <div>
+        <strong>Gran Tempo</strong>
+        <span>© 2025. Plataforma interna de gestão financeira.</span>
+      </div>
+      <div class="footer-links">
+        <a href="#descobrir">Recursos</a>
+        <a href="#">Termos</a>
+        <a href="#">Privacidade</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="modal" id="login-modal">
+    <div class="modal-content">
+      <button class="close" id="close-login" aria-label="Fechar">×</button>
+      <div class="modal-header">
+        <h2>Bem-vindo de volta</h2>
+        <p>Acesse com seu usuário para continuar.</p>
+      </div>
+      <form id="form-login" class="modal-form">
+        <div class="form-group">
+          <label for="email-login">Usuário</label>
+          <input type="text" id="email-login" name="email" placeholder="Digite seu usuário" required>
+        </div>
+        <div class="form-group">
+          <label for="senha-login">Senha</label>
+          <input type="password" id="senha-login" name="senha" placeholder="Digite sua senha" required>
+        </div>
+        <button type="submit" class="btn primary">Entrar</button>
+      </form>
+      <div class="modal-footer">
+        <span>Esqueceu a senha? <a href="#">Recuperar acesso</a></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="../config.js"></script>
+<script src="../auth.js"></script>
+  <script src="index-new.js"></script>
+</body>
+</html>

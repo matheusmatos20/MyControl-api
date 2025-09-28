@@ -14,8 +14,8 @@
   <div id="content" class="content">
     <main class="container">
       <div class="header">
-        <h1>Gran Tempo</h1>
-        <p>Bem-vindo, usuário</p>
+        <h1 id="empresaNome">Gran Tempo</h1>
+        <p id="boasVindas">Bem-vindo, usuário</p>
       </div>
 
       <div class="cards">
@@ -29,10 +29,10 @@
           <p>3 alertas recentes</p>
         </div>
 
-        <div class="card financeiro" id="cardFinanceiro">
+        <!-- <div class="card financeiro" id="cardFinanceiro">
           <h3>Financeiro</h3>
           <p>R$ 15.000,00 em caixa</p>
-        </div>
+        </div> -->
       </div>
 
       <!-- 🔹 Área dinâmica onde a grid será carregada -->
@@ -42,7 +42,8 @@
 
   <!-- 🔹 Bibliotecas e scripts (ordem importa) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-  <script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
+    <script src="../config.js"></script>
+<script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
   <script src="home.js"></script>    <!-- Scripts específicos da Home -->
   <script src="../Menu/Menu.js"></script>
 

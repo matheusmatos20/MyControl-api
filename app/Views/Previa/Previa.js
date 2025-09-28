@@ -1,5 +1,5 @@
-(() => {
-  const API_BASE = "http://127.0.0.1:8000"; // ajuste se necessário
+﻿(() => {
+  const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
   let tokenGlobal = null;
   let selectedPagamentoId = null;
   let selectedCreditoId = null;
@@ -294,3 +294,4 @@
   window.addEventListener('DOMContentLoaded', init);
 
 })();
+

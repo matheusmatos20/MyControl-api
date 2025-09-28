@@ -1,8 +1,13 @@
-// -------------------------
+﻿// -------------------------
 // Variáveis globais
 // -------------------------
 let tokenGlobal = null;
 let servicoSelecionado = null; // Guarda o serviço selecionado para edição
+
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const AUTH_BASE = window.AUTH_BASE_URL || API_BASE;
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+const buildAuthUrl = window.buildAuthUrl || (path => `${AUTH_BASE}${path.startsWith('/') ? path : `/${path}`}`);
 
 // -------------------------
 // Função para obter o token
@@ -46,7 +51,7 @@ async function carregarServicos() {
     }
     tokenGlobal =localStorage.getItem("token");
 
-    const url = 'http://127.0.0.1:8000/Servicos';
+    const url = buildApiUrl('/Servicos');
 
     try {
         const response = await fetch(url, {
@@ -135,8 +140,8 @@ async function salvarServico(event) {
     tokenGlobal =localStorage.getItem("token");
 
     const url = servicoSelecionado
-        ? 'http://127.0.0.1:8000/AlterarServico/'
-        : 'http://127.0.0.1:8000/InserirServico/';
+        ? `${API_BASE}/AlterarServico/`
+        : `${API_BASE}/InserirServico/`;
 
     const payload = servicoSelecionado
         ? { id_servico: servicoSelecionado.ID, ds_servico: dsServico, vl_servico: valor, fl_recorrente: recorrente }
@@ -170,7 +175,7 @@ async function salvarServico(event) {
 
 async function AlterarServico(servico) {
   try {
-    const response = await fetch("http://127.0.0.1:8000/AlterarServico", {
+    const response = await fetch(buildApiUrl('/AlterarServico'), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -201,3 +206,4 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formServico').addEventListener('submit', salvarServico);
     document.getElementById('btnNovo').addEventListener('click', limparFormulario);
 });
+

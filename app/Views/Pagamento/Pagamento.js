@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
   const chkPago = document.getElementById('chkPago');
   const groupDtPagamento = document.getElementById('groupDtPagamento');
   const txtValor = document.getElementById('txtValor');
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cmbFormaPagamento = document.getElementById('cmbFormaPagamento');
   const tabelaBody = document.querySelector("#dgvPagamentos tbody");
 
-  const API_BASE = 'http://127.0.0.1:8000'; // 🔹 backend real (FastAPI)
+  const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 
   let token = null;
 
@@ -116,11 +116,22 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener("click", async () => {
           const id = btn.dataset.id;
           if (confirm("Deseja realmente excluir este pagamento?")) {
-            await fetch(`${API_BASE}/ExcluirDebito/${id}`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            carregarGrid();
+            try {
+              const resp = await fetch(`${API_BASE}/ExcluirDebito/${id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.detail || "Erro ao excluir pagamento");
+              }
+
+              alert("Pagamento excluído com sucesso!");
+              await carregarGrid();
+            } catch (error) {
+              alert("Erro ao excluir: " + error.message);
+            }
           }
         });
       });
@@ -207,3 +218,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 });
+

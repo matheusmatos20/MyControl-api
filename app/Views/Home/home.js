@@ -5,6 +5,25 @@ console.log("Dashboard carregado com sucesso!");
 // -------------------------
 let tokenGlobal = localStorage.getItem("token");
 
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
+function atualizarCabecalho() {
+    const tituloEmpresa = document.getElementById("empresaNome");
+    const saudacao = document.getElementById("boasVindas");
+    const nomeEmpresa = localStorage.getItem("empresa");
+    const nomeUsuario = localStorage.getItem("usuario") || localStorage.getItem("username");
+
+    if (tituloEmpresa && nomeEmpresa) {
+        tituloEmpresa.textContent = nomeEmpresa;
+    }
+
+    if (saudacao) {
+        saudacao.textContent = nomeUsuario ? `Bem-vindo, ${nomeUsuario}` : "Bem-vindo, usuário";
+    }
+}
+
+
 // -------------------------
 // Função para obter o token
 // -------------------------
@@ -54,7 +73,7 @@ async function carregarPendenciasAPI() {
     }
     const tokenGlobal =localStorage.getItem("token");
     
-    const url = 'http://127.0.0.1:8000/ListarDebitosEmAberto';
+    const url = buildApiUrl('/ListarDebitosEmAberto');
 
     try {
         const response = await fetch(url, {
@@ -187,5 +206,8 @@ document.getElementById("cardAlertas").addEventListener("click", async () => {
 // Ao carregar a home já atualiza os cards
 // -------------------------
 window.addEventListener("DOMContentLoaded", async () => {
+    await validarToken();
+    atualizarCabecalho();
     await carregarPendenciasAPI(); // já puxa os números reais
 });
+

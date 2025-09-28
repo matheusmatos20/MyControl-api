@@ -1,4 +1,4 @@
-const api_base = "http://127.0.0.1:8000";
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 
 let colaboradores = [];
 let cargosColaborador = [];
@@ -36,7 +36,7 @@ async function validarToken() {
 async function carregarCargos() {
   const token = localStorage.getItem("token");
   try {
-    const resp = await fetch(`${api_base}/Cargos`, {
+    const resp = await fetch(`${API_BASE}/Cargos`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     if (!resp.ok) throw new Error(`Status ${resp.status}`);
@@ -58,7 +58,7 @@ async function carregarCargos() {
 async function carregarColaboradores() {
   const token = localStorage.getItem("token");
   try {
-    const resp = await fetch(`${api_base}/Colaboradores`, {
+    const resp = await fetch(`${API_BASE}/Colaboradores`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     if (!resp.ok) throw new Error(`Status ${resp.status}`);
@@ -222,7 +222,7 @@ async function salvarColaboradorCargo() {
 
   try {
     // Decide endpoint + method conforme idFuncionario e mudança de cargo
-    let url = `${api_base}/InserirColaboradorComCargo/`;
+    let url = `${API_BASE}/InserirColaboradorComCargo/`;
     let method = "POST";
 
     if (idFuncionario && String(idFuncionario).trim() !== "") {
@@ -242,20 +242,20 @@ async function salvarColaboradorCargo() {
         }
 
         // se mudar de cargo → chama endpoint específico
-        url = `${api_base}/InserirColaboradorCargo/`;
+        url = `${API_BASE}/InserirColaboradorCargo/`;
           method = "POST";
         json = JSON.stringify(colaborador_cargo );
         // opcionalmente envie o cargo anterior junto ao payload para auditoria
         colaborador_cargo.cargo_anterior_id = cargoAtual;
       } else {
         // alteração normal sem troca de cargo
-        url = `${api_base}/AlterarColaboradorComCargo/`;
+        url = `${API_BASE}/AlterarColaboradorComCargo/`;
         method = "POST";
         json = JSON.stringify({ colaborador, colaborador_cargo });
       }
     } else {
       // INSERT
-      url = `${api_base}/InserirColaboradorComCargo/`;
+      url = `${API_BASE}/InserirColaboradorComCargo/`;
       method = "POST";
       json = JSON.stringify({ colaborador, colaborador_cargo });
     }
@@ -324,7 +324,7 @@ async function abrirHistorico(idColaborador) {
   tbody.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
 
   try {
-    const resp = await fetch(`${api_base}/CargosColaborador?id_funcionario=${idColaborador}`, {
+    const resp = await fetch(`${API_BASE}/CargosColaborador?id_funcionario=${idColaborador}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     if (!resp.ok) throw new Error(`Status ${resp.status}`);

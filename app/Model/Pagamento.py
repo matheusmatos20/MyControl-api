@@ -1,17 +1,24 @@
 import pyodbc
 import pandas as pd
+import re
 from datetime import datetime
+from decimal import Decimal
 from Model import Conn_DB
 from Schemas import Pagamento as pagamento
 class PagamentoDAL:
 
     def __init__(self):
         self.conexao = Conn_DB.Conn()
-        
 
     def _connect(self):
         return pyodbc.connect(self.conexao.str_conn)
-    
+
+    @staticmethod
+    def _normalize_cnpj(cnpj: str) -> str:
+        if not cnpj:
+            return ''
+        return re.sub(r'\D', '', cnpj)
+
     def listar_debitos(self):
         print("Listar Débitos")
 
@@ -82,21 +89,119 @@ class PagamentoDAL:
             return False
 
     def delete_pagamento(self, idpagamento: int):
-        
-        query = f"""
+        query = """
            DELETE FROM TB_PAGAMENTOS 
-           WHERE ID_PAGAMENTO = {idpagamento}
+           WHERE ID_PAGAMENTO = ?
         """
 
-        print(query)
         try:
             with self._connect() as conn:
                 cursor = conn.cursor()
-                cursor.execute(query)
+                cursor.execute(query, (idpagamento,))
+                if cursor.rowcount == 0:
+                    return False
                 conn.commit()
                 return True
-        except Exception:
+        except Exception as e:
+            print('Erro em delete_pagamento:', e)
             return False
+
+    def obter_fornecedor_por_cnpj(self, cnpj: str):
+        normalized = self._normalize_cnpj(cnpj)
+        if not normalized:
+            return None
+        query = """
+            SELECT ID_FORNECEDOR, NM_FANTASIA,
+                   REPLACE(REPLACE(REPLACE(CD_CNPJ_CPF,'.',''),'/',''),'-','') AS CNPJ
+            FROM TB_FORNECEDORES WITH(NOLOCK)
+            WHERE REPLACE(REPLACE(REPLACE(CD_CNPJ_CPF,'.',''),'/',''),'-','') = ?
+        """
+        debug_query = query.replace("?", f"'{normalized}'")
+        print("DEBUG SQL:", debug_query)
+    
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, (normalized,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            columns = [col[0] for col in cursor.description]
+            return dict(zip(columns, row))
+
+    def obter_empresa_por_cnpj(self, cnpj: str):
+        normalized = self._normalize_cnpj(cnpj)
+        if not normalized:
+            return None
+        queries = [
+            """
+            SELECT ID_EMPRESA, NM_FANTASIA,
+                   REPLACE(REPLACE(REPLACE(NR_CNPJ,'.',''),'/',''),'-','') AS CNPJ
+            FROM TB_EMPRESA WITH(NOLOCK)
+            WHERE REPLACE(REPLACE(REPLACE(NR_CNPJ,'.',''),'/',''),'-','') = ?
+            """,
+            """
+            SELECT ID_EMPRESA, NM_FANTASIA,
+                   REPLACE(REPLACE(REPLACE(NR_CNPJ,'.',''),'/',''),'-','') AS CNPJ
+            FROM TB_EMPRESA WITH(NOLOCK)
+            WHERE REPLACE(REPLACE(REPLACE(NR_CNPJ,'.',''),'/',''),'-','') = ?
+            """
+        ]
+        
+    
+        for query in queries:
+            try:
+                with self._connect() as conn:
+                    cursor = conn.cursor()
+                    debug_query = query.replace("?", f"'{normalized}'")
+                    print("DEBUG SQL:", debug_query)
+    
+                    cursor.execute(query, (normalized,))
+                    row = cursor.fetchone()
+                    if row:
+                        columns = [col[0] for col in cursor.description]
+                        return dict(zip(columns, row))
+            except pyodbc.ProgrammingError:
+                continue
+        return None
+
+    def registrar_aviso_nf(self, *, id_usuario: int, fornecedor: dict, empresa: dict, valor: Decimal, data_emissao, data_vencimento, numero_nf: str, serie_nf: str, chave_nf: str | None = None, observacao: str | None = None):
+        descricao_base = f"NF {numero_nf}/{serie_nf} - fornecedor {fornecedor.get('NM_FANTASIA') or fornecedor.get('CNPJ')}"
+        descricao_base += f" | Emissão: {data_emissao.strftime('%d/%m/%Y')}"
+        if observacao:
+            descricao_base += f" - {observacao}"
+        if empresa.get('NM_FANTASIA'):
+            descricao_base += f" | Empresa: {empresa['NM_FANTASIA']}"
+        if chave_nf:
+            descricao_base += f" | Chave: {chave_nf}"
+
+        query = """
+            INSERT INTO TB_PAGAMENTOS (
+                ID_USUARIO,
+                DT_PAGAMENTO,
+                DT_VENCIMENTO,
+                DS_PAGAMENTO,
+                ID_FORNECEDOR,
+                VL_PAGAMENTO,
+                ID_FORMA_PAGAMENTO
+            )
+            VALUES (?, NULL, ?, ?, ?, ?, ?)
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            print(id_usuario, data_vencimento.isoformat(), descricao_base, fornecedor['ID_FORNECEDOR'], float(valor), 1)
+            cursor.execute(
+                query,
+                (
+                    5,
+                    data_vencimento.isoformat(),
+                    descricao_base,
+                    fornecedor['ID_FORNECEDOR'],
+                    float(valor),
+                    1
+                )
+            )
+            conn.commit()
+            return True
 
     def inserir_pagamento(self, pagamento):
         
@@ -229,3 +334,13 @@ class PagamentoDAL:
                 JOIN ULTIMO_CARGO UC ON UC.ID_FUNCIONARIO = F.ID_FUNCIONARIO
                 JOIN TB_CARGOS_FUNCIONARIOS CF ON CF.ID_CARGO_FUNCIONARIO = UC.ID_CARGO_FUNCIONARIO
             """
+
+
+
+
+
+
+
+
+
+

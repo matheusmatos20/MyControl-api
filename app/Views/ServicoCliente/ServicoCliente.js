@@ -1,6 +1,11 @@
 // ServicoCliente.js
 let tokenGlobal = null;
 
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const AUTH_BASE = window.AUTH_BASE_URL || API_BASE;
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+const buildAuthUrl = window.buildAuthUrl || (path => `${AUTH_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
 // -----------------------------
 // Helpers
 // -----------------------------
@@ -20,7 +25,7 @@ function hojeISO() {
 
 async function obterToken() {
   // ajusta conforme seu endpoint de auth
-  const url = "http://127.0.0.1:8000/token";
+  const url = buildAuthUrl('/token');
   const formData = new URLSearchParams();
   formData.append("username", "usuario");
   formData.append("password", "1234");
@@ -55,7 +60,7 @@ async function carregarCombos() {
     tokenGlobal =localStorage.getItem("token");
   try {
     // Clientes
-    const respClientes = await fetch("http://127.0.0.1:8000/Clientes", {
+    const respClientes = await fetch(buildApiUrl('/Clientes'), {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
     if (!respClientes.ok) throw new Error("Erro ao buscar clientes");
@@ -74,7 +79,7 @@ async function carregarCombos() {
     });
 
     // Serviços
-    const respServ = await fetch("http://127.0.0.1:8000/Servicos", {
+    const respServ = await fetch(buildApiUrl('/Servicos'), {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
     if (!respServ.ok) throw new Error("Erro ao buscar serviços");
@@ -118,7 +123,7 @@ async function carregarGrid() {
     }
     tokenGlobal =localStorage.getItem("token");
   try {
-    const resp = await fetch("http://127.0.0.1:8000/ServicosCliente", {
+    const resp = await fetch(buildApiUrl('/ServicosCliente'), {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
     if (!resp.ok) throw new Error("Erro ao buscar serviços contratados");
@@ -208,7 +213,7 @@ async function salvarServico() {
   };
 
   try {
-    const resp = await fetch("http://127.0.0.1:8000/InserirServicoCliente", {
+    const resp = await fetch(buildApiUrl('/InserirServicoCliente'), {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${tokenGlobal}`,

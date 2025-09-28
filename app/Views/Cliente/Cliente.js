@@ -1,6 +1,9 @@
 let editando = null;
 let tokenGlobal = null;
 
+const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
+const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
 // -----------------------------
 // Funções auxiliares
 // -----------------------------
@@ -33,7 +36,7 @@ async function carregarRepresentantes() {
   const tokenGlobal = localStorage.getItem("token");
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/RepresentantesComboBox", {
+    const response = await fetch(buildApiUrl('/RepresentantesComboBox'), {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
     if (!response.ok) throw new Error("Erro ao carregar representantes");
@@ -64,7 +67,7 @@ async function carregarClientes() {
   const tokenGlobal = localStorage.getItem("token");
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/Clientes", {
+    const response = await fetch(buildApiUrl('/Clientes'), {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
     if (!response.ok) throw new Error("Erro ao carregar clientes");
@@ -185,8 +188,8 @@ async function salvarCliente(e) {
   }
 
   const url = editando
-    ? "http://127.0.0.1:8000/AlterarCliente"
-    : "http://127.0.0.1:8000/InserirCliente";
+    ? buildApiUrl('/AlterarCliente')
+    : buildApiUrl('/InserirCliente');
 
   try {
     const response = await fetch(url, {

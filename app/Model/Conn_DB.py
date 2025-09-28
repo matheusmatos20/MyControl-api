@@ -23,8 +23,9 @@ class Conn:
         
     def get_usuario(self, username):
         query = f"""
-        SELECT ID_USUARIO, NM_LOGIN, DS_SENHA
-        FROM TB_USUARIOS WITH(NOLOCK)
+        SELECT U.ID_USUARIO, U.NM_LOGIN, U.DS_SENHA,E.NM_FANTASIA AS EMPRESA
+        FROM TB_USUARIOS U WITH(NOLOCK) 
+        INNER JOIN TB_EMPRESA E WITH(NOLOCK)ON E.ID_EMPRESA = U.ID_EMPRESA
         WHERE NM_LOGIN = '{username}'
         """
         print(query)
