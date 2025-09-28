@@ -55,7 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: params.toString(),
+        // body: params.toString(),
+        body: new URLSearchParams({
+          username: email,
+          password: senha
+        })
+
       });
 
       // Recebe JSON do backend
