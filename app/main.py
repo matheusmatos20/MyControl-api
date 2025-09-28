@@ -54,8 +54,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 #     return {"username": user["NM_LOGIN"]}
 
 def authenticate_user(username: str, password: str):
-    conn = Conn.Conn()
-    user = conn.get_usuario(username)
+    try:
+        conn = Conn.Conn()
+        user = conn.get_usuario(username)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
     if not user:
         return False
 
@@ -639,6 +643,7 @@ def Alterar_Colaborador_Com_Cargo(
         return {"mensagem": "Colaborador e cargo atualizado com sucesso!"}
     else:
         raise HTTPException(status_code=400, detail="Erro ao inserir colaborador e cargo")    
+
 
 
 
