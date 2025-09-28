@@ -1,10 +1,25 @@
-// auth.js
+﻿// auth.js
 
 const SECRET_KEY = "minha_chave_secreta_local"; // 🔒 troque por algo forte e único
 
 const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8000';
 const resolvedAuthBase = (window.AUTH_BASE_URL || window.API_BASE_URL || DEFAULT_AUTH_BASE).replace(/\/$/, '');
 const TOKEN_ENDPOINT = window.buildAuthUrl ? window.buildAuthUrl('/token') : `${resolvedAuthBase}/token`;
+const LOGIN_PAGE = (() => {
+  const configured = window.LOGIN_PAGE;
+  if (configured) {
+    try {
+      return new URL(configured, window.location.href).href;
+    } catch (error) {
+      console.warn("⚠ Não foi possível resolver LOGIN_PAGE configurado, usando padrão.", error);
+    }
+  }
+  try {
+    return new URL('../Index/index.html', window.location.href).href;
+  } catch (error) {
+    return '../Index/index.html';
+  }
+})();
 
 // Criptografar string
 function encrypt(text) {
@@ -124,7 +139,7 @@ async function validarToken() {
 
     localStorage.clear();
 
-    window.location.href = "index.html";
+    window.location.href = LOGIN_PAGE;
 
     return false;
 
@@ -140,7 +155,7 @@ async function validarToken() {
 
     localStorage.clear();
 
-    window.location.href = "index.html";
+    window.location.href = LOGIN_PAGE;
 
     return false;
 
@@ -156,7 +171,7 @@ async function validarToken() {
 
     localStorage.clear();
 
-    window.location.href = "index.html";
+    window.location.href = LOGIN_PAGE;
 
     return false;
 
@@ -176,7 +191,7 @@ async function validarToken() {
 
     localStorage.clear();
 
-    window.location.href = "index.html";
+    window.location.href = LOGIN_PAGE;
 
     return false;
 
@@ -194,7 +209,7 @@ async function validarToken() {
 
       localStorage.clear();
 
-      window.location.href = "index.html";
+      window.location.href = LOGIN_PAGE;
 
       return false;
 
@@ -223,3 +238,4 @@ async function validarToken() {
 //   }
 // });
 // document.addEventListener("DOMContentLoaded", validarToken);
+

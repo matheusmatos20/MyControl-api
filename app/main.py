@@ -16,7 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 # Configurações CORS
-origins = ["*"]
+origins = [
+    "http://localhost:5501",
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -32,7 +34,7 @@ async def keepalive():
     return "API operacional"
 
 # Configurações JWT
-SECRET_KEY = "sua_chave_secreta_segura"
+SECRET_KEY = "e7dff6e4a8c2b1f1a3b5e07b469dcd748ac4f3deab9b89c0c1a7f6db2a43f27c"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

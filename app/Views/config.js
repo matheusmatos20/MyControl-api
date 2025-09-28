@@ -1,6 +1,7 @@
 ﻿(function (global) {
   const defaults = {
-    API_BASE_URL: 'http://127.0.0.1:8080',
+    // API_BASE_URL: 'http://127.0.0.1:8080',
+    API_BASE_URL: 'https://mycontrol-api-resz.onrender.com/',
     AUTH_BASE_URL: null,
   };
 
