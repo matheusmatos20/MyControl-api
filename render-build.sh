@@ -22,6 +22,6 @@ apt-get clean
 rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
-python -m pip install --upgrade pip
-pip install --no-cache-dir -r app/requirements.txt
-pip install --no-cache-dir -e .
+python3 -m pip install --upgrade pip
+python3 -m pip install --no-cache-dir -r app/requirements.txt
+python3 -m pip install --no-cache-dir -e .
