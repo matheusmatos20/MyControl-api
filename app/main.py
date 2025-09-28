@@ -24,6 +24,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/keepalive")
+async def keepalive():
+    """Simple endpoint used for uptime checks."""
+    return "API operacional"
+
 # Configurações JWT
 SECRET_KEY = "sua_chave_secreta_segura"
 ALGORITHM = "HS256"
