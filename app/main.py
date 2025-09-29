@@ -19,6 +19,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5501",
     "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com"
+
 ]
 app.add_middleware(
     CORSMiddleware,
