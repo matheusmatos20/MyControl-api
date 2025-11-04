@@ -1,6 +1,6 @@
 ﻿// auth.js
 
-const SECRET_KEY = "minha_chave_secreta_local"; // 🔒 troque por algo forte e único
+const SECRET_KEY = "MC_4e1b96d3d6d14b0e8a2c9f7b5a3c1d0f-7E!q@Z#t$K%p^X&n*L(2)r+V=G?y";
 
 const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8000';
 const resolvedAuthBase = (window.AUTH_BASE_URL || window.API_BASE_URL || DEFAULT_AUTH_BASE).replace(/\/$/, '');
@@ -8,19 +8,25 @@ const TOKEN_ENDPOINT = window.buildAuthUrl ? window.buildAuthUrl('/token') : `${
 const LOGIN_PAGE = (() => {
   const configured = window.LOGIN_PAGE;
   if (configured) {
-    try {
-      return new URL(configured, window.location.href).href;
-    } catch (error) {
-      console.warn("⚠ Não foi possível resolver LOGIN_PAGE configurado, usando padrão.", error);
-
-
+    try { return new URL(configured, window.location.href).href; } catch {}
+  }
+  const path = (window.location.pathname || '').replace(/\\/g, '/');
+  const origin = window.location.origin || '';
+  const lower = path.toLowerCase();
+  // Prefer sempre Index como página de entrada
+  let target = null;
+  const idxApp = lower.lastIndexOf('/app/');
+  if (idxApp !== -1) {
+    target = origin + path.slice(0, idxApp + 5) + 'Views/Index/index.html';
+  } else {
+    const idxViews = lower.lastIndexOf('/views');
+    if (idxViews !== -1) {
+      target = origin + path.slice(0, idxViews + 7) + 'Index/index.html';
     }
   }
-  try {
-    return new URL('../Index/index.html', window.location.href).href;
-  } catch (error) {
-    return '../Index/index.html';
-  }
+  if (target) return target;
+  // Fallbacks relativos
+  return '../Views/Index/index.html';
 })();
 
 let redirectingToLogin = false;
@@ -39,7 +45,11 @@ function logoutAndRedirect(reason) {
     console.error('Erro ao limpar storage durante logout:', error);
   }
   if (window.location.href !== LOGIN_PAGE) {
-    window.location.href = LOGIN_PAGE;
+    // Evita manter a página protegida no histórico
+    try { window.location.replace(LOGIN_PAGE); }
+    catch { window.location.href = LOGIN_PAGE; }
+    // Último recurso em caso de bloqueio pelo navegador
+    setTimeout(() => { if (window.location.href !== LOGIN_PAGE) window.location.href = LOGIN_PAGE; }, 100);
   }
 }
 
@@ -233,15 +243,26 @@ async function validarToken() {
 
 
 
-// document.addEventListener("DOMContentLoaded", () => {
-//   const path = window.location.pathname;
-//   const filename = path.substring(path.lastIndexOf("/") + 1);
+// Validação automática em todas as telas, exceto a própria Index
+function isIndexPage() {
+  const path = (window.location.pathname || '').replace(/\\/g, '/').toLowerCase();
+  // Qualquer arquivo dentro de /views/index/ é considerado página pública (login/landing)
+  return path.includes('/views/index/');
+}
 
-//   if (filename !== "index.html") {
-//     validarToken();
-//   }
-// });
-// document.addEventListener("DOMContentLoaded", validarToken);
+function scheduleValidate() {
+  if (isIndexPage()) return; // não valida na index
+  const run = () => { try { validarToken(); } catch (e) { console.warn('Falha ao validar token:', e); } };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else {
+    // já carregado: valida imediatamente
+    run();
+  }
+}
+
+// Executa em todas as páginas que carregarem auth.js
+try { scheduleValidate(); } catch {}
 
 
 function hasBearerAuthorization(input, init) {

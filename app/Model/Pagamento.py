@@ -23,7 +23,7 @@ class PagamentoDAL:
         return re.sub(r'\D', '', cnpj)
 
     def listar_debitos(self):
-        print("Listar D?bitos")
+        print("Listar Débitos")
 
         query = """select 
                             P.ID_PAGAMENTO as ID
@@ -47,7 +47,7 @@ class PagamentoDAL:
             return pd.read_sql(query, conn)
         
     def listar_debitos_em_aberto(self):
-        print("Listar D?bitos")
+        print("Listar Débitos")
 
         query = """select 
                     	P.ID_PAGAMENTO as ID
@@ -169,7 +169,7 @@ class PagamentoDAL:
 
     def registrar_aviso_nf(self, *, id_usuario: int, fornecedor: dict, empresa: dict, valor: Decimal, data_emissao, data_vencimento, numero_nf: str, serie_nf: str, chave_nf: str | None = None, observacao: str | None = None):
         descricao_base = f"NF {numero_nf}/{serie_nf} - fornecedor {fornecedor.get('NM_FANTASIA') or fornecedor.get('CNPJ')}"
-        descricao_base += f" | Emiss?o: {data_emissao.strftime('%d/%m/%Y')}"
+        descricao_base += f" | Emissão: {data_emissao.strftime('%d/%m/%Y')}"
         if observacao:
             descricao_base += f" - {observacao}"
         if empresa.get('NM_FANTASIA'):
@@ -318,7 +318,7 @@ class PagamentoDAL:
             SELECT
                 ?, F.ID_FUNCIONARIO, NULL,
                 CONVERT(DATE, CONCAT(CONVERT(VARCHAR(6), DATEADD(MONTH, 1, GETDATE()), 112), '05'), 103),
-                CONCAT('Vale Alimenta??o Colaborador: ', F.NM_FUNCIONARIO),
+                CONCAT('Vale Alimentação Colaborador: ', F.NM_FUNCIONARIO),
                 1, VL_ALIMENTACAO, 3,
                 CONVERT(VARCHAR(6), GETDATE(), 112)
             FROM TB_FUNCIONARIOS F
@@ -330,7 +330,7 @@ class PagamentoDAL:
                 SELECT
                     ?, F.ID_FUNCIONARIO, NULL,
                     CONVERT(DATE, CONCAT(CONVERT(VARCHAR(6), DATEADD(MONTH, 1, GETDATE()), 112), '05'), 103),
-                    CONCAT('RESERVA - Parcela 13? Colaborador: ', F.NM_FUNCIONARIO),
+                    CONCAT('RESERVA - Parcela 13º Colaborador: ', F.NM_FUNCIONARIO),
                     1, CONVERT(NUMERIC(19,2), (CF.VL_SALARIO / 12)), 3,
                     CONVERT(VARCHAR(6), GETDATE(), 112)
                 FROM TB_FUNCIONARIOS F
@@ -350,7 +350,7 @@ class PagamentoDAL:
     @staticmethod
     def _parse_date(value):
         if value is None:
-            raise ValueError('Data da primeira parcela ? obrigat?ria.')
+            raise ValueError('Data da primeira parcela é obrigatória.')
         if isinstance(value, datetime):
             return value.date()
         text = str(value).strip()
@@ -362,7 +362,7 @@ class PagamentoDAL:
         try:
             return datetime.fromisoformat(text[:10]).date()
         except ValueError as exc:
-            raise ValueError(f"Formato de data inv?lido: {value}") from exc
+            raise ValueError(f"Formato de data inválido: {value}") from exc
 
     @staticmethod
     def _add_months(base_date, months):
@@ -375,11 +375,11 @@ class PagamentoDAL:
 
     def criar_parcelamento(self, parcelamento: parcelamento_schema.ParcelamentoCreateSchema):
         if parcelamento.numero_parcelas <= 0:
-            raise ValueError("N?mero de parcelas deve ser maior que zero.")
+            raise ValueError("Número de parcelas deve ser maior que zero.")
 
         primeira_data = self._parse_date(parcelamento.data_primeira_parcela)
         if primeira_data is None:
-            raise ValueError("Data da primeira parcela inv?lida.")
+            raise ValueError("Data da primeira parcela inválida.")
 
         valor_total = Decimal(str(parcelamento.valor_total))
         juros_percentual = Decimal(str(parcelamento.juros_percentual or 0))
@@ -389,7 +389,7 @@ class PagamentoDAL:
 
         descricao = parcelamento.descricao.strip()
         if not descricao:
-            raise ValueError('Descri??o do parcelamento ? obrigat?ria.')
+            raise ValueError('Descrição do parcelamento é obrigatória.')
 
         inseridos = 0
         with self._connect() as conn:

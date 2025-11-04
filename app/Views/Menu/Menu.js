@@ -25,3 +25,15 @@ function alternarMenu() {
   menu.classList.toggle('minimizado');
   content.classList.toggle('recolhido'); // 🔹 ajusta o espaço
 }
+
+// Logout: limpa storage e volta para a Index
+const logoutLink = document.getElementById('menuLogout');
+if (logoutLink) {
+  logoutLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    try { localStorage.clear(); sessionStorage && sessionStorage.clear && sessionStorage.clear(); } catch {}
+    // Redireciona para a página de login (Index)
+    const target = '../Index/index.html';
+    try { window.location.replace(target); } catch { window.location.href = target; }
+  });
+}

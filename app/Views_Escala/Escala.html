@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escala de Serviço</title>
+  <link rel="stylesheet" href="Escala.css" />
+  <link rel="stylesheet" href="../Views/Menu/Menu.css" />
+</head>
+<body>
+  <div id="menuContainer"></div>
+  <div id="content" class="content">
+    <main class="container">
+      <h1>Escala de Serviço</h1>
+
+      <section class="toolbar">
+        <div class="toolbar-row top">
+          <div class="actions-left">
+            <button type="button" id="btnCadastroCarga" class="btn">Cadastrar Carga Horária</button>
+            <button type="button" id="btnCadastroPosto" class="btn">Cadastrar Posto</button>
+            <button type="button" class="btn" id="btnFolgasTop">Folgas</button>
+          </div>
+          <div class="actions-cta">
+            <button type="button" id="btnGerar" class="btn primary">Gerar Escala Automática</button>
+            <button type="button" id="btnExport" class="btn btn-icon" title="Exportar CSV" aria-label="Exportar CSV">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 20h14a1 1 0 0 0 1-1v-3h-2v2H6v-2H4v3a1 1 0 0 0 1 1z"/>
+                <path d="M12 3a1 1 0 0 1 1 1v9.586l2.293-2.293 1.414 1.414L12 17.414l-4.707-4.707 1.414-1.414L11 13.586V4a1 1 0 0 1 1-1z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="toolbar-row filters">
+          <div class="filter-group">
+            <label for="dtInicio">Período:</label>
+            <input type="date" id="dtInicio" />
+            <span class="sep">a</span>
+            <input type="date" id="dtFim" />
+          </div>
+          <select id="selPostoFiltro"></select>
+          <select id="selCargoFiltro"></select>
+        </div>
+      </section>
+
+      <section class="grid-section">
+        <div id="gridContainer" class="grid-container">
+          <!-- Grid renderizada via JS -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Carga Horária -->
+  <div class="modal" id="modalCarga" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Cadastro de Carga Horária</h2>
+        <button class="close" data-close="modalCarga">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="dsCarga">Descrição</label>
+          <input type="text" id="dsCarga" placeholder="Ex: 12x36, Administrativo, 6h/dia" />
+        </div>
+        <div class="form-group">
+          <label for="qtHoras">Horas Semanais (opcional)</label>
+          <input type="number" id="qtHoras" min="0" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn" id="btnSalvarCarga">Salvar</button>
+          <button class="btn" data-close="modalCarga">Cancelar</button>
+        </div>
+        <div class="listagem">
+          <h3>Listagem</h3>
+          <table id="tblCarga">
+            <thead><tr><th>ID</th><th>Descrição</th><th>Horas Semanais</th><th>Ações</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Posto -->
+  <div class="modal" id="modalPosto" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Cadastro de Posto</h2>
+        <button class="close" data-close="modalPosto">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nmPosto">Nome do Posto</label>
+          <input type="text" id="nmPosto" placeholder="Ex: Posto Enfermagem Dia" />
+        </div>
+        <div class="form-group">
+          <label for="selCarga">Carga Horária</label>
+          <select id="selCarga"></select>
+        </div>
+        <div class="form-group">
+          <label for="qtColab">Qtd. Colaboradores</label>
+          <input type="number" id="qtColab" min="1" value="1" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn" id="btnSalvarPosto">Salvar</button>
+          <button class="btn" data-close="modalPosto">Cancelar</button>
+        </div>
+        <div class="listagem">
+          <h3>Postos</h3>
+          <table id="tblPostos">
+            <thead><tr><th>ID</th><th>Posto</th><th>Carga Horária</th><th>Qtde</th><th>Ações</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edição de Célula -->
+  <div class="modal" id="modalEditCell" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Editar Escala (Posto/Dia)</h2>
+        <button class="close" data-close="modalEditCell">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group"><strong id="infoCell"></strong></div>
+        <div class="form-group">
+          <label for="selColaborador">Colaborador</label>
+          <select id="selColaborador"></select>
+        </div>
+        <div class="form-group">
+          <label for="txtObs">Observação</label>
+          <input type="text" id="txtObs" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn primary" id="btnSalvarCell">Salvar</button>
+          <button class="btn" id="btnExcluirCell">Excluir</button>
+          <button class="btn" data-close="modalEditCell">Fechar</button>
+        </div>
+        <div class="listagem">
+          <h3>Alocações existentes</h3>
+          <table id="tblCellItems"><thead><tr><th>ID</th><th>Colaborador</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Folga -->
+  <div class="modal" id="modalFolga" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Configurar Folga</h2>
+        <button class="close" data-close="modalFolga">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="selColabFolga">Colaborador</label>
+          <select id="selColabFolga"></select>
+        </div>
+        <div class="form-group">
+          <label for="dtFolga">Data</label>
+          <input type="date" id="dtFolga" />
+        </div>
+        <div class="form-group">
+          <label for="obsFolga">Observação</label>
+          <input type="text" id="obsFolga" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn primary" id="btnSalvarFolga">Salvar Folga</button>
+          <button class="btn" id="btnListarFolgas">Listar Folgas</button>
+        </div>
+        <div class="listagem">
+          <h3>Folgas do Colaborador</h3>
+          <table id="tblFolgas"><thead><tr><th>ID</th><th>Data</th><th>Obs</th><th>Ações</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <script src="../Views/config.js"></script>
+  <script src="../Views/auth.js"></script>
+  <script src="Escala.js"></script>
+  <script src="../Views/Menu/Menu.js"></script>
+  <script>
+    // Carrega o menu e sincroniza o estado recolhido/expandido com o wrapper .content
+    fetch('../Views/Menu/Menu.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('menuContainer').innerHTML = html;
+        const menu = document.getElementById('menuLateral');
+        const content = document.querySelector('.content');
+        if (menu && content) {
+          content.classList.toggle('recolhido', menu.classList.contains('minimizado'));
+        }
+      })
+      .catch(err => console.error('Erro ao carregar o menu:', err));
+  </script>
+</body>
+</html>

@@ -6,7 +6,7 @@ let colaboradorSelecionado = null;
 let json = null;
 // Inicialização
 window.onload = async () => {
-  if (!await validarToken()) {
+  if (!await (window.validarToken ? window.validarToken() : Promise.resolve(true))) {
     return;
   }
 
@@ -19,18 +19,14 @@ window.onload = async () => {
   document.getElementById("closeHistorico").onclick = () => {
     document.getElementById("historicoModal").style.display = "none";
   };
+
+  const filtro = document.getElementById('txtFiltroColaborador');
+  const btnLimparFiltro = document.getElementById('btnLimparFiltro');
+  if (filtro) filtro.addEventListener('input', renderGridColaboradores);
+  if (btnLimparFiltro) btnLimparFiltro.onclick = () => { if (filtro) { filtro.value = ''; } renderGridColaboradores(); };
 };
 
-// Validação simples de token (ajuste conforme sua lógica real)
-async function validarToken() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Token não encontrado. Faça login.");
-    return false;
-  }
-  // aqui você pode verificar validade do token chamando o backend se quiser
-  return true;
-}
+// Removido validarToken local: usamos o global de auth.js
 
 // Buscar cargos do backend
 async function carregarCargos() {
@@ -71,11 +67,49 @@ async function carregarColaboradores() {
   }
 }
 
+function parseDateSafe(v) {
+  if (!v) return new Date('1900-01-01');
+  const s = String(v).slice(0,10);
+  const t = Date.parse(s);
+  return isNaN(t) ? new Date('1900-01-01') : new Date(t);
+}
+
+function uniqueByLastCargo(rows) {
+  const byId = new Map();
+  for (const r of rows || []) {
+    const id = r.Id;
+    const atual = byId.get(id);
+    if (!atual) { byId.set(id, r); continue; }
+    const dNew = parseDateSafe(r.DtAdmissao);
+    const dOld = parseDateSafe(atual.DtAdmissao);
+    if (dNew > dOld) { byId.set(id, r); continue; }
+    if (+dNew === +dOld) {
+      // empate: prefere Ativo
+      const sNew = (r.StatusColaborador||'').toLowerCase();
+      const sOld = (atual.StatusColaborador||'').toLowerCase();
+      if (sNew === 'ativo' && sOld !== 'ativo') byId.set(id, r);
+    }
+  }
+  return Array.from(byId.values());
+}
+
+function filtrar(rows) {
+  const filtro = document.getElementById('txtFiltroColaborador');
+  const termo = (filtro && filtro.value ? filtro.value : '').trim().toLowerCase();
+  if (!termo) return rows;
+  return rows.filter(c => {
+    const campos = [c.NomeColaborador, c.Cpf, c.Rg, c.Cargo];
+    return campos.some(v => String(v||'').toLowerCase().includes(termo));
+  });
+}
+
 function renderGridColaboradores() {
   const tbody = document.getElementById("tbodyColaboradores");
   if (!tbody) return;
   tbody.innerHTML = "";
-  colaboradores.forEach(colab => {
+  const base = uniqueByLastCargo(colaboradores);
+  const lista = filtrar(base);
+  lista.forEach(colab => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${colab.Id}</td>

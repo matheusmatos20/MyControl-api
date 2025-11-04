@@ -326,23 +326,12 @@ document.getElementById("cardContasReceber").addEventListener("click", () => {
     mostrarAreaExpansivel("entradas_semana", () => renderizarContasReceber(dashboardResumo.contas_receber_lista));
 });
 
-// -------------------------
-// Validação de token
-// -------------------------
-async function validarToken() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("Token não encontrado. Faça login.");
-        return false;
-    }
-    return true;
-}
 
 // -------------------------
 // Ao carregar a home
 // -------------------------
 window.addEventListener("DOMContentLoaded", async () => {
-    if (!await validarToken()) {
+    if (!await (window.validarToken ? window.validarToken() : Promise.resolve(true))) {
         return;
     }
     atualizarCabecalho();

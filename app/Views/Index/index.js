@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalLogin = document.getElementById("login-modal");
   const closeLogin = document.getElementById("close-login");
   const formLogin = document.getElementById("form-login");
+  const btnCtaFinal = document.getElementById('btn-cta-final');
 
   const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8000';
   const resolvedAuthBase = (window.AUTH_BASE_URL || window.API_BASE_URL || DEFAULT_AUTH_BASE).replace(/\/$/, '');
@@ -24,6 +25,20 @@ document.addEventListener("DOMContentLoaded", () => {
       modalLogin.style.display = "none";
     }
   });
+
+  // CTA final -> WhatsApp
+  if (btnCtaFinal) {
+    btnCtaFinal.addEventListener('click', (e) => {
+      e.preventDefault();
+      const number = '5513991547402';
+      const text = encodeURIComponent('Olá! Tenho interesse no My Control.');
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const url = isMobile
+        ? `https://wa.me/${number}?text=${text}`
+        : `https://web.whatsapp.com/send?phone=${number}&text=${text}`;
+      window.open(url, '_blank');
+    });
+  }
 
   // Login real
   formLogin.addEventListener("submit", async (e) => {
@@ -118,5 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 800);
     });
   }
+
+  // Cards de módulos agora são estáticos (sem navegação ou popups)
 });
 

@@ -4,61 +4,125 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão Financeira - Sistema de Controle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <header>
-    <div class="logo">💰 Gestão Financeira</div>
-    <nav>
-      <button id="btn-login" class="btn btn-primary">Login / Assinar</button>
-    </nav>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand" aria-label="My Control">
+        <svg class="brand-mark" viewBox="0 0 36 36" role="img" aria-hidden="true">
+          <circle cx="18" cy="18" r="16" fill="#2a9d8f"/>
+          <rect x="10" y="16" width="4" height="10" rx="1" fill="#ffffff"/>
+          <rect x="16" y="12" width="4" height="14" rx="1" fill="#ffffff"/>
+          <rect x="22" y="8" width="4" height="18" rx="1" fill="#ffffff"/>
+        </svg>
+        <span class="brand-text">My Control</span>
+      </div>
+      <nav>
+        <button id="btn-login" class="btn btn-primary">Entrar</button>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <!-- Seção Hero -->
-    <section class="hero">
-      <h1>Controle Financeiro Simplificado</h1>
-      <p>Nosso sistema ajuda sua empresa a gerenciar representantes, clientes, pagamentos e relatórios com eficiência e segurança.</p>
-      <button id="btn-cta" class="btn btn-primary">Comece Agora</button>
-    </section>
-
-    <!-- Seção Benefícios -->
-    <section class="benefits">
-      <h2>Benefícios do Sistema</h2>
-      <div class="benefits-grid">
-        <div class="benefit-card">
-          <div class="icon">🧑‍💼</div>
-          <h3>Gestão de Representantes</h3>
-          <p>Cadastre e acompanhe todos os representantes de forma organizada.</p>
-        </div>
-
-        <div class="benefit-card">
-          <div class="icon">👥</div>
-          <h3>Controle de Clientes</h3>
-          <p>Gerencie clientes, contratos e histórico financeiro com facilidade.</p>
-        </div>
-
-        <div class="benefit-card">
-          <div class="icon">💳</div>
-          <h3>Pagamentos e Recebimentos</h3>
-          <p>Registre transações e acompanhe o fluxo de caixa em tempo real.</p>
-        </div>
-
-        <div class="benefit-card">
-          <div class="icon">📊</div>
-          <h3>Relatórios Inteligentes</h3>
-          <p>Visualize relatórios detalhados para tomar decisões mais rápidas e precisas.</p>
+    <!-- Hero minimalista -->
+    <section class="hero hero-min">
+      <div class="container hero-center">
+        <h1>Tudo do financeiro em um painel só</h1>
+        <p>Centralize lançamentos, pessoas e previsões sem planilhas confusas.</p>
+        <div class="hero-actions">
+          <button id="btn-cta" class="btn btn-primary">Entrar e começar</button>
+          <a href="#modulos" class="btn btn-link">Ver módulos</a>
         </div>
       </div>
     </section>
 
+    <!-- Como funciona (3 passos) -->
+    <section class="steps">
+      <div class="container">
+        <h2>Como funciona</h2>
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-badge">1</div>
+            <strong>Cadastre pessoas e serviços</strong>
+            <p>Colaboradores, clientes e serviços organizados para o dia a dia.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">2</div>
+            <strong>Lance pagamentos e previsões</strong>
+            <p>Fluxo direto para registrar lançamentos e acompanhar pendências.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">3</div>
+            <strong>Acompanhe alertas e entradas</strong>
+            <p>Veja o que importa: vencimentos da semana e avisos em destaque.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulos principais -->
+    <section class="modules" id="modulos">
+      <div class="container">
+        <h2>Módulos</h2>
+        <div class="modules-grid">
+          <div class="module-card" aria-label="Colaboradores">
+            <span class="icon">👤</span>
+            <strong>Colaboradores</strong>
+            <small>Cadastro e cargos</small>
+          </div>
+          <div class="module-card" aria-label="Clientes">
+            <span class="icon">👥</span>
+            <strong>Clientes</strong>
+            <small>Contratos e dados</small>
+          </div>
+          <div class="module-card" aria-label="Pagamentos">
+            <span class="icon">💳</span>
+            <strong>Pagamentos</strong>
+            <small>Lançamentos e baixas</small>
+          </div>
+          <div class="module-card" aria-label="Escala de Serviço">
+            <span class="icon">🗓️</span>
+            <strong>Escala</strong>
+            <small>Alocação e folgas</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+
     <!-- Seção CTA final -->
     <section class="cta-final">
-      <h2>Pronto para simplificar sua gestão financeira?</h2>
-      <p>Assine agora e comece a usar todas as funcionalidades do sistema.</p>
-      <button id="btn-cta-final" class="btn btn-primary">Assinar Agora</button>
+      <div class="container">
+        <h2>Pronto para começar?</h2>
+        <p>Entre em contato e veja como simplificar suas finanças no dia a dia.</p>
+        <button id="btn-cta-final" class="btn btn-primary">Assinar Agora</button>
+      </div>
+    </section>
+
+    <!-- Seção Recursos detalhados -->
+    <section class="features">
+      <div class="container">
+        <h2>Recursos que fazem diferença</h2>
+        <div class="feature-list">
+          <div class="feature-item"><span class="check">✓</span><div><strong>Escala de serviço</strong><p>Alocação automática com regras 12x36 e controle de folgas.</p></div></div>
+          <div class="feature-item"><span class="check">✓</span><div><strong>Financeiro integrado</strong><p>Pagamentos, previsões e despesas fixas com visão semanal.</p></div></div>
+          <div class="feature-item"><span class="check">✓</span><div><strong>Relatórios e previsões</strong><p>Painel com alertas, entradas da semana e pendências.</p></div></div>
+        </div>
+      </div>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© My Control — Gestão financeira integrada</small>
+    </div>
+  </footer>
+
 
   <!-- Modal Login -->
   <div class="modal" id="login-modal">

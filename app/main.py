@@ -2,8 +2,10 @@ from pathlib import Path
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor, Pagamento as Pagamento, ContaReceber as ContaReceberModel, DespesaFixa as DespesaFixaModel, Conn_DB as Conn    
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema, NotaFiscalAviso as NotaFiscalAvisoSchema, Parcelamento as ParcelamentoSchema, DespesaFixa as DespesaFixaSchema, ServicoRecorrente as ServicoRecorrenteSchema   
+from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor, Pagamento as Pagamento, ContaReceber as ContaReceberModel, DespesaFixa as DespesaFixaModel, Conn_DB as Conn
+from Model import Escala as EscalaModel
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema, NotaFiscalAviso as NotaFiscalAvisoSchema, Parcelamento as ParcelamentoSchema, DespesaFixa as DespesaFixaSchema, ServicoRecorrente as ServicoRecorrenteSchema
+from Schemas import CargaHoraria as CargaHorariaSchema, Posto as PostoSchema, Escala as EscalaSchema
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -686,7 +688,7 @@ async def dashboard_resumo(current_user: dict = Depends(get_current_user)):
     try:
         resumo_recorrentes = contas_dal.resumo_servicos_recorrentes()
     except Exception as exc:
-        print(f"[dashboard_resumo] Falha ao obter resumo de servi?os recorrentes: {exc}")
+        print(f"[dashboard_resumo] Falha ao obter resumo de serviços recorrentes: {exc}")
 
     resumo_despesas = {"quantidade": 0, "valor_previsto": 0.0}
     despesas_pendentes: List[Dict[str, Any]] = []
@@ -694,7 +696,7 @@ async def dashboard_resumo(current_user: dict = Depends(get_current_user)):
         resumo_despesas = despesas_dal.pendencias_resumo()
         despesas_pendentes = despesas_dal.listar_pendencias()
     except Exception as exc:
-        print(f"[dashboard_resumo] Falha ao obter pend?ncias de despesas fixas: {exc}")
+        print(f"[dashboard_resumo] Falha ao obter pendências de despesas fixas: {exc}")
 
     resumo_parcelas = {"quantidade": 0, "valor_total": 0.0}
     parcelas_semana: List[Dict[str, Any]] = []
@@ -847,3 +849,187 @@ async def processar_folha_mensal(competencia: Optional[int] = None, id_forma_pag
         "quantidade": inseridos,
     }
 
+
+# -----------------------
+# Escala de Serviço
+# -----------------------
+
+@app.get("/carga-horaria", tags=["Escala"])
+async def listar_carga_horaria(current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        return dal.listar_carga_horaria()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao listar cargas horárias: {exc}")
+
+
+@app.post("/carga-horaria", tags=["Escala"])
+async def criar_carga_horaria(payload: CargaHorariaSchema.CargaHorariaSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.inserir_carga_horaria(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao criar carga horária: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não foi possível inserir carga horária.")
+    return {"mensagem": "Carga horária criada com sucesso."}
+
+
+@app.delete("/carga-horaria/{id_carga}", tags=["Escala"])
+async def excluir_carga_horaria(id_carga: int, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.deletar_carga_horaria(id_carga)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao excluir carga horária: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não é possível excluir: existem postos ou escala vinculados.")
+    return {"mensagem": "Carga horária excluída com sucesso."}
+
+
+@app.get("/postos", tags=["Escala"])
+async def listar_postos(current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        return dal.listar_postos()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao listar postos: {exc}")
+
+
+@app.post("/postos", tags=["Escala"])
+async def criar_posto(payload: PostoSchema.PostoSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.inserir_posto(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao criar posto: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não foi possível inserir posto.")
+    return {"mensagem": "Posto criado com sucesso."}
+
+
+@app.put("/postos/{id_posto}", tags=["Escala"])
+async def atualizar_posto(id_posto: int, payload: PostoSchema.PostoSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.atualizar_posto(id_posto, payload)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao atualizar posto: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não foi possível atualizar posto.")
+    return {"mensagem": "Posto atualizado com sucesso."}
+
+
+@app.delete("/postos/{id_posto}", tags=["Escala"])
+async def deletar_posto(id_posto: int, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.deletar_posto(id_posto)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao excluir posto: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não é possível excluir: existe escala vinculada ao posto.")
+    return {"mensagem": "Posto excluído com sucesso."}
+
+
+@app.post("/escala/gerar", tags=["Escala"])
+async def gerar_escala(payload: EscalaSchema.GerarEscalaSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        resultado = dal.gerar_escala(payload)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao gerar escala: {exc}")
+    return {"mensagem": "Escala gerada.", "itens": resultado}
+
+
+@app.get("/escala/funcionario/{id_funcionario}", tags=["Escala"])
+async def consultar_escala_funcionario(id_funcionario: int, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        return dal.consultar_escala_funcionario(id_funcionario)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao consultar escala do colaborador: {exc}")
+
+
+@app.get("/escala/posto/{id_post}/data/{data}", tags=["Escala"])
+async def consultar_escala_posto_dia(id_post: int, data: str, current_user: dict = Depends(get_current_user)):
+    try:
+        data_ref = datetime.fromisoformat(data[:10]).date()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Data inválida. Use YYYY-MM-DD.")
+    dal = EscalaModel.EscalaDAL()
+    try:
+        return dal.consultar_escala_posto_dia(id_post, data_ref)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao consultar escala do posto/dia: {exc}")
+
+
+@app.put("/escala/{id_escala}", tags=["Escala"])
+async def atualizar_item_escala(id_escala: int, payload: EscalaSchema.EscalaSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.atualizar_escala_item(id_escala, payload)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao atualizar item da escala: {exc}")
+    if not ok:
+        raise HTTPException(status_code=404, detail="Item de escala não encontrado.")
+    return {"mensagem": "Item da escala atualizado."}
+
+
+@app.delete("/escala/{id_escala}", tags=["Escala"])
+async def excluir_item_escala(id_escala: int, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.excluir_escala(id_escala)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao excluir item da escala: {exc}")
+    if not ok:
+        raise HTTPException(status_code=404, detail="Item de escala não encontrado.")
+    return {"mensagem": "Item da escala excluído."}
+
+
+@app.post("/escala", tags=["Escala"])
+async def inserir_item_escala(payload: EscalaSchema.EscalaSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.inserir_escala_item(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao inserir item da escala: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não foi possível inserir item da escala.")
+    return {"mensagem": "Item da escala inserido."}
+
+
+@app.post("/escala/folga", tags=["Escala"])
+async def inserir_folga(payload: EscalaSchema.FolgaSchema, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.inserir_folga(payload)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao registrar folga: {exc}")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Não foi possível registrar folga.")
+    return {"mensagem": "Folga registrada."}
+
+
+@app.get("/escala/folgas/funcionario/{id_funcionario}", tags=["Escala"])
+async def listar_folgas(id_funcionario: int, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        return dal.listar_folgas_funcionario(id_funcionario)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao listar folgas: {exc}")
+
+
+@app.delete("/escala/folga/{id_folga}", tags=["Escala"])
+async def deletar_folga(id_folga: int, current_user: dict = Depends(get_current_user)):
+    dal = EscalaModel.EscalaDAL()
+    try:
+        ok = dal.deletar_folga(id_folga)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao excluir folga: {exc}")
+    if not ok:
+        raise HTTPException(status_code=404, detail="Folga não encontrada.")
+    return {"mensagem": "Folga excluída."}

@@ -146,53 +146,39 @@ class ColaboradorDAL:
 
     def retorna_colaborador(self):
         query = """
-                 WITH CTE_ULTIMO_CARGO AS (
-                    SELECT MAX(DT_CARGO) MAX_DT_CARGO
-                    ,ID_FUNCIONARIO
-                    FROM TB_CARGOS_FUNCIONARIOS CF WITH(NOLOCK)
-                    GROUP BY ID_FUNCIONARIO
-                    
-                    )
-                    ,
-                     CTE AS (
-                    SELECT 
-                    CONCAT(C.ID_CARGO,' - ',C.DS_CARGO) AS Cargo
-                    ,CASE WHEN CF.DT_DESLIGAMENTO IS NULL	
-					THEN 'Ativo'
-					ELSE 'Inativo'
-					END                 as StatusColaborador
-                    ,CF.ID_FUNCIONARIO
-                    ,CF.DT_CARGO		AS DtAdmissao
-                    ,CF.VL_FGTS			AS Fgts
-                    ,CF.VL_INSS			AS Inss
-                    ,CF.VL_PLANO_SAUDE	AS PlanoSaude
-                    ,CF.VL_REFEICAO		AS Refeicao
-                    ,CF.VL_ALIMENTACAO	AS Alimentacao
-                    ,CF.VL_SALARIO		AS Salario
-                     ,CF.VL_TRANSPORTE   AS ValeTransporte
-
-                    FROM TB_CARGOS_FUNCIONARIOS CF WITH(NOLOCK)
-                    JOIN CTE_ULTIMO_CARGO		CFU WITH(NOLOCK) ON CFU.MAX_DT_CARGO = CF.DT_CARGO AND CFU.ID_FUNCIONARIO = CF.ID_FUNCIONARIO
-                    JOIN TB_CARGOS				C WITH(NOLOCK) ON C.ID_CARGO = CF.ID_CARGO
-                    )
-                    
-                    SELECT				   F.ID_FUNCIONARIO as Id
-                                          ,F.NM_FUNCIONARIO AS NomeColaborador
-                                          ,F.DT_NASCIMENTO    AS DtNascimento
-                                          ,F.CD_CPF           AS Cpf
-                                          ,F.CD_RG            AS Rg
-                                          ,case when Cargo is null then 'Sem Cargo' else Cargo end as Cargo
-                    					  ,ISNULL(C.DtAdmissao,'1900-01-01') AS DtAdmissao
-										  ,ISNULL(C.Fgts			,0) AS Fgts
-										  ,ISNULL(C.Inss			,0) AS Inss
-										  ,ISNULL(C.PlanoSaude	,0) AS PlanoSaude
-										  ,ISNULL(C.Refeicao		,0) AS Refeicao
-                                          ,ISNULL(C.Alimentacao		,0) AS Alimentacao
-										  ,ISNULL(C.Salario		,0) AS Salario
-										  ,ISNULL(C.ValeTransporte,0) AS ValeTransporte
-                                          ,case when StatusColaborador is null then 'Inativo' else StatusColaborador end as StatusColaborador\n
-                    FROM dbo.TB_FUNCIONARIOS F WITH(NOLOCK) 
-                    LEFT JOIN CTE C ON C.ID_FUNCIONARIO = F.ID_FUNCIONARIO
+        ;WITH UltimoCargo AS (
+            SELECT CF.ID_FUNCIONARIO,
+                   CF.ID_CARGO,
+                   CF.DT_CARGO,
+                   CF.DT_DESLIGAMENTO,
+                   CF.VL_FGTS AS Fgts,
+                   CF.VL_INSS AS Inss,
+                   CF.VL_PLANO_SAUDE AS PlanoSaude,
+                   CF.VL_REFEICAO AS Refeicao,
+                   CF.VL_ALIMENTACAO AS Alimentacao,
+                   CF.VL_SALARIO AS Salario,
+                   CF.VL_TRANSPORTE AS ValeTransporte,
+                   ROW_NUMBER() OVER (PARTITION BY CF.ID_FUNCIONARIO ORDER BY CF.DT_CARGO DESC, CF.ID_CARGO DESC) AS rn
+            FROM TB_CARGOS_FUNCIONARIOS CF WITH(NOLOCK)
+        )
+        SELECT F.ID_FUNCIONARIO AS Id,
+               F.NM_FUNCIONARIO AS NomeColaborador,
+               F.DT_NASCIMENTO AS DtNascimento,
+               F.CD_CPF AS Cpf,
+               F.CD_RG AS Rg,
+               CASE WHEN C.ID_CARGO IS NULL THEN 'Sem Cargo' ELSE CONCAT(C.ID_CARGO,' - ',C.DS_CARGO) END AS Cargo,
+               ISNULL(UC.DT_CARGO,'1900-01-01') AS DtAdmissao,
+               ISNULL(UC.Fgts,0) AS Fgts,
+               ISNULL(UC.Inss,0) AS Inss,
+               ISNULL(UC.PlanoSaude,0) AS PlanoSaude,
+               ISNULL(UC.Refeicao,0) AS Refeicao,
+               ISNULL(UC.Alimentacao,0) AS Alimentacao,
+               ISNULL(UC.Salario,0) AS Salario,
+               ISNULL(UC.ValeTransporte,0) AS ValeTransporte,
+               CASE WHEN UC.DT_DESLIGAMENTO IS NULL THEN 'Ativo' ELSE 'Inativo' END AS StatusColaborador
+        FROM dbo.TB_FUNCIONARIOS F WITH(NOLOCK)
+        LEFT JOIN UltimoCargo UC ON UC.ID_FUNCIONARIO = F.ID_FUNCIONARIO AND UC.rn = 1
+        LEFT JOIN TB_CARGOS C WITH(NOLOCK) ON C.ID_CARGO = UC.ID_CARGO
         """
         with self._connect() as conn:
             return pd.read_sql(query, conn)
