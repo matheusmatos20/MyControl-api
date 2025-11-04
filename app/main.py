@@ -1,9 +1,9 @@
-﻿from pathlib import Path
-from typing import Annotated, Any, List, Optional
+from pathlib import Path
+from typing import Annotated, Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
-from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor, Pagamento as Pagamento, Conn_DB as Conn    
-from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema, NotaFiscalAviso as NotaFiscalAvisoSchema   
+from Model import Representantes as Representante,Cliente as Cliente,Cargo as Cargo,Servico as Servico,Colaborador as Colaborador,Financeiro as Financeiro, Fornecedor as Fornecedor, Pagamento as Pagamento, ContaReceber as ContaReceberModel, DespesaFixa as DespesaFixaModel, Conn_DB as Conn    
+from Schemas import Representante as RepresentanteSchena,Cliente as ClienteSchema, Cargo as CargoSchema, Servico as ServicoSchema, Colaborador as ColaboradorSchema, ServicoCliente as ServicoClienteSchema, Fornecedor as FornecedorSchema, Pagamento as PagamentoSchema, NotaFiscalAviso as NotaFiscalAvisoSchema, Parcelamento as ParcelamentoSchema, DespesaFixa as DespesaFixaSchema, ServicoRecorrente as ServicoRecorrenteSchema   
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -117,6 +117,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         return {"username": username}
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido")
+
+def _resolve_user_id(username: str) -> Optional[int]:
+    try:
+        conn = Conn.Conn()
+        user = conn.get_usuario(username)
+        if user and user.get("ID_USUARIO"):
+            return int(user["ID_USUARIO"])
+    except Exception as exc:
+        print(f"Falha ao resolver ID do usuário {username}: {exc}")
+    return None
+
 
 # Endpoint para login
 @app.post("/token")
@@ -235,11 +246,15 @@ async def Consultar_Debitos(
     mes: Optional[int] = None,
     ano: Optional[int] = None,
     competencia: Optional[int] = None,
+    id_fornecedor: Optional[int] = None,
+    mostrar_futuros: bool = False,
     current_user: dict = Depends(get_current_user)
 ):
     filtro_competencia = _resolver_competencia(mes, ano, competencia)
+    if id_fornecedor and filtro_competencia is None and not mostrar_futuros:
+        mostrar_futuros = True
     dal = Financeiro.FinanceiroDAL()
-    df = dal.retorna_pagamentos(filtro_competencia)
+    df = dal.retorna_pagamentos(filtro_competencia, id_fornecedor=id_fornecedor, mostrar_futuros=mostrar_futuros)
     return df.to_dict(orient="records")
 
 @app.get("/RetornaCredito",tags=["Financeiro"])
@@ -652,4 +667,183 @@ def Alterar_Colaborador_Com_Cargo(
 
 
 
+
+@app.get("/dashboard/resumo", tags=["Dashboard"])
+async def dashboard_resumo(current_user: dict = Depends(get_current_user)):
+    pagamento_dal = Pagamento.PagamentoDAL()
+    contas_dal = ContaReceberModel.ContaReceberDAL()
+    despesas_dal = DespesaFixaModel.DespesaFixaDAL()
+
+    resumo_receber = {"total_previsto": 0.0, "total_recebido": 0.0, "saldo_em_aberto": 0.0}
+    contas_semana: List[Dict[str, Any]] = []
+    try:
+        resumo_receber = contas_dal.resumo_semana()
+        contas_semana = contas_dal.listar_contas_semana()
+    except Exception as exc:
+        print(f"[dashboard_resumo] Falha ao obter contas a receber: {exc}")
+
+    resumo_recorrentes = {"competencia": int(datetime.now().strftime('%Y%m')), "servicos_ativos": 0, "valor_previsto": 0.0}
+    try:
+        resumo_recorrentes = contas_dal.resumo_servicos_recorrentes()
+    except Exception as exc:
+        print(f"[dashboard_resumo] Falha ao obter resumo de servi?os recorrentes: {exc}")
+
+    resumo_despesas = {"quantidade": 0, "valor_previsto": 0.0}
+    despesas_pendentes: List[Dict[str, Any]] = []
+    try:
+        resumo_despesas = despesas_dal.pendencias_resumo()
+        despesas_pendentes = despesas_dal.listar_pendencias()
+    except Exception as exc:
+        print(f"[dashboard_resumo] Falha ao obter pend?ncias de despesas fixas: {exc}")
+
+    resumo_parcelas = {"quantidade": 0, "valor_total": 0.0}
+    parcelas_semana: List[Dict[str, Any]] = []
+    try:
+        resumo_parcelas = pagamento_dal.resumo_parcelas_semana()
+        parcelas_semana = pagamento_dal.listar_parcelas_semana()
+    except Exception as exc:
+        print(f"[dashboard_resumo] Falha ao obter parcelas da semana: {exc}")
+
+    return {
+        "contas_receber_semana": resumo_receber,
+        "contas_receber_lista": contas_semana,
+        "servicos_recorrentes": resumo_recorrentes,
+        "despesas_fixas": {
+            "resumo": resumo_despesas,
+            "pendencias": despesas_pendentes,
+        },
+        "parcelas_semana": {
+            "resumo": resumo_parcelas,
+            "parcelas": parcelas_semana,
+        },
+    }
+
+
+@app.post("/contas-receber/recorrentes/processar", tags=["Contas a Receber"])
+async def processar_servicos_recorrentes(payload: ServicoRecorrenteSchema.ProcessarRecorrenciaSchema, current_user: dict = Depends(get_current_user)):
+    usuario_id = _resolve_user_id(current_user["username"])
+    if usuario_id is None:
+        raise HTTPException(status_code=500, detail="Não foi possível identificar o usuário autenticado.")
+
+    dal = ContaReceberModel.ContaReceberDAL()
+    try:
+        inseridos = dal.gerar_lancamentos_recorrentes(payload.competencia, usuario_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao gerar lançamentos recorrentes: {exc}")
+
+    return {
+        "mensagem": "Lançamentos recorrentes processados.",
+        "competencia": payload.competencia or int(datetime.now().strftime('%Y%m')),
+        "quantidade": inseridos,
+    }
+
+
+@app.post("/contas-receber/recorrentes/finalizar", tags=["Contas a Receber"])
+async def finalizar_servico_recorrente(payload: ServicoRecorrenteSchema.FinalizarServicoRecorrenteSchema, current_user: dict = Depends(get_current_user)):
+    dal = ContaReceberModel.ContaReceberDAL()
+    try:
+        sucesso = dal.finalizar_servico_recorrente(payload.id_servico_cliente, payload.data_fim)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao finalizar serviço recorrente: {exc}")
+
+    if not sucesso:
+        raise HTTPException(status_code=404, detail="Serviço recorrente não encontrado.")
+
+    return {"mensagem": "Serviço recorrente finalizado com sucesso."}
+
+
+@app.post("/despesas-fixas/processar", tags=["Despesas Fixas"])
+async def processar_despesas_fixas(competencia: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    usuario_id = _resolve_user_id(current_user["username"]) or 1
+    dal = DespesaFixaModel.DespesaFixaDAL()
+    try:
+        inseridos = dal.processar_competencia(competencia, usuario_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao processar despesas fixas: {exc}")
+
+    return {
+        "mensagem": "Pré-lançamentos gerados.",
+        "competencia": competencia or int(datetime.now().strftime('%Y%m')),
+        "quantidade": inseridos,
+    }
+
+
+@app.get("/despesas-fixas/pendencias", tags=["Despesas Fixas"])
+async def listar_pendencias_despesas(competencia: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    dal = DespesaFixaModel.DespesaFixaDAL()
+    try:
+        resumo = dal.pendencias_resumo(competencia)
+        pendencias = dal.listar_pendencias(competencia)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao obter pendências: {exc}")
+    return {"resumo": resumo, "pendencias": pendencias}
+
+
+@app.post("/despesas-fixas/confirmar", tags=["Despesas Fixas"])
+async def confirmar_despesa_fixa(payload: DespesaFixaSchema.DespesaFixaConfirmacaoSchema, current_user: dict = Depends(get_current_user)):
+    usuario_id = _resolve_user_id(current_user["username"]) or 1
+    dal = DespesaFixaModel.DespesaFixaDAL()
+    try:
+        sucesso = dal.confirmar_lancamento(payload.id_lancamento, payload.valor_confirmado, usuario_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao confirmar lançamento: {exc}")
+    if not sucesso:
+        raise HTTPException(status_code=404, detail="Lançamento não encontrado.")
+    return {"mensagem": "Lançamento confirmado."}
+
+
+@app.post("/despesas-fixas/auto-confirmar", tags=["Despesas Fixas"])
+async def auto_confirmar_despesas(current_user: dict = Depends(get_current_user)):
+    usuario_id = _resolve_user_id(current_user["username"]) or 1
+    dal = DespesaFixaModel.DespesaFixaDAL()
+    try:
+        quantidade = dal.auto_confirmar_valor_padrao(usuario_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao auto-confirmar despesas: {exc}")
+    return {
+        "mensagem": "Despesas confirmadas automaticamente.",
+        "quantidade": quantidade,
+    }
+
+
+@app.post("/pagamentos/parcelado", tags=["Pagamentos"])
+async def criar_pagamento_parcelado(parcelamento: ParcelamentoSchema.ParcelamentoCreateSchema, current_user: dict = Depends(get_current_user)):
+    usuario_id = _resolve_user_id(current_user["username"]) or parcelamento.id_usuario
+    dados = parcelamento.dict()
+    dados["id_usuario"] = usuario_id
+    parcelamento_corrigido = ParcelamentoSchema.ParcelamentoCreateSchema(**dados)
+
+    dal = Pagamento.PagamentoDAL()
+    try:
+        resultado = dal.criar_parcelamento(parcelamento_corrigido)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao criar parcelamento: {exc}")
+    return {
+        "mensagem": "Parcelamento criado com sucesso.",
+        "dados": resultado,
+    }
+
+
+@app.get("/pagamentos/parcelado/semana", tags=["Pagamentos"])
+async def listar_parcelas_semana(current_user: dict = Depends(get_current_user)):
+    dal = Pagamento.PagamentoDAL()
+    try:
+        resumo = dal.resumo_parcelas_semana()
+        parcelas = dal.listar_parcelas_semana()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao listar parcelas: {exc}")
+    return {"resumo": resumo, "parcelas": parcelas}
+@app.post("/folha/processar", tags=["Financeiro"])
+async def processar_folha_mensal(competencia: Optional[int] = None, id_forma_pagamento: int = 3, current_user: dict = Depends(get_current_user)):
+    usuario_id = _resolve_user_id(current_user["username"]) or 1
+    dal = Financeiro.FinanceiroDAL()
+    try:
+        inseridos = dal.insere_salarios_mes(competencia, usuario_id, id_forma_pagamento)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Falha ao processar folha mensal: {exc}")
+    return {
+        "mensagem": "Folha gerada com sucesso.",
+        "competencia": competencia or int(datetime.now().strftime('%Y%m')),
+        "quantidade": inseridos,
+    }
 

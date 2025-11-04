@@ -1,12 +1,15 @@
-console.log("Dashboard carregado com sucesso!");
+﻿console.log("Dashboard carregado com sucesso!");
 
 // -------------------------
 // Variáveis globais
 // -------------------------
 let tokenGlobal = localStorage.getItem("token");
+let dashboardResumo = null;
 
 const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+
+const areaExpansivel = document.getElementById("areaExpansivel");
 
 function atualizarCabecalho() {
     const tituloEmpresa = document.getElementById("empresaNome");
@@ -23,62 +26,195 @@ function atualizarCabecalho() {
     }
 }
 
+function formatCurrency(valor) {
+    return `R$ ${Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+}
 
-// -------------------------
-// Função para obter o token
-// -------------------------
-// async function obterToken() {
-    
-//     const url = 'http://localhost:8000/token';
-//     const formData = new URLSearchParams();
-//     formData.append('username', 'usuario');
-//     formData.append('password', '1234');
-//     formData.append('grant_type', 'password');
+async function carregarResumoDashboard() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        return;
+    }
+    try {
+        const response = await fetch(`${API_BASE}/dashboard/resumo`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!response.ok) {
+            throw new Error(`Status ${response.status}`);
+        }
+        dashboardResumo = await response.json();
+        atualizarCardAlertas(dashboardResumo);
+        atualizarCardEntradas(dashboardResumo?.contas_receber_semana);
+    } catch (err) {
+        console.error("Erro ao carregar resumo do dashboard:", err);
+    }
+}
 
-//     try {
-//         const response = await fetch(url, {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-//             body: formData
-//         });
+function atualizarCardEntradas(resumo) {
+    const card = document.getElementById("cardContasReceber");
+    if (!card) return;
+    if (!resumo) {
+        card.querySelector("p").textContent = "Sem previsão de entradas na semana.";
+        return;
+    }
+    card.querySelector("p").innerHTML = `Previsto: <strong>${formatCurrency(resumo.total_previsto)}</strong><br>` +
+        `Recebido: ${formatCurrency(resumo.total_recebido)}<br>` +
+        `Em aberto: ${formatCurrency(resumo.saldo_em_aberto)}`;
+}
 
-//         if (!response.ok) {
-//             const erro = await response.text();
-//             throw new Error(`Erro ao obter token: ${erro}`);
-//         }
+function atualizarCardAlertas(resumo) {
+    const card = document.getElementById("cardAlertas");
+    if (!card) return;
+    const despesasResumo = resumo?.despesas_fixas?.resumo;
+    const parcelasResumo = resumo?.parcelas_semana?.resumo;
+    const qtdDespesas = despesasResumo?.quantidade ?? 0;
+    const valorDespesas = despesasResumo ? formatCurrency(despesasResumo.valor_previsto) : formatCurrency(0);
+    const qtdParcelas = parcelasResumo?.quantidade ?? 0;
+    const valorParcelas = parcelasResumo ? formatCurrency(parcelasResumo.valor_total) : formatCurrency(0);
+    card.querySelector("p").innerHTML = 
+        `Despesas a confirmar: <strong>${qtdDespesas}</strong> (${valorDespesas}).<br>` +
+        `Parcelas da semana: <strong>${qtdParcelas}</strong> (${valorParcelas}).`;
+}
 
-//         const data = await response.json();
-//         tokenGlobal = data.access_token;
-//         return tokenGlobal;
+function renderizarContasReceber(lista) {
+    if (!lista || !lista.length) {
+        return '<p class="mensagem-vazia">Sem contas a receber nos próximos 7 dias.</p>';
+    }
+    const linhas = lista.map(item => `
+        <tr>
+            <td>${item.descricao}</td>
+            <td>${item.data_prevista ? new Date(item.data_prevista).toLocaleDateString('pt-BR') : '-'}</td>
+            <td>${formatCurrency(item.valor_previsto)}</td>
+            <td>${formatCurrency(item.valor_recebido)}</td>
+            <td>${item.status || '-'}</td>
+        </tr>
+    `).join('');
+    return `
+        <div class="card">
+            <h4>Contas a Receber nesta Semana</h4>
+            <table class="tabela-resumo">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Vencimento</th>
+                        <th>Previsto</th>
+                        <th>Recebido</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>${linhas}</tbody>
+            </table>
+        </div>
+    `;
+}
 
-//     } catch (err) {
-//         console.error('Erro ao obter token:', err);
-//         alert("Falha ao autenticar. Verifique o backend e abra via localhost:5501.");
-//         return null;
-//     }
-// }
+
+function renderizarAlertas(resumo) {
+    const partes = [];
+    partes.push('<div class="card"><h4>Alertas financeiros</h4><p>Confirme os valores das despesas fixas e acompanhe parcelas programadas para esta semana.</p></div>');
+    const despesasHtml = renderizarDespesasPendentes(resumo?.despesas_fixas?.pendencias || []);
+    if (despesasHtml) {
+        partes.push(despesasHtml);
+    }
+    const parcelasHtml = renderizarParcelasSemana(resumo?.parcelas_semana?.parcelas || []);
+    if (parcelasHtml) {
+        partes.push(parcelasHtml);
+    }
+    return partes.join('');
+}
+function renderizarDespesasPendentes(lista) {
+    if (!lista || !lista.length) {
+        return '<p class="mensagem-vazia">Todas as despesas fixas estão confirmadas.</p>';
+    }
+    const linhas = lista.map(item => `
+        <tr>
+            <td>${item.descricao}</td>
+            <td>${item.data_vencimento ? new Date(item.data_vencimento).toLocaleDateString('pt-BR') : '-'}</td>
+            <td>${formatCurrency(item.valor_previsto)}</td>
+            <td>${item.status}</td>
+        </tr>
+    `).join('');
+    return `
+        <div class="card">
+            <h4>Despesas Fixas a Confirmar</h4>
+            <table class="tabela-resumo">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Vencimento</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>${linhas}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderizarParcelasSemana(lista) {
+    if (!lista || !lista.length) {
+        return '<p class="mensagem-vazia">Nenhuma parcela vence nesta semana.</p>';
+    }
+    const linhas = lista.map(item => `
+        <tr>
+            <td>${item.descricao}</td>
+            <td>${item.data_vencimento ? new Date(item.data_vencimento).toLocaleDateString('pt-BR') : '-'}</td>
+            <td>${item.numero_parcela}/${item.total_parcelas}</td>
+            <td>${formatCurrency(item.valor)}</td>
+        </tr>
+    `).join('');
+    return `
+        <div class="card">
+            <h4>Parcelas da Semana</h4>
+            <table class="tabela-resumo">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Vencimento</th>
+                        <th>Parcela</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>${linhas}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+function limparAreaExpansivel() {
+    if (!areaExpansivel) return;
+    areaExpansivel.classList.remove("mostrar");
+    areaExpansivel.dataset.activeSection = "";
+    areaExpansivel.innerHTML = "";
+}
+
+function mostrarAreaExpansivel(chave, builder) {
+    if (!areaExpansivel) return;
+    const ativo = areaExpansivel.dataset.activeSection;
+    if (ativo === chave && areaExpansivel.classList.contains("mostrar")) {
+        limparAreaExpansivel();
+        return;
+    }
+    areaExpansivel.innerHTML = builder();
+    areaExpansivel.dataset.activeSection = chave;
+    areaExpansivel.classList.add("mostrar");
+}
 
 // -------------------------
 // Função para carregar pendências da API
 // -------------------------
 async function carregarPendenciasAPI() {
-    // if (!tokenGlobal) {
-    //     await obterToken();
-    //     if (!tokenGlobal) return;
-    // }
-
-    
     if (!await validarToken()) {
-        return
+        return;
     }
-    const tokenGlobal =localStorage.getItem("token");
-    
+    const token = localStorage.getItem("token");
     const url = buildApiUrl('/ListarDebitosEmAberto');
 
     try {
         const response = await fetch(url, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${tokenGlobal}` }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) {
@@ -87,12 +223,10 @@ async function carregarPendenciasAPI() {
         }
 
         const pendencias = await response.json();
-
-        // Atualiza os cards
         atualizarCards(pendencias);
-
-        // Renderiza a grid
         renderizarPendencias(pendencias);
+        areaExpansivel.dataset.activeSection = "pendencias";
+        areaExpansivel.classList.add("mostrar");
 
     } catch (err) {
         console.error(err);
@@ -100,9 +234,6 @@ async function carregarPendenciasAPI() {
     }
 }
 
-// -------------------------
-// Atualizar os cards dinâmicos
-// -------------------------
 function atualizarCards(pendencias) {
     const totalPendencias = pendencias.filter(p => p.StatusPagamento === "Pendente" || p.StatusPagamento === "Atraso").length;
     const totalAtrasos = pendencias.filter(p => p.StatusPagamento === "Atrasado").length;
@@ -110,13 +241,8 @@ function atualizarCards(pendencias) {
     document.querySelector("#cardPendencias p").textContent = 
         `${totalAtrasos} pendência${totalAtrasos !== 1 ? 's' : ''} em atraso`;
 
-    document.querySelector("#cardAlertas p").textContent = 
-        `${totalPendencias} pagamento${totalPendencias !== 1 ? 's' : ''} em aberto${totalPendencias !== 1 ? 's' : ''}`;
 }
 
-// -------------------------
-// Função para renderizar a grid
-// -------------------------
 function renderizarPendencias(lista) {
     const area = document.getElementById("areaExpansivel");
     area.innerHTML = `
@@ -149,7 +275,7 @@ function renderizarPendencias(lista) {
               <td>${p.Fornecedor}</td>
               <td>${p.Descricao}</td>
               <td>${p.FormaPagamento}</td>
-              <td>R$ ${Number(p.Valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+              <td>${formatCurrency(p.Valor)}</td>
               <td>${new Date(p.Vencimento).toLocaleDateString("pt-BR")}</td>
               <td><span class="status ${p.StatusPagamento.toLowerCase()}">${p.StatusPagamento}</span></td>
             </tr>
@@ -159,7 +285,6 @@ function renderizarPendencias(lista) {
     </div>
   `;
 
-    // Filtro por busca
     document.querySelector("#busca").addEventListener("input", (e) => {
         const termo = e.target.value.toLowerCase();
         document.querySelectorAll("#tabelaPendencias tbody tr").forEach(row => {
@@ -167,7 +292,6 @@ function renderizarPendencias(lista) {
         });
     });
 
-    // Filtro por status
     document.querySelector("#filtroStatus").addEventListener("change", (e) => {
         const status = e.target.value.toLowerCase();
         document.querySelectorAll("#tabelaPendencias tbody tr").forEach(row => {
@@ -178,36 +302,50 @@ function renderizarPendencias(lista) {
 }
 
 // -------------------------
-// Clique no card Pendências
+// Clique nos cards
 // -------------------------
 document.getElementById("cardPendencias").addEventListener("click", async () => {
-    const area = document.getElementById("areaExpansivel");
-    if (area.classList.contains("mostrar")) {
-        area.classList.remove("mostrar");
-        area.innerHTML = "";
+    if (areaExpansivel.dataset.activeSection === "pendencias" && areaExpansivel.classList.contains("mostrar")) {
+        limparAreaExpansivel();
     } else {
         await carregarPendenciasAPI();
-        area.classList.add("mostrar");
     }
 });
 
-document.getElementById("cardAlertas").addEventListener("click", async () => {
-    const area = document.getElementById("areaExpansivel");
-    if (area.classList.contains("mostrar")) {
-        area.classList.remove("mostrar");
-        area.innerHTML = "";
-    } else {
-        await carregarPendenciasAPI();
-        area.classList.add("mostrar");
+document.getElementById("cardAlertas").addEventListener("click", () => {
+    if (!dashboardResumo) {
+        return;
     }
+    mostrarAreaExpansivel("alertas", () => renderizarAlertas(dashboardResumo));
+});
+
+document.getElementById("cardContasReceber").addEventListener("click", () => {
+    if (!dashboardResumo) {
+        return;
+    }
+    mostrarAreaExpansivel("entradas_semana", () => renderizarContasReceber(dashboardResumo.contas_receber_lista));
 });
 
 // -------------------------
-// Ao carregar a home já atualiza os cards
+// Validação de token
+// -------------------------
+async function validarToken() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Token não encontrado. Faça login.");
+        return false;
+    }
+    return true;
+}
+
+// -------------------------
+// Ao carregar a home
 // -------------------------
 window.addEventListener("DOMContentLoaded", async () => {
-    await validarToken();
+    if (!await validarToken()) {
+        return;
+    }
     atualizarCabecalho();
-    await carregarPendenciasAPI(); // já puxa os números reais
+    await carregarResumoDashboard();
+    await carregarPendenciasAPI();
 });
-

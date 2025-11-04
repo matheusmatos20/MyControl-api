@@ -12,6 +12,8 @@ const LOGIN_PAGE = (() => {
       return new URL(configured, window.location.href).href;
     } catch (error) {
       console.warn("⚠ Não foi possível resolver LOGIN_PAGE configurado, usando padrão.", error);
+
+
     }
   }
   try {
@@ -20,6 +22,27 @@ const LOGIN_PAGE = (() => {
     return '../Index/index.html';
   }
 })();
+
+let redirectingToLogin = false;
+
+function logoutAndRedirect(reason) {
+  if (reason) {
+    console.warn(reason);
+  }
+  if (redirectingToLogin) {
+    return;
+  }
+  redirectingToLogin = true;
+  try {
+    localStorage.clear();
+  } catch (error) {
+    console.error('Erro ao limpar storage durante logout:', error);
+  }
+  if (window.location.href !== LOGIN_PAGE) {
+    window.location.href = LOGIN_PAGE;
+  }
+}
+
 
 // Criptografar string
 function encrypt(text) {
@@ -136,11 +159,7 @@ async function validarToken() {
   if (!token || !username || !encryptedPassword) {
 
     console.warn("⚠ Usuário não está logado!");
-
-    localStorage.clear();
-
-    window.location.href = LOGIN_PAGE;
-
+    logoutAndRedirect();
     return false;
 
   }
@@ -152,11 +171,7 @@ async function validarToken() {
   if (!password) {
 
     console.warn("⚠ Erro ao descriptografar senha!");
-
-    localStorage.clear();
-
-    window.location.href = LOGIN_PAGE;
-
+    logoutAndRedirect();
     return false;
 
   }
@@ -168,11 +183,7 @@ async function validarToken() {
   if (!payload || !payload.exp) {
 
     console.warn("⚠ Token inválido!");
-
-    localStorage.clear();
-
-    window.location.href = LOGIN_PAGE;
-
+    logoutAndRedirect();
     return false;
 
   }
@@ -188,11 +199,7 @@ async function validarToken() {
   if (tempoRestante <= 0) {
 
     console.warn("⚠ Token expirado. Redirecionando para login.");
-
-    localStorage.clear();
-
-    window.location.href = LOGIN_PAGE;
-
+    logoutAndRedirect();
     return false;
 
   }
@@ -206,10 +213,7 @@ async function validarToken() {
     const renovado = await renovarToken(username, password);
 
     if (!renovado) {
-
-      localStorage.clear();
-
-      window.location.href = LOGIN_PAGE;
+        logoutAndRedirect();
 
       return false;
 
@@ -239,3 +243,43 @@ async function validarToken() {
 // });
 // document.addEventListener("DOMContentLoaded", validarToken);
 
+
+function hasBearerAuthorization(input, init) {
+  const sources = [];
+  if (init && init.headers) {
+    sources.push(init.headers);
+  }
+  if (typeof Request !== 'undefined' && input instanceof Request) {
+    sources.push(input.headers);
+  }
+  for (const source of sources) {
+    try {
+      const headers = source instanceof Headers ? source : new Headers(source);
+      const auth = headers.get('Authorization') || headers.get('authorization');
+      if (auth && auth.toLowerCase().startsWith('bearer')) {
+        return true;
+      }
+    } catch (error) {
+      console.error('Erro ao analisar cabecalhos de autorizacao:', error);
+    }
+  }
+  return false;
+}
+
+(function attachAuthInterceptor() {
+  if (typeof window === 'undefined' || !window.fetch) {
+    return;
+  }
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = async function (input, init = {}) {
+    const response = await originalFetch(input, init);
+    try {
+      if (response && response.status === 401 && hasBearerAuthorization(input, init)) {
+        logoutAndRedirect('Sessao expirada. Faca login novamente.');
+      }
+    } catch (error) {
+      console.error('Erro no interceptor de autenticacao:', error);
+    }
+    return response;
+  };
+})();

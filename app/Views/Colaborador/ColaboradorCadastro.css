@@ -5,11 +5,11 @@ body {
   color: #333;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* evita scroll lateral desnecessário */
+  overflow-x: hidden; /* evita scroll lateral desnecess?rio */
   box-sizing: border-box;
 }
 
-/* WRAPPER DO CONTEÚDO */
+/* WRAPPER DO CONTE?DO */
 .content {
   margin-left: 220px; /* largura menu aberto */
   width: calc(100% - 220px);
@@ -17,7 +17,7 @@ body {
   padding: 20px;
 }
 
-/* QUANDO O MENU ESTÁ RECOLHIDO */
+/* QUANDO O MENU EST? RECOLHIDO */
 .content.recolhido {
   margin-left: 60px;
   width: calc(100% - 60px);
@@ -29,7 +29,7 @@ body {
   border-radius: 12px;
   padding: 25px 30px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  max-width: 100%; /* garante que não extrapole a tela */
+  max-width: 100%; /* garante que n?o extrapole a tela */
   box-sizing: border-box;
   overflow-x: hidden; /* evita scroll dentro do card */
 }
@@ -53,7 +53,7 @@ header h2 {
   white-space: nowrap; /* evita quebra do texto */
 }
 
-/* FORMULÁRIO */
+/* FORMUL?RIO */
 form {
   display: grid;
   gap: 12px;
@@ -73,7 +73,7 @@ form input:focus, form select:focus {
   outline: none;
 }
 
-/* BOTOES DE AÇÃO */
+/* BOTOES DE A??O */
 #btnSalvar {
   margin-top: 10px;
   background: #2a9d8f;
@@ -112,7 +112,7 @@ form input:focus, form select:focus {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* mantém tabela legível */
+  min-width: 600px; /* mant?m tabela leg?vel */
 }
 
 thead {
@@ -197,4 +197,19 @@ tbody tr.selected {
 #gridHistorico th, #gridHistorico td {
   border: 1px solid #ddd;
   padding: 8px;
+}
+.campo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.campo-checkbox input {
+  width: auto;
+}
+
+input[readonly] {
+  background: #f0f0f0;
+  cursor: not-allowed;
 }

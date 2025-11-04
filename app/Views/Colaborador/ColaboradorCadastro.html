@@ -4,17 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro de Colaboradores</title>
-
-  <!-- CSS do menu -->
   <link rel="stylesheet" href="../Menu/Menu.css">
-  <!-- CSS da tela -->
   <link rel="stylesheet" href="ColaboradorCadastro.css">
 </head>
 <body>
-  <!-- MENU LATERAL carregado dinamicamente -->
   <div id="menu-container"></div>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <div class="content">
     <div class="container">
       <header>
@@ -22,9 +17,7 @@
         <button id="btnNovo" type="button">+ Novo</button>
       </header>
 
-      <!-- Formulário -->
       <form id="formColaborador">
-        <!-- ADICIONADO: campo hidden para controlar insert / update -->
         <input type="hidden" id="id_funcionario" />
 
         <label>Nome:</label>
@@ -39,29 +32,34 @@
         <label>Data de Nascimento:</label>
         <input type="date" id="dt_nascimento" required>
 
-        <label>Data de Admissão:</label>
+        <label>Data de Admiss?o:</label>
         <input type="date" id="dt_cargo" required>
 
-        <label>Salário:</label>
-        <input type="number" id="vl_salario" required>
+        <label>Sal?rio Base:</label>
+        <input type="number" id="vl_salario" min="0" step="0.01" required>
 
-        <label>Vale Alimentação:</label>
-        <input type="number" id="vl_alimentacao">
+        <label>Vale Alimenta??o:</label>
+        <input type="number" id="vl_alimentacao" min="0" step="0.01">
 
-        <label>Vale Refeição:</label>
-        <input type="number" id="vl_refeicao">
+        <label>Vale Refei??o:</label>
+        <input type="number" id="vl_refeicao" min="0" step="0.01">
 
         <label>Vale Transporte:</label>
-        <input type="number" id="vl_transporte">
+        <input type="number" id="vl_transporte" min="0" step="0.01">
 
-        <label>INSS:</label>
-        <input type="number" id="vl_inss">
+        <label>Plano de Sa?de:</label>
+        <input type="number" id="vl_plano_saude" min="0" step="0.01">
 
-        <label>FGTS:</label>
-        <input type="number" id="vl_fgts">
+        <label>INSS (calculado):</label>
+        <input type="number" id="vl_inss" readonly>
 
-        <label>Plano de Saúde:</label>
-        <input type="number" id="vl_plano_saude">
+        <label>FGTS (calculado):</label>
+        <input type="number" id="vl_fgts" readonly>
+
+        <div class="campo-checkbox">
+          <input type="checkbox" id="lancar_automatico">
+          <label for="lancar_automatico">Lan?ar sal?rios automaticamente nos pr?ximos meses?</label>
+        </div>
 
         <label>Cargo:</label>
         <select id="id_cargo" required></select>
@@ -69,7 +67,6 @@
         <button type="button" id="btnSalvar">Salvar</button>
       </form>
 
-      <!-- GRID -->
       <section class="table-section">
         <h3>Colaboradores</h3>
         <table id="grid">
@@ -82,7 +79,7 @@
               <th>RG</th>
               <th>Status</th>
               <th>Cargo Atual</th>
-              <th>Ações</th>
+              <th>A??es</th>
             </tr>
           </thead>
           <tbody id="tbodyColaboradores"></tbody>
@@ -93,16 +90,15 @@
     </div>
   </div>
 
-  <!-- POPUP HISTÓRICO -->
   <div id="historicoModal" class="modal">
     <div class="modal-content">
       <span class="close" id="closeHistorico">&times;</span>
-      <h3>Histórico do Colaborador</h3>
+      <h3>Hist?rico do Colaborador</h3>
       <table id="gridHistorico">
         <thead>
           <tr>
             <th>Data Cargo</th>
-            <th>Salário</th>
+            <th>Sal?rio</th>
             <th>Cargo</th>
             <th>Data Desligamento</th>
           </tr>
@@ -113,13 +109,11 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <script src="../config.js"></script>
-<script src="../auth.js"></script> <!-- Funções de auth (encrypt/decrypt/validação de token) -->
-  <!-- JS -->
+  <script src="../config.js"></script>
+  <script src="../auth.js"></script>
   <script src="ColaboradorCadastro.js"></script>
   <script src="../Menu/Menu.js"></script>
 
-  <!-- Carregar o menu dinamicamente -->
   <script>
     fetch('../Menu/Menu.html')
       .then(response => response.text())

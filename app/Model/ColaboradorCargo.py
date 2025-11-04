@@ -1,5 +1,7 @@
-import pyodbc
+﻿import pyodbc
 import pandas as pd
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from Model.Conn_DB import Conn as Conn_DB
 from Schemas import ColaboradorCargo as cargoSchema
 
@@ -23,6 +25,44 @@ class ColaboradorCargoDAL:
 
     def _connect(self):
         return pyodbc.connect(self.conexao.str_conn)
+
+    def _parse_date(self, value):
+        if not value:
+            return None
+        value = str(value).strip()
+        if not value:
+            return None
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(value[:10], fmt).strftime("%Y-%m-%d")
+            except ValueError:
+                continue
+        try:
+            return datetime.fromisoformat(value[:10]).strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+
+    def _date_literal(self, value, *, default_today=False, allow_null=True):
+        parsed = self._parse_date(value)
+        if parsed:
+            return f"CONVERT(DATE, '{parsed}', 120)"
+        if default_today:
+            return "CAST(GETDATE() AS DATE)"
+        if allow_null:
+            return "NULL"
+        return "CAST(GETDATE() AS DATE)"
+
+    def _decimal_literal(self, value):
+        if value is None or value == "":
+            return "NULL"
+        try:
+            dec = Decimal(str(value).replace(',', '.'))
+            return str(dec)
+        except (InvalidOperation, ValueError, TypeError):
+            try:
+                return str(float(value))
+            except (TypeError, ValueError):
+                return "NULL"
 
     def retorna_cargos_colaborador(self):
         query = """
@@ -51,7 +91,7 @@ class ColaboradorCargoDAL:
             print("Erro ao buscar cargos do colaborador:", e)
             return pd.DataFrame()
 
-    def retorna_cargo_colaborador(self,id_funcionario: int):
+    def retorna_cargo_colaborador(self, id_funcionario: int):
         query = f"""
             SELECT 
                 CF.ID_CARGO_FUNCIONARIO AS IdCargoFuncionario,
@@ -80,7 +120,18 @@ class ColaboradorCargoDAL:
             return pd.DataFrame()
 
     def inserir_cargo_colaborador(self, cargo: cargoSchema):
-        query = f"""
+        dt_cargo_literal = self._date_literal(getattr(cargo, "dt_cargo", None), default_today=True, allow_null=False)
+        dt_desligamento_literal = self._date_literal(getattr(cargo, "dt_desligamento", None), allow_null=True)
+        dt_desligamento_anterior = self._date_literal(getattr(cargo, "dt_cargo", None), default_today=True, allow_null=False)
+
+        update_query = f"""
+            UPDATE TB_CARGOS_FUNCIONARIOS
+            SET DT_DESLIGAMENTO = {dt_desligamento_anterior}
+            WHERE ID_FUNCIONARIO = {cargo.id_funcionario}
+              AND DT_DESLIGAMENTO IS NULL
+        """
+
+        insert_query = f"""
             INSERT INTO TB_CARGOS_FUNCIONARIOS (
                 ID_FUNCIONARIO, DT_CARGO, VL_SALARIO, ID_USUARIO,
                 VL_TRANSPORTE, VL_ALIMENTACAO, VL_PLANO_SAUDE,
@@ -88,24 +139,24 @@ class ColaboradorCargoDAL:
             )
             VALUES (
                 {cargo.id_funcionario},
-                GETDATE(),
-                {cargo.vl_salario},
+                {dt_cargo_literal},
+                {self._decimal_literal(getattr(cargo, 'vl_salario', None))},
                 {cargo.id_usuario},
-                {cargo.vl_transporte},
-                {cargo.vl_alimentacao},
-                {cargo.vl_plano_saude},
-                {cargo.vl_refeicao},
-                {cargo.vl_inss},
-                {cargo.vl_fgts},
-                {f"CONVERT(DATE, '{cargo.dt_desligamento}', 103)" if cargo.dt_desligamento else "NULL"},
+                {self._decimal_literal(getattr(cargo, 'vl_transporte', None))},
+                {self._decimal_literal(getattr(cargo, 'vl_alimentacao', None))},
+                {self._decimal_literal(getattr(cargo, 'vl_plano_saude', None))},
+                {self._decimal_literal(getattr(cargo, 'vl_refeicao', None))},
+                {self._decimal_literal(getattr(cargo, 'vl_inss', None))},
+                {self._decimal_literal(getattr(cargo, 'vl_fgts', None))},
+                {dt_desligamento_literal},
                 {cargo.id_cargo}
             )
         """
-        print(query)
         try:
             with self._connect() as conn:
                 cursor = conn.cursor()
-                cursor.execute(query)
+                cursor.execute(update_query)
+                cursor.execute(insert_query)
                 conn.commit()
                 return True
         except Exception as e:
@@ -113,20 +164,22 @@ class ColaboradorCargoDAL:
             return False
 
     def alterar_cargo_colaborador(self, cargo: cargoSchema):
+        dt_cargo_literal = self._date_literal(getattr(cargo, "dt_cargo", None), default_today=True, allow_null=False)
+        dt_desligamento_literal = self._date_literal(getattr(cargo, "dt_desligamento", None), allow_null=True)
         query = f"""
             UPDATE TB_CARGOS_FUNCIONARIOS
             SET 
                 ID_FUNCIONARIO = {cargo.id_funcionario},
-                DT_CARGO = CONVERT(DATE, '{cargo.dt_cargo}', 103),
-                VL_SALARIO = {cargo.vl_salario},
+                DT_CARGO = {dt_cargo_literal},
+                VL_SALARIO = {self._decimal_literal(getattr(cargo, 'vl_salario', None))},
                 ID_USUARIO = {cargo.id_usuario},
-                VL_TRANSPORTE = {cargo.vl_transporte},
-                VL_ALIMENTACAO = {cargo.vl_alimentacao},
-                VL_PLANO_SAUDE = {cargo.vl_plano_saude},
-                VL_REFEICAO = {cargo.vl_refeicao},
-                VL_INSS = {cargo.vl_inss},
-                VL_FGTS = {cargo.vl_fgts},
-                DT_DESLIGAMENTO = {f"CONVERT(DATE, '{cargo.dt_desligamento}', 103)" if cargo.dt_desligamento else "NULL"},
+                VL_TRANSPORTE = {self._decimal_literal(getattr(cargo, 'vl_transporte', None))},
+                VL_ALIMENTACAO = {self._decimal_literal(getattr(cargo, 'vl_alimentacao', None))},
+                VL_PLANO_SAUDE = {self._decimal_literal(getattr(cargo, 'vl_plano_saude', None))},
+                VL_REFEICAO = {self._decimal_literal(getattr(cargo, 'vl_refeicao', None))},
+                VL_INSS = {self._decimal_literal(getattr(cargo, 'vl_inss', None))},
+                VL_FGTS = {self._decimal_literal(getattr(cargo, 'vl_fgts', None))},
+                DT_DESLIGAMENTO = {dt_desligamento_literal},
                 ID_CARGO = {cargo.id_cargo}
             WHERE ID_CARGO_FUNCIONARIO = {cargo.id_cargo_funcionario}
         """

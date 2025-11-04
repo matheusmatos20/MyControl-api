@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class ColaboradorCargoSchema(BaseModel):
     id_cargo_funcionario: Optional[int] = None
     id_funcionario: int
@@ -13,7 +14,8 @@ class ColaboradorCargoSchema(BaseModel):
     vl_refeicao: Optional[float] = None
     vl_inss: Optional[float] = None
     vl_fgts: Optional[float] = None
+    vl_prov_decimo_terceiro: Optional[float] = None
+    vl_prov_ferias: Optional[float] = None
+    vl_custo_total: Optional[float] = None
     dt_desligamento: Optional[str] = None
     id_cargo: int
-
-    

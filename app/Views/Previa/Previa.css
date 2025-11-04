@@ -160,6 +160,13 @@ button.hidden {
   .filtros button {
     width: 100%;
   }
+  .filtros select {
+    width: 100%;
+  }
+  .checkbox-inline {
+    width: 100%;
+    justify-content: flex-start;
+  }
 
   table, thead, tbody, th, td, tr {
     display: block;
@@ -182,4 +189,23 @@ button.hidden {
     font-weight: bold;
     color: #555;
   }
+}
+
+.filtros select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
+.checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.checkbox-inline input {
+  width: 16px;
+  height: 16px;
 }

@@ -1,4 +1,4 @@
-/* ===== Reset ===== */
+﻿/* ===== Reset ===== */
 * {
   margin: 0;
   padding: 0;
@@ -87,8 +87,8 @@ body {
   border-left: 5px solid #f4c542;
 }
 
-.financeiro {
-  border-left: 5px solid #00c853;
+.receber {
+  border-left: 5px solid #2ecc71;
 }
 
 /* 🔽 Área expansível abaixo dos cards */
@@ -189,4 +189,12 @@ tbody tr:hover {
   .cards {
     grid-template-columns: 1fr;
   }
+}
+
+.mensagem-vazia {
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+  background: #f9fafb;
+  border-radius: 12px;
 }

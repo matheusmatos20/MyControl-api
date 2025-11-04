@@ -1,10 +1,13 @@
 import pyodbc
 import pandas as pd
 import re
+import calendar
 from datetime import datetime
 from decimal import Decimal
+from typing import Any, Dict, List
 from Model import Conn_DB
 from Schemas import Pagamento as pagamento
+from Schemas import Parcelamento as parcelamento_schema
 class PagamentoDAL:
 
     def __init__(self):
@@ -20,7 +23,7 @@ class PagamentoDAL:
         return re.sub(r'\D', '', cnpj)
 
     def listar_debitos(self):
-        print("Listar Débitos")
+        print("Listar D?bitos")
 
         query = """select 
                             P.ID_PAGAMENTO as ID
@@ -44,7 +47,7 @@ class PagamentoDAL:
             return pd.read_sql(query, conn)
         
     def listar_debitos_em_aberto(self):
-        print("Listar Débitos")
+        print("Listar D?bitos")
 
         query = """select 
                     	P.ID_PAGAMENTO as ID
@@ -166,7 +169,7 @@ class PagamentoDAL:
 
     def registrar_aviso_nf(self, *, id_usuario: int, fornecedor: dict, empresa: dict, valor: Decimal, data_emissao, data_vencimento, numero_nf: str, serie_nf: str, chave_nf: str | None = None, observacao: str | None = None):
         descricao_base = f"NF {numero_nf}/{serie_nf} - fornecedor {fornecedor.get('NM_FANTASIA') or fornecedor.get('CNPJ')}"
-        descricao_base += f" | Emissão: {data_emissao.strftime('%d/%m/%Y')}"
+        descricao_base += f" | Emiss?o: {data_emissao.strftime('%d/%m/%Y')}"
         if observacao:
             descricao_base += f" - {observacao}"
         if empresa.get('NM_FANTASIA'):
@@ -315,7 +318,7 @@ class PagamentoDAL:
             SELECT
                 ?, F.ID_FUNCIONARIO, NULL,
                 CONVERT(DATE, CONCAT(CONVERT(VARCHAR(6), DATEADD(MONTH, 1, GETDATE()), 112), '05'), 103),
-                CONCAT('Vale Alimentação Colaborador: ', F.NM_FUNCIONARIO),
+                CONCAT('Vale Alimenta??o Colaborador: ', F.NM_FUNCIONARIO),
                 1, VL_ALIMENTACAO, 3,
                 CONVERT(VARCHAR(6), GETDATE(), 112)
             FROM TB_FUNCIONARIOS F
@@ -327,7 +330,7 @@ class PagamentoDAL:
                 SELECT
                     ?, F.ID_FUNCIONARIO, NULL,
                     CONVERT(DATE, CONCAT(CONVERT(VARCHAR(6), DATEADD(MONTH, 1, GETDATE()), 112), '05'), 103),
-                    CONCAT('RESERVA - Parcela 13º Colaborador: ', F.NM_FUNCIONARIO),
+                    CONCAT('RESERVA - Parcela 13? Colaborador: ', F.NM_FUNCIONARIO),
                     1, CONVERT(NUMERIC(19,2), (CF.VL_SALARIO / 12)), 3,
                     CONVERT(VARCHAR(6), GETDATE(), 112)
                 FROM TB_FUNCIONARIOS F
@@ -342,5 +345,144 @@ class PagamentoDAL:
 
 
 
+
+
+    @staticmethod
+    def _parse_date(value):
+        if value is None:
+            raise ValueError('Data da primeira parcela ? obrigat?ria.')
+        if isinstance(value, datetime):
+            return value.date()
+        text = str(value).strip()
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(text[:10], fmt).date()
+            except ValueError:
+                continue
+        try:
+            return datetime.fromisoformat(text[:10]).date()
+        except ValueError as exc:
+            raise ValueError(f"Formato de data inv?lido: {value}") from exc
+
+    @staticmethod
+    def _add_months(base_date, months):
+        year = base_date.year + (base_date.month - 1 + months) // 12
+        month = ((base_date.month - 1 + months) % 12) + 1
+        import calendar
+        last_day = calendar.monthrange(year, month)[1]
+        day = min(base_date.day, last_day)
+        return base_date.replace(year=year, month=month, day=day)
+
+    def criar_parcelamento(self, parcelamento: parcelamento_schema.ParcelamentoCreateSchema):
+        if parcelamento.numero_parcelas <= 0:
+            raise ValueError("N?mero de parcelas deve ser maior que zero.")
+
+        primeira_data = self._parse_date(parcelamento.data_primeira_parcela)
+        if primeira_data is None:
+            raise ValueError("Data da primeira parcela inv?lida.")
+
+        valor_total = Decimal(str(parcelamento.valor_total))
+        juros_percentual = Decimal(str(parcelamento.juros_percentual or 0))
+        fator = Decimal('1.00') + (juros_percentual / Decimal('100'))
+        total_com_juros = (valor_total * fator).quantize(Decimal('0.01'))
+        valor_parcela_base = (total_com_juros / Decimal(parcelamento.numero_parcelas)).quantize(Decimal('0.01'))
+
+        descricao = parcelamento.descricao.strip()
+        if not descricao:
+            raise ValueError('Descri??o do parcelamento ? obrigat?ria.')
+
+        inseridos = 0
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            acumulado = Decimal('0.00')
+            for numero in range(1, parcelamento.numero_parcelas + 1):
+                vencimento = self._add_months(primeira_data, numero - 1)
+                competencia = (vencimento.year * 100) + vencimento.month
+                descricao_parcela = f"PARCELA {numero}/{parcelamento.numero_parcelas} - {descricao}"
+
+                valor_parcela = valor_parcela_base
+                if numero == parcelamento.numero_parcelas:
+                    valor_parcela = (total_com_juros - acumulado).quantize(Decimal('0.01'))
+                acumulado += valor_parcela
+
+                cursor.execute("""
+                    INSERT INTO TB_PAGAMENTOS
+                        (ID_USUARIO, ID_FUNCIONARIO, DT_PAGAMENTO, DT_VENCIMENTO, DS_PAGAMENTO,
+                         ID_FORNECEDOR, VL_PAGAMENTO, ID_FORMA_PAGAMENTO, COMPETENCIA)
+                    VALUES (?, NULL, NULL, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    parcelamento.id_usuario,
+                    vencimento,
+                    descricao_parcela,
+                    parcelamento.id_fornecedor,
+                    float(valor_parcela),
+                    parcelamento.id_forma_pagamento,
+                    competencia,
+                ))
+                inseridos += 1
+
+            conn.commit()
+
+        return {
+            "parcelas_criadas": inseridos,
+            "valor_total_com_juros": float(total_com_juros)
+        }
+
+    def resumo_parcelas_semana(self) -> Dict[str, float]:
+        query = """
+            SELECT COUNT(*) AS Quantidade, COALESCE(SUM(VL_PAGAMENTO), 0) AS ValorTotal
+            FROM TB_PAGAMENTOS WITH(NOLOCK)
+            WHERE DS_PAGAMENTO LIKE 'PARCELA %'
+              AND DT_PAGAMENTO IS NULL
+              AND DT_VENCIMENTO BETWEEN CAST(GETDATE() AS DATE) AND DATEADD(DAY, 7, CAST(GETDATE() AS DATE))
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            row = cursor.fetchone()
+            quantidade = int(row[0] or 0)
+            valor = float(row[1] or 0)
+            return {
+                "quantidade": quantidade,
+                "valor_total": round(valor, 2),
+            }
+
+    def listar_parcelas_semana(self) -> List[Dict[str, Any]]:
+        query = """
+            SELECT
+                ID_PAGAMENTO,
+                DS_PAGAMENTO,
+                DT_VENCIMENTO,
+                VL_PAGAMENTO
+            FROM TB_PAGAMENTOS WITH(NOLOCK)
+            WHERE DS_PAGAMENTO LIKE 'PARCELA %'
+              AND DT_PAGAMENTO IS NULL
+              AND DT_VENCIMENTO BETWEEN CAST(GETDATE() AS DATE) AND DATEADD(DAY, 7, CAST(GETDATE() AS DATE))
+            ORDER BY DT_VENCIMENTO
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            rows = cursor.execute(query).fetchall()
+            resultado: List[Dict[str, Any]] = []
+            for row in rows:
+                descricao = row.DS_PAGAMENTO or ''
+                numero_parcela = None
+                total_parcelas = None
+                match = re.search(r"PARCELA (\d+)/(\d+)", descricao)
+                if match:
+                    numero_parcela = int(match.group(1))
+                    total_parcelas = int(match.group(2))
+                resultado.append(
+                    {
+                        "id_pagamento": row.ID_PAGAMENTO,
+                        "descricao": descricao,
+                        "data_vencimento": row.DT_VENCIMENTO.strftime("%Y-%m-%d") if row.DT_VENCIMENTO else None,
+                        "valor": float(row.VL_PAGAMENTO or 0),
+                        "numero_parcela": numero_parcela,
+                        "total_parcelas": total_parcelas,
+                    }
+                )
+            return resultado
 
 

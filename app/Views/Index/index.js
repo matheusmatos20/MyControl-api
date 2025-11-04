@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLogin = document.getElementById("close-login");
   const formLogin = document.getElementById("form-login");
 
-  const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8080';
+  const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8000';
   const resolvedAuthBase = (window.AUTH_BASE_URL || window.API_BASE_URL || DEFAULT_AUTH_BASE).replace(/\/$/, '');
   const tokenEndpoint = window.buildAuthUrl ? window.buildAuthUrl('/token') : `${resolvedAuthBase}/token`;
 
