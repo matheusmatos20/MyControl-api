@@ -1,8 +1,8 @@
 ﻿// auth.js
 
 const SECRET_KEY = "MC_4e1b96d3d6d14b0e8a2c9f7b5a3c1d0f-7E!q@Z#t$K%p^X&n*L(2)r+V=G?y";
-
-const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8000';
+const DEFAULT_AUTH_BASE = 'https://mycontrol-api-d.onrender.com';
+// const DEFAULT_AUTH_BASE = 'http://127.0.0.1:8000';
 const resolvedAuthBase = (window.AUTH_BASE_URL || window.API_BASE_URL || DEFAULT_AUTH_BASE).replace(/\/$/, '');
 const TOKEN_ENDPOINT = window.buildAuthUrl ? window.buildAuthUrl('/token') : `${resolvedAuthBase}/token`;
 const LOGIN_PAGE = (() => {
