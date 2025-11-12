@@ -25,8 +25,8 @@ const LOGIN_PAGE = (() => {
     }
   }
   if (target) return target;
-  // Fallbacks relativos
-  return '../Views/Index/index.html';
+  // Em ambientes como Azure SWA (raiz /), a página pública é /Index/index.html
+  return origin + '/Index/index.html';
 })();
 
 let redirectingToLogin = false;
@@ -246,8 +246,8 @@ async function validarToken() {
 // Validação automática em todas as telas, exceto a própria Index
 function isIndexPage() {
   const path = (window.location.pathname || '').replace(/\\/g, '/').toLowerCase();
-  // Qualquer arquivo dentro de /views/index/ é considerado página pública (login/landing)
-  return path.includes('/views/index/');
+  // Considere público quando for servido de /views/index/ (dev) ou /index/ (SWA)
+  return path.includes('/views/index/') || path.startsWith('/index/');
 }
 
 function scheduleValidate() {
