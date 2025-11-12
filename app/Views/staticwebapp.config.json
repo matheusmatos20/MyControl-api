@@ -1,7 +1,8 @@
 {
   "routes": [
     { "route": "/", "redirect": "/Index/index.html", "statusCode": 302 },
-    { "route": "/index.html", "rewrite": "/Index/index.html" }
+    { "route": "/index.html", "rewrite": "/Index/index.html" },
+    { "route": "/Views/Index/index.html", "redirect": "/Index/index.html", "statusCode": 302 }
   ],
   "navigationFallback": {
     "rewrite": "/Index/index.html",
