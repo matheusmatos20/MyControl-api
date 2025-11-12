@@ -1,0 +1,20 @@
+{
+  "routes": [
+    { "route": "/", "rewrite": "/Index/index.html" },
+    { "route": "/index.html", "rewrite": "/Index/index.html" }
+  ],
+  "navigationFallback": {
+    "rewrite": "/Index/index.html",
+    "exclude": [
+      "/assets/*",
+      "/*.css",
+      "/*.js",
+      "/favicon.ico",
+      "/api/*"
+    ]
+  },
+  "globalHeaders": {
+    "Cache-Control": "public, max-age=60"
+  }
+}
+
