@@ -6,21 +6,10 @@
   "navigationFallback": {
     "rewrite": "/Index/index.html",
     "exclude": [
-      "/assets/*",
-      "/**/*.css",
-      "/**/*.js",
-      "/**/*.map",
-      "/**/*.png",
-      "/**/*.jpg",
-      "/**/*.jpeg",
-      "/**/*.gif",
-      "/**/*.svg",
-      "/**/*.webp",
-      "/**/*.ico",
-      "/**/*.woff",
-      "/**/*.woff2",
-      "/**/*.ttf",
-      "/api/*"
+      "/api/*",
+      "/favicon.ico",
+      "/robots.txt",
+      "/sitemap.xml"
     ]
   },
   "globalHeaders": {
