@@ -7,9 +7,19 @@
     "rewrite": "/Index/index.html",
     "exclude": [
       "/assets/*",
-      "/*.css",
-      "/*.js",
-      "/favicon.ico",
+      "/**/*.css",
+      "/**/*.js",
+      "/**/*.map",
+      "/**/*.png",
+      "/**/*.jpg",
+      "/**/*.jpeg",
+      "/**/*.gif",
+      "/**/*.svg",
+      "/**/*.webp",
+      "/**/*.ico",
+      "/**/*.woff",
+      "/**/*.woff2",
+      "/**/*.ttf",
       "/api/*"
     ]
   },
