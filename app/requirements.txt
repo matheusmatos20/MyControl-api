@@ -1,0 +1,11 @@
+﻿fastapi[standard]==0.115.4
+pydantic
+pytest
+httpx
+pyodbc
+pandas
+uvicorn
+python-jose[cryptography]
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
+psycopg[binary]==3.2.1
