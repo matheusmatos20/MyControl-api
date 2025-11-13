@@ -22,7 +22,6 @@ build/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 
 # Testing / Tooling caches
 .pytest_cache/
@@ -35,3 +34,5 @@ coverage/
 
 # Project-specific
 temp_slice.txt
+
+.python_packages
