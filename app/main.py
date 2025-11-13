@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
@@ -20,7 +20,8 @@ app = FastAPI()
 # Configurações CORS
 origins = [
     "http://localhost:5501",
-    "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com"
+    "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com",
+    "https://calm-sky-04182d41e.3.azurestaticapps.net"
 
 ]
 app.add_middleware(
