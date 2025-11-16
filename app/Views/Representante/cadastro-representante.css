@@ -117,52 +117,56 @@ main.main {
 }
 
 /* Tabela responsiva */
-.grid-view {
-  width: 100%;
-  overflow-x: auto;
+.cards-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
 }
-#tabela-representantes {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  min-width: 600px;
-}
-#tabela-representantes th,
-#tabela-representantes td {
+
+.representante-card {
   border: 1px solid #e5e7eb;
-  padding: 0.8rem;
-  text-align: left;
-}
-#tabela-representantes th {
-  background: var(--primary);
-  color: white;
-}
-#tabela-representantes tr:nth-child(even) {
-  background: #f9fafb;
+  border-radius: 1rem;
+  padding: 1.1rem 1.3rem;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
 }
 
-/* Destaque ao passar o mouse */
-#tabela-representantes tbody tr:hover {
-  background: rgba(42, 157, 143, 0.1);
-  cursor: pointer;
-  transition: background 0.2s ease;
+.representante-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 14px 32px rgba(42, 157, 143, 0.15);
+  transform: translateY(-2px);
 }
 
-.acao-btn {
-  margin: 0 0.2rem;
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  font-size: 0.9rem;
+.representante-card.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(42, 157, 143, 0.25);
 }
-.acao-btn.editar {
-  background: #facc15;
-  color: #333;
+
+.representante-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #0f172a;
 }
-.acao-btn.excluir {
-  background: #ef4444;
-  color: white;
+
+.representante-card .dados {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.representante-card .dados span {
+  font-size: 0.92rem;
+  color: #475569;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.representante-card .dados span strong {
+  color: #0f172a;
+  font-weight: 600;
 }
 
 /* Responsividade */
@@ -171,9 +175,8 @@ main.main {
     flex-direction: column;
     align-items: stretch;
   }
-  #tabela-representantes th,
-  #tabela-representantes td {
-    font-size: 0.85rem;
+  .representante-card h3 {
+    font-size: 1rem;
   }
 }
 
