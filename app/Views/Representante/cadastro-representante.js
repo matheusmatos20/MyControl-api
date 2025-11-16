@@ -26,25 +26,25 @@ async function carregarRepresentantes() {
         }
 
         const representantes = await response.json();
-        const tbody = document.querySelector("#tabela-representantes tbody");
-        tbody.innerHTML = "";
+        const lista = document.getElementById("lista-representantes");
+        lista.innerHTML = "";
 
         representantes.forEach(r => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${r.Cliente || ""}</td>
-                <td>${r.RG !== "None" ? r.RG : ""}</td>
-                <td>${r.CPF !== "None" ? r.CPF : ""}</td>
-                <td>${r.Telefone !== "None" ? r.Telefone : ""}</td>
-                <td>${r.DtNascimento !== "None" ? r.DtNascimento : ""}</td>
-                <td>${r.Email !== "None" ? r.Email : ""}</td>`;
-                // <td>
-                //      <button class="acao-btn excluir" data-id="${r.Id}">Excluir</button>
-                // </td>
-            // `;
-
-            tr.addEventListener("click", () => carregarFormulario(r, tr));
-            tbody.appendChild(tr);
+            const card = document.createElement("article");
+            card.className = "representante-card";
+            card.dataset.nome = normalizarTexto(r.Cliente || "");
+            card.innerHTML = `
+                <h3>${r.Cliente || "Sem nome"}</h3>
+                <div class="dados">
+                    <span><strong>RG:</strong> ${r.RG && r.RG !== "None" ? r.RG : "-"}</span>
+                    <span><strong>CPF:</strong> ${r.CPF && r.CPF !== "None" ? r.CPF : "-"}</span>
+                    <span><strong>Telefone:</strong> ${r.Telefone && r.Telefone !== "None" ? r.Telefone : "-"}</span>
+                    <span><strong>Dt. Nasc.:</strong> ${r.DtNascimento && r.DtNascimento !== "None" ? r.DtNascimento : "-"}</span>
+                    <span><strong>E-mail:</strong> ${r.Email && r.Email !== "None" ? r.Email : "-"}</span>
+                </div>
+            `;
+            card.addEventListener("click", () => carregarFormulario(r, card));
+            lista.appendChild(card);
         });
 
     } catch (err) {
@@ -56,7 +56,7 @@ async function carregarRepresentantes() {
 // -------------------------
 // Carregar formulário
 // -------------------------
-function carregarFormulario(rep, linha) {
+function carregarFormulario(rep, elemento) {
     representanteSelecionado = rep;
     const form = document.getElementById("form-representante");
 
@@ -69,8 +69,10 @@ function carregarFormulario(rep, linha) {
 
     form.querySelector("button[type=submit]").textContent = "Atualizar";
 
-    document.querySelectorAll("#tabela-representantes tbody tr").forEach(tr => tr.classList.remove("selected"));
-    linha.classList.add("selected");
+    document.querySelectorAll(".representante-card").forEach(card => card.classList.remove("selected"));
+    if (elemento) {
+        elemento.classList.add("selected");
+    }
 }
 
 // -------------------------
@@ -81,7 +83,7 @@ function limparFormulario() {
     const form = document.getElementById("form-representante");
     form.reset();
     form.querySelector("button[type=submit]").textContent = "Salvar";
-    document.querySelectorAll("#tabela-representantes tbody tr").forEach(tr => tr.classList.remove("selected"));
+    document.querySelectorAll(".representante-card").forEach(card => card.classList.remove("selected"));
 }
 
 // -------------------------
@@ -182,11 +184,8 @@ function normalizarTexto(texto) {
 
 function aplicarFiltro() {
     const filtro = normalizarTexto(document.getElementById("filtroNome").value);
-    const linhas = document.querySelectorAll("#tabela-representantes tbody tr");
-
-    linhas.forEach(linha => {
-        const nome = normalizarTexto(linha.querySelector("td")?.textContent || "");
-        linha.style.display = nome.includes(filtro) ? "" : "none";
+    document.querySelectorAll(".representante-card").forEach(card => {
+        card.style.display = filtro ? (card.dataset.nome.includes(filtro) ? "" : "none") : "";
     });
 }
 
@@ -200,8 +199,8 @@ window.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", salvarRepresentante);
     form.addEventListener("reset", limparFormulario);
 
-    const tabela = document.querySelector("#tabela-representantes tbody");
-    tabela.addEventListener("click", (e) => {
+    const lista = document.getElementById("lista-representantes");
+    lista.addEventListener("click", (e) => {
         if (e.target.classList.contains("excluir")) {
             const id = Number(e.target.dataset.id);
             excluirRepresentante(id);
