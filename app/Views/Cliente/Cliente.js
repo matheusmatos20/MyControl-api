@@ -3,6 +3,7 @@ let tokenGlobal = null;
 
 const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+const COLUNAS_CLIENTE = ["ID", "Nome", "CPF", "RG", "Data Nasc.", "Telefone", "Representante"];
 
 // -----------------------------
 // Funções auxiliares
@@ -89,6 +90,10 @@ async function carregarClientes() {
         <td>${c.Telefone || ""}</td>
         <td>${c.Representante || ""}</td>
       `;
+
+      Array.from(tr.children).forEach((td, index) => {
+        td.setAttribute('data-label', COLUNAS_CLIENTE[index] || '');
+      });
 
       // Clique para editar
       tr.addEventListener("click", () => {

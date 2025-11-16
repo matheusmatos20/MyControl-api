@@ -92,18 +92,20 @@ function renderizarContasReceber(lista) {
     return `
         <div class="card">
             <h4>Contas a Receber nesta Semana</h4>
-            <table class="tabela-resumo">
-                <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th>Vencimento</th>
-                        <th>Previsto</th>
-                        <th>Recebido</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>${linhas}</tbody>
-            </table>
+            <div class="table-section">
+              <table class="tabela-resumo">
+                  <thead>
+                      <tr>
+                          <th>Descrição</th>
+                          <th>Vencimento</th>
+                          <th>Previsto</th>
+                          <th>Recebido</th>
+                          <th>Status</th>
+                      </tr>
+                  </thead>
+                  <tbody>${linhas}</tbody>
+              </table>
+            </div>
         </div>
     `;
 }
@@ -137,17 +139,19 @@ function renderizarDespesasPendentes(lista) {
     return `
         <div class="card">
             <h4>Despesas Fixas a Confirmar</h4>
-            <table class="tabela-resumo">
-                <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th>Vencimento</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>${linhas}</tbody>
-            </table>
+            <div class="table-section">
+              <table class="tabela-resumo">
+                  <thead>
+                      <tr>
+                          <th>Descrição</th>
+                          <th>Vencimento</th>
+                          <th>Valor</th>
+                          <th>Status</th>
+                      </tr>
+                  </thead>
+                  <tbody>${linhas}</tbody>
+              </table>
+            </div>
         </div>
     `;
 }
@@ -167,17 +171,19 @@ function renderizarParcelasSemana(lista) {
     return `
         <div class="card">
             <h4>Parcelas da Semana</h4>
-            <table class="tabela-resumo">
-                <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th>Vencimento</th>
-                        <th>Parcela</th>
-                        <th>Valor</th>
-                    </tr>
-                </thead>
-                <tbody>${linhas}</tbody>
-            </table>
+            <div class="table-section">
+              <table class="tabela-resumo">
+                  <thead>
+                      <tr>
+                          <th>Descrição</th>
+                          <th>Vencimento</th>
+                          <th>Parcela</th>
+                          <th>Valor</th>
+                      </tr>
+                  </thead>
+                  <tbody>${linhas}</tbody>
+              </table>
+            </div>
         </div>
     `;
 }
@@ -256,32 +262,34 @@ function renderizarPendencias(lista) {
         </select>
       </div>
 
-      <table id="tabelaPendencias">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Fornecedor</th>
-            <th>Descrição</th>
-            <th>Forma de Pagamento</th>
-            <th>Valor</th>
-            <th>Vencimento</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${lista.map(p => `
+      <div class="table-section">
+        <table id="tabelaPendencias">
+          <thead>
             <tr>
-              <td>${p.ID ?? "-"}</td>
-              <td>${p.Fornecedor}</td>
-              <td>${p.Descricao}</td>
-              <td>${p.FormaPagamento}</td>
-              <td>${formatCurrency(p.Valor)}</td>
-              <td>${new Date(p.Vencimento).toLocaleDateString("pt-BR")}</td>
-              <td><span class="status ${p.StatusPagamento.toLowerCase()}">${p.StatusPagamento}</span></td>
+              <th>ID</th>
+              <th>Fornecedor</th>
+              <th>Descrição</th>
+              <th>Forma de Pagamento</th>
+              <th>Valor</th>
+              <th>Vencimento</th>
+              <th>Status</th>
             </tr>
-          `).join("")}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            ${lista.map(p => `
+              <tr>
+                <td>${p.ID ?? "-"}</td>
+                <td>${p.Fornecedor}</td>
+                <td>${p.Descricao}</td>
+                <td>${p.FormaPagamento}</td>
+                <td>${formatCurrency(p.Valor)}</td>
+                <td>${new Date(p.Vencimento).toLocaleDateString("pt-BR")}</td>
+                <td><span class="status ${p.StatusPagamento.toLowerCase()}">${p.StatusPagamento}</span></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 
