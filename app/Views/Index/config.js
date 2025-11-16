@@ -1,8 +1,8 @@
-﻿(function (global) {
+(function (global) {
   const defaults = {
     // API_BASE_URL: 'http://127.0.0.1:8001',
     
-    API_BASE_URL: 'https://mycontrol-api-d.onrender.com',
+    API_BASE_URL: 'https://mycontrol-c4ajevh3adbqe7fk.westcentralus-01.azurewebsites.net/api',
     AUTH_BASE_URL: null,
   };
 
