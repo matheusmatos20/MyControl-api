@@ -13,10 +13,10 @@ class Conn:
     ]
 
     def __init__(self):
-        self._server = os.getenv("SQLSERVER_HOST", "mfmatos_grantempo.sqlserver.dbaas.com.br")
-        self._database = os.getenv("SQLSERVER_DATABASE", "mfmatos_grantempo")
-        self._user = os.getenv("SQLSERVER_USER", "mfmatos_grantempo")
-        self._password = os.getenv("SQLSERVER_PASSWORD", "gr@ntempo2024")
+        self._server = os.getenv("SQLSERVER_HOST", "mycontrol-server.database.windows.net")
+        self._database = os.getenv("SQLSERVER_DATABASE", "mycontrol")
+        self._user = os.getenv("SQLSERVER_USER", "db-admin")
+        self._password = os.getenv("SQLSERVER_PASSWORD", "MyContr0l@2025")
         self._driver = self._resolve_driver()
         self._str_conn = self._build_connection_string(self._driver)
 
