@@ -8,6 +8,7 @@ const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 const AUTH_BASE = window.AUTH_BASE_URL || API_BASE;
 const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
 const buildAuthUrl = window.buildAuthUrl || (path => `${AUTH_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+const COLUNAS_SERVICO = ["ID", "Descrição", "Valor (R$)", "Recorrente"];
 
 // -------------------------
 // Função para obter o token
@@ -70,14 +71,17 @@ async function carregarServicos() {
         tbody.innerHTML = '';
 
         servicos.forEach(s => {
-            const tr = document.createElement('tr');
-            const valorFormatado = Number(s.Valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            tr.innerHTML = `
+        const tr = document.createElement('tr');
+        const valorFormatado = Number(s.Valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        tr.innerHTML = `
                 <td>${s.ID}</td>
                 <td>${s.Servico}</td>
                 <td>R$ ${valorFormatado}</td>
                 <td>${s.Recorrente ? 'Sim' : 'Não'}</td>
             `;
+            Array.from(tr.children).forEach((td, index) => {
+                td.setAttribute('data-label', COLUNAS_SERVICO[index] || '');
+            });
             tr.addEventListener('click', () => carregarFormulario(s, tr));
             tbody.appendChild(tr);
         });
