@@ -203,12 +203,62 @@ tbody tr:hover {
 
 
 /* Responsivo */
+@media (max-width: 1024px) {
+  .content {
+    margin-left: var(--menu-min);
+  }
+
+  main.main {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   table {
-    font-size: 0.85rem;
+    font-size: 0.92rem;
+    min-width: 0;
+    border: 0;
   }
-  th, td {
-    padding: 8px;
+
+  thead {
+    clip: rect(0 0 0 0);
+    border: 0;
+    height: 1px;
+    width: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+  }
+
+  tbody tr {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  tbody td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border: 0;
+    padding: 4px 0;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  .actions {
+    flex-direction: column;
   }
 }
 

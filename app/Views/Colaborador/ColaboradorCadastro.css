@@ -213,12 +213,20 @@ tbody tr.selected {
 
 .modal-content {
   background: #fff;
-  margin: 10% auto;
+  margin: 5vh auto;
   padding: 20px;
   border-radius: 10px;
-  width: 80%;
-  max-width: 800px;
+  width: min(92vw, 800px);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
 }
 
 .modal .close {
@@ -228,15 +236,33 @@ tbody tr.selected {
   cursor: pointer;
 }
 
+.modal-table {
+  flex: 1;
+  overflow: auto;
+}
+
 #gridHistorico {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
+  min-width: 520px;
 }
 
 #gridHistorico th, #gridHistorico td {
   border: 1px solid #ddd;
   padding: 8px;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: min(96vw, 520px);
+    padding: 16px;
+  }
+
+  #gridHistorico {
+    min-width: 0;
+    font-size: 0.9rem;
+  }
 }
 .campo-checkbox {
   display: flex;

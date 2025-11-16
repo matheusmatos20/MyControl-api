@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
   let token = null;
+  const COLUNAS_PAGAMENTO = ["ID", "Descrição", "Fornecedor", "Vencimento", "Valor", "Forma Pagamento", "Status", "Ações"];
 
   function getTipoPagamento() {
     if (!cmbTipoPagamento) {
@@ -162,6 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
               : ''}
           </td>
         `;
+        Array.from(tr.children).forEach((td, index) => {
+          td.setAttribute('data-label', COLUNAS_PAGAMENTO[index] || '');
+        });
         tabelaBody.appendChild(tr);
       });
 

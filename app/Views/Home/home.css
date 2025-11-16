@@ -135,7 +135,8 @@ thead {
   color: #fff;
 }
 
-th, td {
+th,
+td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
@@ -144,6 +145,15 @@ th, td {
 tbody tr:hover {
   background: #f1f1f1;
   transition: 0.2s;
+}
+
+.table-section {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-section table {
+  min-width: 600px;
 }
 
 /* Status */
@@ -188,6 +198,10 @@ tbody tr:hover {
 
   .cards {
     grid-template-columns: 1fr;
+  }
+
+  .table-section table {
+    min-width: 480px;
   }
 }
 
