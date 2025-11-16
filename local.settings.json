@@ -2,6 +2,12 @@
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true"
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "SQLSERVER_HOST": "mycontrol-server.database.windows.net",
+    "SQLSERVER_DATABASE": "mycontrol",
+    "SQLSERVER_USER": "db-admin",
+    "SQLSERVER_PASSWORD": "MyContr0l@2025",
+    "SQLSERVER_ODBC_DRIVER": "ODBC Driver 18 for SQL Server",
+    "SECRET_KEY": "<jwt-secret>"
   }
 }

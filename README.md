@@ -1,104 +1,130 @@
-# MyControl API
+# MyControl API (Azure Functions)
 
-Back-end FastAPI com integrações para gestão (Clientes, Colaboradores, Serviços, Financeiro) e módulo de Escala de Serviço.
+Backend FastAPI hospedado dentro do Azure Functions (Python) para atender o MyControl.  
+A mesma base FastAPI continua existindo em `app/main.py`, porém agora é exposta por um único HTTP Trigger que usa `AsgiMiddleware`.
 
-## Requisitos
+## Visão geral da arquitetura
 
-- Python 3.10+
-- SQL Server (com driver ODBC 17/18 instalado)
-- Pip + venv
-- (Opcional) Docker/Docker Compose
+```
+Azure Static Web Apps (front)  --->  https://<sua-func-app>.azurewebsites.net/api/*
+                                                |
+                                                v
+                              Azure Functions (Python v4) + FastAPI (app/main.py)
+                                                |
+                                                v
+                                      SQL Server (pyodbc)
+```
 
-## Variáveis de Ambiente (SQL Server)
+- Todas as rotas REST existentes continuam localizadas em `app/main.py`.
+- `function_app.py` cria a Function `FastAPIHost` e encaminha qualquer chamada (`{*segments}`) para o FastAPI via `AsgiMiddleware`.
+- Para desenvolvimento local usamos Azure Functions Core Tools (`func start`) e o Azurite/Storage Emulator (`UseDevelopmentStorage=true` já funciona).
 
-- `SQLSERVER_HOST` (ex: `mfmatos_grantempo.sqlserver.dbaas.com.br`)
-- `SQLSERVER_DATABASE`
-- `SQLSERVER_USER`
-- `SQLSERVER_PASSWORD`
-- (Opcional) `SQLSERVER_ODBC_DRIVER` (ex: `ODBC Driver 18 for SQL Server`)
+## Pré-requisitos
 
-O código autodetecta drivers; se precisar, force via `SQLSERVER_ODBC_DRIVER`.
+- Python 3.10+ (recomendado 3.11).
+- [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local).
+- ODBC Driver 17 ou 18 para SQL Server (necessário ao `pyodbc`).
+- SQL Server acessível com o schema do `database_changes.sql`.
+- (Opcional) Azurite ou Storage Emulator — o `local.settings.json` já usa `UseDevelopmentStorage=true`.
 
-## Instalação
+### Variáveis de ambiente
+
+Configure em `local.settings.json` (para dev) ou nas Application Settings (produção):
+
+| Variável | Descrição |
+| --- | --- |
+| `SQLSERVER_HOST` | Host ou instancia do SQL Server (`server,port` ou FQDN). |
+| `SQLSERVER_DATABASE` | Nome do database. |
+| `SQLSERVER_USER` / `SQLSERVER_PASSWORD` | Credenciais com acesso às tabelas da aplicação. |
+| `SQLSERVER_ODBC_DRIVER` | Driver ODBC forçado (ex.: `ODBC Driver 18 for SQL Server`). Opcional; o código autodetecta. |
+| `SECRET_KEY` | Chave usada para assinar os JWTs (troque em produção). |
+
+> **Importante:** os valores em `local.settings.json` são placeholders. Ajuste antes de rodar localmente e **não** faça commit de segredos reais.
+
+## Configuração local
 
 ```bash
 python -m venv .venv
-. .venv/Scripts/activate  # Windows PowerShell
-pip install -r app/requirements.txt
+. .venv/Scripts/activate   # PowerShell
+pip install -r requirements.txt
+# Ajuste local.settings.json com o host/credenciais do SQL Server
+func start
 ```
 
-## Banco de Dados
+- O Functions Core Tools vai subir em `http://localhost:7071`.  
+- As rotas ficam disponíveis sob `http://localhost:7071/api/...`.  
+- Para que o front local use essa instância você pode temporariamente definir:
 
-1) Execute o script de estrutura/migrações: `database_changes.sql` no seu SQL Server.
-2) Garanta que as tabelas base (ex.: TB_FUNCIONARIOS, TB_CARGOS, etc.) já existam no seu banco.
+```html
+<script>
+  window.APP_CONFIG = { API_BASE_URL: 'http://localhost:7071/api' };
+</script>
+```
 
-Novas tabelas para Escala:
-- `TB_CARGA_HORARIA (ID, DS_CARGA_HORARIA, QT_HORAS_SEMANAIS)`
-- `TB_POSTOS (ID_POSTO, NM_POSTO, ID_CARGA_HORARIA, QT_COLABORADORES)`
-- `TB_ESCALA (ID_ESCALA, ID_FUNCIONARIO, ID_POSTO, DATA, TURNO, OBSERVACAO, DT_CADASTRO)`
-- `TB_FOLGAS_FUNCIONARIO (ID_FOLGA, ID_FUNCIONARIO, DATA, OBSERVACAO, DT_CADASTRO)`
+ou alterar `app/Views/config.js` enquanto estiver desenvolvendo.
 
-## Executando a API (dev)
+### Debug/Standalone FastAPI (opcional)
+
+Ainda é possível subir apenas o FastAPI:
 
 ```bash
 uvicorn app.main:app --reload --port 8001
 ```
 
-- O front padrão usa `app/Views/config.js` (API_BASE_URL). Por padrão aponta para `http://127.0.0.1:8001`.
-- O Auth usa `app/Views/auth.js`; por padrão herda o mesmo host via `buildAuthUrl`.
+Isso é útil para debugging rápido, porém o fluxo oficial de deploy agora depende do Azure Functions.
 
-CORS permitido em `app/main.py`:
-- `http://localhost:5501`
-- `http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com`
+## Estrutura do repositório
 
-Ajuste a lista `origins` conforme seu ambiente.
+| Caminho | Descrição |
+| --- | --- |
+| `app/main.py` | FastAPI com todos os endpoints (clientes, colaboradores, serviços, pagamentos, escala, etc.). |
+| `app/Model/` | Camada de acesso ao SQL Server (pyodbc). |
+| `app/Schemas/` | Schemas Pydantic utilizados nas respostas/validações. |
+| `app/Views/` | Front-end legado usado pelo time (HTML/CSS/JS). |
+| `function_app.py` | Define o `FunctionApp` e expõe o FastAPI via `AsgiMiddleware`. |
+| `local.settings.json` | Configurações locais (não vai para produção). |
+| `host.json` | Configuração do host Azure Functions. |
+| `requirements.txt` | Dependências Python (incluindo `azure-functions`). |
+| `database_changes.sql` | Estrutura necessária no SQL Server. |
+| `docs/` | Diagramas e documentos auxiliares. |
 
-## Autenticação
+## Banco de dados
 
-- Endpoint de login: `POST /token` (OAuth2 Password)
-- Envie `username` e `password` (form-urlencoded). Recebe `{ success, token, empresa, usuario }`.
-- As views usam `localStorage` para token e renovação automática (ver `app/Views/auth.js`).
+1. Execute `database_changes.sql` para criar/atualizar tabelas.
+2. Verifique se as tabelas legadas (TB_FUNCIONARIOS, TB_CLIENTES, etc.) estão populadas.
+3. A conexão é construída dinamicamente em `app/Model/Conn_DB.py` com base nas variáveis `SQLSERVER_*`.
 
-## Módulo Escala de Serviço (novo)
+## Fluxo principal / módulos
 
-Principais endpoints:
-- `POST /carga-horaria` — cadastra carga horária
-- `GET /carga-horaria` — lista cargas horárias
-- `POST /postos` — cadastra posto (vincula carga e quantidade)
-- `GET /postos` — lista postos
-- `PUT /postos/{id}` — atualiza posto
-- `DELETE /postos/{id}` — remove posto
-- `POST /escala/gerar` — gera escala automática por período/postos/cargos
-- `GET /escala/funcionario/{id}` — consulta escala por colaborador
-- `GET /escala/posto/{id_post}/data/{data}` — consulta por posto/dia
-- `POST /escala` — insere item (alocação manual)
-- `PUT /escala/{id}` — edita item
-- `DELETE /escala/{id}` — exclui item
-- `POST /escala/folga` — registra folga
-- `GET /escala/folgas/funcionario/{id}` — lista folgas
-- `DELETE /escala/folga/{id}` — exclui folga
+- **Autenticação**: `POST /token` (OAuth2 password). O front salva o JWT e o `auth.js` renova automaticamente.
+- **Colaboradores / Clientes / Serviços / Pagamentos**: CRUD completo usando as tabelas já existentes.
+- **Escala de Serviço**: Endpoint para cargas horárias, postos, geração automática e controle de folgas.
+- **Keepalive**: `GET /keepalive` ajuda no monitoring.
 
-View do módulo:
-- `app/Views_Escala/Escala.html` (usa `Escala.js`/`Escala.css`)
-- Integra-se ao menu e é responsiva (acompanha o recolher/expandir).
+Todos esses endpoints continuam com o mesmo path usado antes da migração; apenas o host muda para a Function App.
 
-## Anotações Importantes
+## Como testar
 
-- Drivers ODBC: Instale `ODBC Driver 18 for SQL Server` (ou 17) no host de execução.
-- Secrets: Altere `SECRET_KEY` em `app/main.py` para produção.
-- CORS: Ajuste `origins` conforme seus domínios do front.
-- Segurança: Senhas do banco via variáveis de ambiente (não comitar credenciais reais).
-- Geração de escala: respeita folgas e quantidade por posto; 12x36 alterna dias.
+1. Suba o Functions local (`func start`).
+2. Rode a suíte de testes/unitários customizados com `pytest` se necessário (`pytest app/tests` quando existirem).
+3. Exercite os fluxos principais via `httpx` ou `curl`:
 
-## Estrutura
+```bash
+curl http://localhost:7071/api/keepalive
+curl -X POST http://localhost:7071/api/token -d "username=...&password=..."
+```
 
-- `app/main.py` — FastAPI + rotas
-- `app/Model/` — DALs (SQL Server via pyodbc)
-- `app/Schemas/` — Pydantic Schemas
-- `app/Views/` e `app/Views_Escala/` — Front (HTML/CSS/JS)
-- `database_changes.sql` — DDL/migrações
-- `docs/` — documentação técnica
+4. Abra as telas HTML em `app/Views` utilizando `Live Server`/`http.server` e garanta que `window.APP_CONFIG` aponta para `http://localhost:7071/api`.
 
-## Documentação técnica
+## Deploy (resumo)
 
-Veja `docs/` para lista completa de endpoints, fluxos e diagramas.
+1. Empacote e envie o código para a Function App (`func azure functionapp publish <nome>` ou pipeline GitHub).  
+2. Configure as Application Settings com os mesmos `SQLSERVER_*` e `SECRET_KEY`.  
+3. Atualize o Static Web App (ou CDN) para consumir o novo host `https://<func>.azurewebsites.net/api`.  
+4. Habilite logs em Application Insights para acompanhar execuções.
+
+## Próximos passos
+
+- Migrar secrets para Azure Key Vault quando estiver em produção.
+- Adicionar testes automatizados para os módulos críticos (Pagamentos/Escala).
+- Automatizar o deploy via GitHub Actions utilizando `azure-functions-action`.
