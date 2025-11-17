@@ -1,5 +1,13 @@
+import sys
+from pathlib import Path
+
 import azure.functions as func
 from azure.functions import AsgiMiddleware
+
+BASE_DIR = Path(__file__).resolve().parent
+APP_DIR = BASE_DIR / "app"
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
 
 from app.main import app as fastapi_app
 
