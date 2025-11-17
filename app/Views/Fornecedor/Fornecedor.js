@@ -3,6 +3,14 @@ let fornecedores = [];
 let fornecedorSelecionado = null;
 let tokenGlobal = null;
 
+function renderTabelaFornecedoresMensagem(mensagem) {
+  const tbody = document.querySelector("#grid tbody");
+  if (!tbody) {
+    return;
+  }
+  tbody.innerHTML = `<tr><td colspan="6" class="mensagem-vazia">${mensagem}</td></tr>`;
+}
+
 async function carregarFornecedores() {
   if (!await validarToken()) {
     return;
@@ -25,10 +33,14 @@ async function carregarFornecedores() {
     }
 
     fornecedores = await resp.json();
-    renderGrid();
+    if (!fornecedores.length) {
+      renderTabelaFornecedoresMensagem("Nenhum fornecedor cadastrado.");
+    } else {
+      renderGrid();
+    }
   } catch (err) {
     console.error("Erro ao carregar fornecedores:", err);
-    alert("Erro ao carregar fornecedores");
+    renderTabelaFornecedoresMensagem("Não foi possível carregar os fornecedores agora.");
   }
 }
 

@@ -18,6 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
   let token = null;
   const COLUNAS_PAGAMENTO = ["ID", "Descrição", "Fornecedor", "Vencimento", "Valor", "Forma Pagamento", "Status", "Ações"];
+  function setComboState(combo, placeholder, disabled = false) {
+    if (!combo) return;
+    combo.innerHTML = `<option value="">${placeholder}</option>`;
+    combo.disabled = !!disabled;
+  }
+
+  function preencherGridMensagem(mensagem) {
+    if (!tabelaBody) return;
+    tabelaBody.innerHTML = `<tr><td colspan="8" class="mensagem-vazia">${mensagem}</td></tr>`;
+  }
 
   function getTipoPagamento() {
     if (!cmbTipoPagamento) {
@@ -86,37 +96,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function carregarSelects() {
     try {
-      cmbFornecedores.innerHTML = '<option value="">Selecione</option>';
+      setComboState(cmbFornecedores, 'Carregando...');
       const respFornecedores = await fetch(`${API_BASE}/RetornaFornecedores`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const fornecedores = await respFornecedores.json();
 
-      fornecedores.forEach(f => {
-        const option = document.createElement('option');
-        let value = null;
-        let text = '';
+      if (!fornecedores.length) {
+        setComboState(cmbFornecedores, 'Cadastre um fornecedor antes.', true);
+      } else {
+        cmbFornecedores.disabled = false;
+        cmbFornecedores.innerHTML = '<option value="">Selecione</option>';
+        fornecedores.forEach(f => {
+          const option = document.createElement('option');
+          let value = null;
+          let text = '';
 
-        if (f.id_fornecedor != null) {
-          value = f.id_fornecedor;
-          text = `${f.id_fornecedor} - ${f.nm_fantasia ?? f.NM_FANTASIA ?? ''}`.trim();
-        } else if (f.ID_FORNECEDOR != null) {
-          value = f.ID_FORNECEDOR;
-          text = `${f.ID_FORNECEDOR} - ${f.NM_FANTASIA ?? f.nm_fantasia ?? ''}`.trim();
-        } else if (f.Fornecedor) {
-          const partes = String(f.Fornecedor).split(' - ');
-          value = partes[0];
-          text = f.Fornecedor;
-        }
+          if (f.id_fornecedor != null) {
+            value = f.id_fornecedor;
+            text = `${f.id_fornecedor} - ${f.nm_fantasia ?? f.NM_FANTASIA ?? ''}`.trim();
+          } else if (f.ID_FORNECEDOR != null) {
+            value = f.ID_FORNECEDOR;
+            text = `${f.ID_FORNECEDOR} - ${f.NM_FANTASIA ?? f.nm_fantasia ?? ''}`.trim();
+          } else if (f.Fornecedor) {
+            const partes = String(f.Fornecedor).split(' - ');
+            value = partes[0];
+            text = f.Fornecedor;
+          }
 
-        if (!value) {
-          return;
-        }
+          if (!value) {
+            return;
+          }
 
-        option.value = value;
-        option.textContent = text || String(value);
-        cmbFornecedores.appendChild(option);
-      });
+          option.value = value;
+          option.textContent = text || String(value);
+          cmbFornecedores.appendChild(option);
+        });
+      }
 
       cmbFormaPagamento.innerHTML = '<option value="">Selecione</option>';
       const formasPagamento = [
@@ -134,7 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cmbFormaPagamento.appendChild(option);
       });
     } catch (error) {
-      alert('Erro ao carregar fornecedores: ' + error.message);
+      console.warn('Erro ao carregar fornecedores:', error);
+      setComboState(cmbFornecedores, 'Não foi possível carregar fornecedores.', true);
+      setComboState(cmbFormaPagamento, 'Não disponível', true);
     }
   }
 
@@ -343,3 +361,5 @@ document.addEventListener('DOMContentLoaded', () => {
     await carregarGrid();
   })();
 });
+
+

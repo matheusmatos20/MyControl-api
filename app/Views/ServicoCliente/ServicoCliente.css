@@ -152,3 +152,5 @@ tr:hover {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.mensagem-vazia { text-align:center; padding:12px; color:#64748b; }
