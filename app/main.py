@@ -24,6 +24,7 @@ origins = [
     # "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com",
     "https://calm-sky-04182d41e.3.azurestaticapps.net",
     "https://mycontrol-app.com.br"
+    "https://www.mycontrol-app.com.br"
 
 ]
 app.add_middleware(
