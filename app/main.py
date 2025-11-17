@@ -20,6 +20,7 @@ app = FastAPI()
 # Configurações CORS
 origins = [
     "http://localhost:5501",
+    "http://localhost:7071",
     # "http://mycontrol-frontend.s3-website-us-east-1.amazonaws.com",
     "https://calm-sky-04182d41e.3.azurestaticapps.net",
     "https://mycontrol-app.com.br"
