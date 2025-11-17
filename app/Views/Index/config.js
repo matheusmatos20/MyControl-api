@@ -3,6 +3,7 @@
     // API_BASE_URL: 'http://127.0.0.1:8001',
     
     API_BASE_URL: 'https://mycontrol-c4ajevh3adbqe7fk.westcentralus-01.azurewebsites.net',
+    // API_BASE_URL: 'http://localhost:7071',
     AUTH_BASE_URL: null,
   };
 
