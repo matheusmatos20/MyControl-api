@@ -1,7 +1,11 @@
 ﻿import os
 import platform
+import logging
 import pyodbc
 import pandas as pd
+
+
+logger = logging.getLogger(__name__)
 
 
 class Conn:
@@ -59,6 +63,7 @@ class Conn:
         try:
             return pyodbc.connect(self._str_conn)
         except pyodbc.Error as exc:
+            logger.exception("Erro ao conectar ao SQL Server: %s", exc)
             raise RuntimeError(
                 "Falha ao conectar ao SQL Server. Confira as variáveis de ambiente de conexão e se o driver ODBC está "
                 "instalado no ambiente (ex.: msodbcsql18)."
