@@ -159,3 +159,5 @@ tbody tr.selected {
     min-width: 0; /* permite tabela encolher */
   }
 }
+
+.mensagem-vazia { text-align:center; padding:12px; color:#64748b; }

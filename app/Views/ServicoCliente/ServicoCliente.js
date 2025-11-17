@@ -5,6 +5,19 @@ const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 const AUTH_BASE = window.AUTH_BASE_URL || API_BASE;
 const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
 const buildAuthUrl = window.buildAuthUrl || (path => `${AUTH_BASE}${path.startsWith('/') ? path : `/${path}`}`);
+const COLUNAS_SERVICO_CLIENTE = ["ID", "Cliente", "Serviço", "Valor", "Desconto"];
+
+function setComboState(combo, placeholder, disabled = false) {
+  if (!combo) return;
+  combo.innerHTML = `<option value="">${placeholder}</option>`;
+  combo.disabled = !!disabled;
+}
+
+function renderGridMensagem(mensagem) {
+  const tbody = document.querySelector("#grid tbody");
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="5" class="mensagem-vazia">${mensagem}</td></tr>`;
+}
 
 // -----------------------------
 // Helpers
@@ -67,18 +80,21 @@ async function carregarCombos() {
     const clientes = await respClientes.json();
 
     const cmbCliente = document.getElementById("cliente");
-    cmbCliente.innerHTML = `<option value="">Selecione...</option>`;
-    clientes.forEach(c => {
-      // tenta lidar com nomes diferentes de campos vindos da API
-      const id = c.id_cliente ?? c.id ?? c.Id ?? c.IdCliente;
-      const nome = c.Nome ?? c.nome ?? c.nome_cliente ?? "";
-      const opt = document.createElement("option");
-      opt.value = String(id); // garante que value = apenas o ID
-      opt.textContent = `${id} - ${nome}`;
-      cmbCliente.appendChild(opt);
-    });
+    if (!clientes.length) {
+      setComboState(cmbCliente, "Cadastre um cliente antes.", true);
+    } else {
+      cmbCliente.disabled = false;
+      cmbCliente.innerHTML = `<option value="">Selecione...</option>`;
+      clientes.forEach(c => {
+        const id = c.id_cliente ?? c.id ?? c.Id ?? c.IdCliente;
+        const nome = c.Nome ?? c.nome ?? c.nome_cliente ?? "";
+        const opt = document.createElement("option");
+        opt.value = String(id);
+        opt.textContent = `${id} - ${nome}`;
+        cmbCliente.appendChild(opt);
+      });
+    }
 
-    // Serviços
     const respServ = await fetch(buildApiUrl('/Servicos'), {
       headers: { Authorization: `Bearer ${tokenGlobal}` }
     });
@@ -86,15 +102,20 @@ async function carregarCombos() {
     const servicos = await respServ.json();
 
     const cmbServico = document.getElementById("servico");
-    cmbServico.innerHTML = `<option value="">Selecione...</option>`;
-    servicos.forEach(s => {
-      const id = s.ID
-      const nome = s.Servico
-      const opt = document.createElement("option");
-      opt.value = String(id); // garante que value = apenas o ID
-      opt.textContent = `${id} - ${nome}`;
-      cmbServico.appendChild(opt);
-    });
+    if (!servicos.length) {
+      setComboState(cmbServico, "Cadastre um serviço antes.", true);
+    } else {
+      cmbServico.disabled = false;
+      cmbServico.innerHTML = `<option value="">Selecione...</option>`;
+      servicos.forEach(s => {
+        const id = s.ID;
+        const nome = s.Servico;
+        const opt = document.createElement("option");
+        opt.value = String(id);
+        opt.textContent = `${id} - ${nome}`;
+        cmbServico.appendChild(opt);
+      });
+    }
 
     //   const cmbServico = document.getElementById("servico");
     // cmbServico.innerHTML = `<option value="">Selecione...</option>`;
@@ -108,7 +129,8 @@ async function carregarCombos() {
 
   } catch (err) {
     console.error(err);
-    alert("Erro ao carregar combos (Clientes/Serviços).");
+    setComboState(document.getElementById("cliente"), "Não foi possível carregar clientes.", true);
+    setComboState(document.getElementById("servico"), "Não foi possível carregar serviços.", true);
   }
 }
 
@@ -131,6 +153,10 @@ async function carregarGrid() {
 
     const tbody = document.querySelector("#grid tbody");
     tbody.innerHTML = "";
+    if (!dados.length) {
+      renderGridMensagem("Nenhum serviço vendido até o momento.");
+      return;
+    }
 
     dados.forEach(d => {
       const row = document.createElement("tr");
@@ -148,7 +174,7 @@ async function carregarGrid() {
 
   } catch (err) {
     console.error(err);
-    alert("Erro ao carregar grid.");
+    renderGridMensagem("Não foi possível carregar a lista agora.");
   }
 }
 
@@ -186,8 +212,15 @@ async function salvarServico() {
     }
   tokenGlobal =localStorage.getItem("token");
 
-  const clienteRaw = document.getElementById("cliente").value;
-  const servicoRaw = document.getElementById("servico").value;
+  const selectCliente = document.getElementById("cliente");
+  const selectServico = document.getElementById("servico");
+  if (selectCliente?.disabled || selectServico?.disabled) {
+    alert("Cadastre clientes e serviços antes de registrar vendas.");
+    return;
+  }
+
+  const clienteRaw = selectCliente.value;
+  const servicoRaw = selectServico.value;
   const valorRaw = document.getElementById("valor").value;
   const descontoRaw = document.getElementById("desconto").value;
 
@@ -249,3 +282,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarCombos();
   await carregarGrid();
 });
+
