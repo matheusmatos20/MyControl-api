@@ -5,6 +5,14 @@ const API_BASE = window.API_BASE_URL || 'http://127.0.0.1:8000';
 const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`);
 const COLUNAS_CLIENTE = ["ID", "Nome", "CPF", "RG", "Data Nasc.", "Telefone", "Representante"];
 
+function exibirMensagemTabela(seletor, colunas, mensagem) {
+  const tbody = document.querySelector(seletor);
+  if (!tbody) {
+    return;
+  }
+  tbody.innerHTML = `<tr><td colspan="${colunas}" class="mensagem-vazia">${mensagem}</td></tr>`;
+}
+
 // -----------------------------
 // Funções auxiliares
 // -----------------------------
@@ -45,6 +53,7 @@ async function carregarRepresentantes() {
     const lista = await response.json();
     const combo = document.getElementById("representante");
     combo.innerHTML = `<option value="">Selecione...</option>`;
+    combo.disabled = false;
 
     lista.forEach(item => {
       const [id, nome] = item.Representante.split(" - ");
@@ -56,7 +65,11 @@ async function carregarRepresentantes() {
 
   } catch (err) {
     console.error(err);
-    alert("Falha ao carregar representantes.");
+    const combo = document.getElementById("representante");
+    if (combo) {
+      combo.innerHTML = `<option value="">Nenhum representante cadastrado</option>`;
+      combo.disabled = true;
+    }
   }
 }
 
@@ -76,6 +89,10 @@ async function carregarClientes() {
     const lista = await response.json();
     const tbody = document.querySelector("#clientes-table tbody");
     tbody.innerHTML = "";
+    if (!lista.length) {
+      exibirMensagemTabela("#clientes-table tbody", 7, "Nenhum cliente cadastrado.");
+      return;
+    }
 
     lista.forEach(c => {
       const tr = document.createElement("tr");
@@ -105,7 +122,7 @@ async function carregarClientes() {
 
   } catch (err) {
     console.error(err);
-    alert("Falha ao carregar clientes.");
+    exibirMensagemTabela("#clientes-table tbody", 7, "Nenhum cliente cadastrado.");
   }
 }
 
