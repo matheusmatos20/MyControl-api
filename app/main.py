@@ -72,7 +72,7 @@ def authenticate_user(username: str, password: str):
         return False
 
     # Converta para str simples
-    hashed_password = str(user["DS_SENHA"])
+    hashed_password = str(user["DS_SENHA"]).strip()
 
     print("Senha fornecida:", repr(password))
     print("Hash do banco:", repr(hashed_password))
