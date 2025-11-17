@@ -11,6 +11,22 @@ const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith
 
 const areaExpansivel = document.getElementById("areaExpansivel");
 
+function setCardMessage(cardId, message) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    const paragraph = card.querySelector("p");
+    if (paragraph) {
+        paragraph.textContent = message;
+    }
+}
+
+function mostrarMensagemArea(chave, mensagem) {
+    if (!areaExpansivel) return;
+    areaExpansivel.innerHTML = `<p class="mensagem-vazia">${mensagem}</p>`;
+    areaExpansivel.dataset.activeSection = chave || "";
+    areaExpansivel.classList.add("mostrar");
+}
+
 function atualizarCabecalho() {
     const tituloEmpresa = document.getElementById("empresaNome");
     const saudacao = document.getElementById("boasVindas");
@@ -47,6 +63,8 @@ async function carregarResumoDashboard() {
         atualizarCardEntradas(dashboardResumo?.contas_receber_semana);
     } catch (err) {
         console.error("Erro ao carregar resumo do dashboard:", err);
+        setCardMessage("cardAlertas", "Nenhum alerta disponível.");
+        setCardMessage("cardContasReceber", "Sem entradas previstas.");
     }
 }
 
@@ -236,7 +254,8 @@ async function carregarPendenciasAPI() {
 
     } catch (err) {
         console.error(err);
-        alert("Falha ao carregar pendências. Veja o console para detalhes.");
+        console.warn("Falha ao carregar pendências.", err);
+        mostrarMensagemArea("pendencias", "Nenhuma pendência registrada no momento.");
     }
 }
 
@@ -250,6 +269,9 @@ function atualizarCards(pendencias) {
 }
 
 function renderizarPendencias(lista) {
+    if (!lista || !lista.length) {
+        return '<p class="mensagem-vazia">Nenhuma pendência registrada.</p>';
+    }
     const area = document.getElementById("areaExpansivel");
     area.innerHTML = `
     <div class="card">

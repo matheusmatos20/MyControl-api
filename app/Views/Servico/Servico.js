@@ -10,6 +10,12 @@ const buildApiUrl = window.buildApiUrl || (path => `${API_BASE}${path.startsWith
 const buildAuthUrl = window.buildAuthUrl || (path => `${AUTH_BASE}${path.startsWith('/') ? path : `/${path}`}`);
 const COLUNAS_SERVICO = ["ID", "Descrição", "Valor (R$)", "Recorrente"];
 
+function mostrarTabelaVazia(mensagem) {
+    const tbody = document.querySelector('#gridServicos tbody');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="4" class="mensagem-vazia">${mensagem}</td></tr>`;
+}
+
 // -------------------------
 // Função para obter o token
 // -------------------------
@@ -69,6 +75,10 @@ async function carregarServicos() {
 
         const tbody = document.querySelector('#gridServicos tbody');
         tbody.innerHTML = '';
+        if (!servicos.length) {
+            mostrarTabelaVazia("Nenhum serviço cadastrado.");
+            return;
+        }
 
         servicos.forEach(s => {
         const tr = document.createElement('tr');
@@ -88,7 +98,7 @@ async function carregarServicos() {
 
     } catch (err) {
         console.error(err);
-        alert("Falha ao carregar serviços. Veja o console para detalhes.");
+        mostrarTabelaVazia("Não foi possível listar os serviços agora.");
     }
 }
 

@@ -248,3 +248,9 @@ tbody tr.selected {
     color: #4b5563;
   }
 }
+
+.mensagem-vazia {
+  text-align: center;
+  padding: 12px;
+  color: #64748b;
+}

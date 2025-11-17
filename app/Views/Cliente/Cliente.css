@@ -305,3 +305,9 @@ main.main {
 .btn-novo:hover {
   background: #43a047;
 }
+
+.mensagem-vazia {
+  text-align: center;
+  padding: 12px;
+  color: #64748b;
+}

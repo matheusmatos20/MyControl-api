@@ -217,3 +217,9 @@ main.main {
   border-color: #007bff;
   outline: none;
 }
+
+.mensagem-vazia {
+  text-align: center;
+  padding: 12px;
+  color: #64748b;
+}

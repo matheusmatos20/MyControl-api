@@ -49,7 +49,10 @@ async function carregarRepresentantes() {
 
     } catch (err) {
         console.error(err);
-        alert("Falha ao carregar representantes.");
+        const lista = document.getElementById("lista-representantes");
+        if (lista) {
+            lista.innerHTML = '<p class="mensagem-vazia">Nenhum representante cadastrado.</p>';
+        }
     }
 }
 
