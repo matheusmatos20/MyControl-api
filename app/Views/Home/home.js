@@ -27,6 +27,13 @@ function mostrarMensagemArea(chave, mensagem) {
     areaExpansivel.classList.add("mostrar");
 }
 
+function limparAreaExpansivel() {
+    if (!areaExpansivel) return;
+    areaExpansivel.classList.remove("mostrar");
+    areaExpansivel.dataset.activeSection = "";
+    areaExpansivel.innerHTML = "";
+}
+
 function atualizarCabecalho() {
     const tituloEmpresa = document.getElementById("empresaNome");
     const saudacao = document.getElementById("boasVindas");
@@ -253,9 +260,9 @@ async function carregarPendenciasAPI() {
         areaExpansivel.classList.add("mostrar");
 
     } catch (err) {
-        console.error(err);
         console.warn("Falha ao carregar pendências.", err);
-        mostrarMensagemArea("pendencias", "Nenhuma pendência registrada no momento.");
+        setCardMessage("cardPendencias", "Nenhuma pendência registrada.");
+        limparAreaExpansivel();
     }
 }
 

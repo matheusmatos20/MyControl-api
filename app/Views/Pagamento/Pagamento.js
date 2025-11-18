@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } catch (error) {
       console.warn('Erro ao carregar fornecedores:', error);
-      setComboState(cmbFornecedores, 'Não foi possível carregar fornecedores.', true);
-      setComboState(cmbFormaPagamento, 'Não disponível', true);
+      setComboState(cmbFornecedores, 'Nenhum fornecedor cadastrado.', true);
+      setComboState(cmbFormaPagamento, 'Nenhuma forma disponível.', true);
     }
   }
 
@@ -237,7 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
     } catch (error) {
-      alert('Erro ao carregar pagamentos: ' + error.message);
+      console.warn('Erro ao carregar pagamentos:', error);
+      preencherGridMensagem('Nenhum pagamento cadastrado.');
     }
   }
 
